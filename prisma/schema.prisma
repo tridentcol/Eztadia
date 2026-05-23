@@ -1,0 +1,553 @@
+// Eztadia · schema de datos
+// Generado en Phase B2 (blueprint Seccion 4 + 17.2 B2).
+//
+// Convenciones:
+// - Tablas y columnas en snake_case via @map / @@map.
+// - Money siempre en cents (Int). Nunca floats.
+// - Fechas timestamptz (UTC en DB, render en America/Bogota).
+// - FKs a auth.users NO se declaran aqui (Prisma no conoce auth schema);
+//   se agregan via SQL puro en B3 (RLS migration).
+// - Tabla profiles tiene PK = auth.users.id (mismo UUID); el trigger
+//   handle_new_user (B3) la rellena al signup.
+// - RLS policies se agregan en B3, no aqui.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  super_admin
+  owner
+  staff_manager
+  staff_reception
+  guest
+}
+
+enum PropertyUserRole {
+  owner
+  manager
+  reception
+}
+
+enum BookingStatus {
+  pending_payment
+  confirmed
+  cancelled
+  no_show
+  completed
+}
+
+enum PaymentMethod {
+  pse
+  manual_transfer
+  external
+  admin_override
+}
+
+enum PaymentStatus {
+  pending
+  approved
+  declined
+  voided
+  refunded
+}
+
+enum HoldStatus {
+  active
+  consumed
+  expired
+  cancelled
+}
+
+enum BookingSource {
+  direct
+  booking_com
+  airbnb
+  manual
+}
+
+enum ICalDirection {
+  inbound
+  outbound
+}
+
+enum MessageDirection {
+  inbound
+  outbound
+}
+
+enum WhatsappMessageStatus {
+  sent
+  delivered
+  read
+  failed
+}
+
+enum EmailStatus {
+  sent
+  delivered
+  bounced
+  complained
+}
+
+enum AuditActorType {
+  user
+  system
+  webhook
+}
+
+enum LoginEventType {
+  login_success
+  login_failed
+  password_reset
+  twofa_enabled
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Usuarios y organizaciones
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Profile {
+  // PK = auth.users.id. No usamos @default(uuid()) — el trigger handle_new_user
+  // (B3) inserta filas usando NEW.id de auth.users.
+  id          String   @id @db.Uuid
+  email       String   @unique
+  fullName    String?  @map("full_name")
+  phone       String?
+  avatarUrl   String?  @map("avatar_url")
+  role        UserRole @default(owner)
+  locale      String   @default("es")
+  totpEnabled Boolean  @default(false) @map("totp_enabled")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  ownedOrganizations  Organization[]
+  propertyUsers       PropertyUser[]  @relation("PropertyUserMember")
+  invitationsSent     PropertyUser[]  @relation("PropertyUserInviter")
+  bookingsCancelled   Booking[]       @relation("BookingCancelledBy")
+  paymentsConfirmed   Payment[]       @relation("PaymentConfirmedBy")
+  auditLogs           AuditLog[]
+  loginEvents         LoginEvent[]
+
+  @@map("profiles")
+}
+
+model Organization {
+  id            String   @id @default(uuid()) @db.Uuid
+  name          String
+  ownerId       String   @map("owner_id") @db.Uuid
+  billingEmail  String?  @map("billing_email")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  owner      Profile    @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+  properties Property[]
+
+  @@index([ownerId])
+  @@map("organizations")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Propiedades
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Property {
+  id                String   @id @default(uuid()) @db.Uuid
+  organizationId    String   @map("organization_id") @db.Uuid
+  slug              String   @unique
+  name              String
+  descriptionEs     String?  @map("description_es")
+  descriptionEn     String?  @map("description_en")
+  address           String?
+  city              String?
+  country           String   @default("CO")
+  timezone          String   @default("America/Bogota")
+  currency          String   @default("COP")
+  coverImageUrl     String?  @map("cover_image_url")
+  gallery           Json?
+  amenities         String[] @default([])
+  // HH:MM string (validado por Zod). Guardado como VARCHAR para simplicidad.
+  checkInTime       String   @default("15:00") @map("check_in_time")
+  checkOutTime      String   @default("12:00") @map("check_out_time")
+  minStayNights     Int      @default(1) @map("min_stay_nights")
+  maxStayNights     Int?     @map("max_stay_nights")
+  bookingPolicy     Json?    @map("booking_policy")
+  isActive          Boolean  @default(true) @map("is_active")
+  icalExportSecret  String?  @map("ical_export_secret")
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  organization      Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  propertyUsers     PropertyUser[]
+  roomTypes         RoomType[]
+  rooms             Room[]
+  bookings          Booking[]
+  bookingHolds      BookingHold[]
+  payments          Payment[]
+  icalFeeds         ICalFeed[]
+  externalBlocks    ExternalBlock[]
+  wompiConfig       WompiConfig?
+  whatsappConfig    WhatsappConfig?
+  whatsappMessages  WhatsappMessage[]
+  emailLogs         EmailLog[]
+
+  @@index([organizationId])
+  @@index([slug])
+  @@map("properties")
+}
+
+model PropertyUser {
+  id                    String           @id @default(uuid()) @db.Uuid
+  propertyId            String           @map("property_id") @db.Uuid
+  userId                String           @map("user_id") @db.Uuid
+  role                  PropertyUserRole
+  invitedBy             String?          @map("invited_by") @db.Uuid
+  invitationAcceptedAt  DateTime?        @map("invitation_accepted_at") @db.Timestamptz()
+  createdAt             DateTime         @default(now()) @map("created_at") @db.Timestamptz()
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  member   Profile  @relation("PropertyUserMember", fields: [userId], references: [id], onDelete: Cascade)
+  inviter  Profile? @relation("PropertyUserInviter", fields: [invitedBy], references: [id], onDelete: SetNull)
+
+  @@unique([propertyId, userId])
+  @@index([userId])
+  @@map("property_users")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Habitaciones
+// ─────────────────────────────────────────────────────────────────────────────
+
+model RoomType {
+  id                String   @id @default(uuid()) @db.Uuid
+  propertyId        String   @map("property_id") @db.Uuid
+  nameEs            String   @map("name_es")
+  nameEn            String?  @map("name_en")
+  descriptionEs     String?  @map("description_es")
+  descriptionEn     String?  @map("description_en")
+  basePriceCents    Int      @map("base_price_cents")
+  capacityAdults    Int      @map("capacity_adults")
+  capacityChildren  Int      @default(0) @map("capacity_children")
+  sizeM2            Int?     @map("size_m2")
+  bedConfiguration  String?  @map("bed_configuration")
+  amenities         String[] @default([])
+  gallery           Json?
+  isActive          Boolean  @default(true) @map("is_active")
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  property      Property       @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  rooms         Room[]
+  seasonalRates SeasonalRate[]
+  bookings      Booking[]
+  bookingHolds  BookingHold[]
+
+  @@index([propertyId])
+  @@map("room_types")
+}
+
+model Room {
+  id          String   @id @default(uuid()) @db.Uuid
+  propertyId  String   @map("property_id") @db.Uuid
+  roomTypeId  String   @map("room_type_id") @db.Uuid
+  number      String
+  floor       String?
+  notes       String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  property        Property        @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  roomType        RoomType        @relation(fields: [roomTypeId], references: [id], onDelete: Restrict)
+  bookings        Booking[]
+  icalFeeds       ICalFeed[]
+  externalBlocks  ExternalBlock[]
+
+  @@unique([propertyId, number])
+  @@index([roomTypeId])
+  @@map("rooms")
+}
+
+model SeasonalRate {
+  id          String   @id @default(uuid()) @db.Uuid
+  roomTypeId  String   @map("room_type_id") @db.Uuid
+  name        String?
+  startDate   DateTime @map("start_date") @db.Date
+  endDate     DateTime @map("end_date") @db.Date
+  priceCents  Int      @map("price_cents")
+  priority    Int      @default(0)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  roomType RoomType @relation(fields: [roomTypeId], references: [id], onDelete: Cascade)
+
+  @@index([roomTypeId, startDate, endDate])
+  @@map("seasonal_rates")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Reservas y holds
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Booking {
+  id                  String         @id @default(uuid()) @db.Uuid
+  propertyId          String         @map("property_id") @db.Uuid
+  roomId              String?        @map("room_id") @db.Uuid
+  roomTypeId          String         @map("room_type_id") @db.Uuid
+  code                String         @unique
+  checkIn             DateTime       @map("check_in") @db.Date
+  checkOut            DateTime       @map("check_out") @db.Date
+  // nights se vuelve GENERATED column en B3 (SQL puro).
+  // Por ahora Int? para que Prisma no se queje; trigger lo rellena.
+  nights              Int?
+  adults              Int            @default(1)
+  children            Int            @default(0)
+  guestFullName       String         @map("guest_full_name")
+  guestDocumentType   String?        @map("guest_document_type")
+  guestDocumentNumber String?        @map("guest_document_number")
+  guestEmail          String         @map("guest_email")
+  guestPhone          String         @map("guest_phone")
+  guestCountry        String         @default("CO") @map("guest_country")
+  totalCents          Int            @map("total_cents")
+  status              BookingStatus  @default(pending_payment)
+  paymentMethod       PaymentMethod  @map("payment_method")
+  publicToken         String         @unique @map("public_token")
+  source              BookingSource  @default(direct)
+  notes               String?
+  cancelledAt         DateTime?      @map("cancelled_at") @db.Timestamptz()
+  cancelledBy         String?        @map("cancelled_by") @db.Uuid
+  cancellationReason  String?        @map("cancellation_reason")
+  createdAt           DateTime       @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt           DateTime       @updatedAt @map("updated_at") @db.Timestamptz()
+
+  property      Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  room          Room?     @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  roomType      RoomType  @relation(fields: [roomTypeId], references: [id], onDelete: Restrict)
+  canceller     Profile?  @relation("BookingCancelledBy", fields: [cancelledBy], references: [id], onDelete: SetNull)
+  payments      Payment[]
+  whatsappMessages WhatsappMessage[]
+
+  @@index([propertyId, status])
+  @@index([propertyId, checkIn, checkOut])
+  @@index([roomId, checkIn, checkOut])
+  @@index([guestEmail])
+  @@map("bookings")
+}
+
+model BookingHold {
+  id            String        @id @default(uuid()) @db.Uuid
+  propertyId    String        @map("property_id") @db.Uuid
+  roomTypeId    String        @map("room_type_id") @db.Uuid
+  checkIn       DateTime      @map("check_in") @db.Date
+  checkOut      DateTime      @map("check_out") @db.Date
+  guestEmail    String        @map("guest_email")
+  guestPhone    String        @map("guest_phone")
+  totalCents    Int           @map("total_cents")
+  expiresAt     DateTime      @map("expires_at") @db.Timestamptz()
+  status        HoldStatus    @default(active)
+  paymentMethod PaymentMethod @map("payment_method")
+  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt     DateTime      @updatedAt @map("updated_at") @db.Timestamptz()
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  roomType RoomType @relation(fields: [roomTypeId], references: [id], onDelete: Restrict)
+
+  @@index([propertyId, status, expiresAt])
+  @@index([roomTypeId, checkIn, checkOut, status])
+  @@map("booking_holds")
+}
+
+model Payment {
+  id                  String        @id @default(uuid()) @db.Uuid
+  bookingId           String        @map("booking_id") @db.Uuid
+  propertyId          String        @map("property_id") @db.Uuid
+  amountCents         Int           @map("amount_cents")
+  currency            String        @default("COP")
+  method              PaymentMethod
+  wompiTransactionId  String?       @map("wompi_transaction_id")
+  wompiReference      String?       @map("wompi_reference")
+  wompiPaymentLinkId  String?       @map("wompi_payment_link_id")
+  status              PaymentStatus @default(pending)
+  proofUrl            String?       @map("proof_url")
+  confirmedBy         String?       @map("confirmed_by") @db.Uuid
+  confirmedAt         DateTime?     @map("confirmed_at") @db.Timestamptz()
+  rawPayload          Json?         @map("raw_payload")
+  createdAt           DateTime      @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt           DateTime      @updatedAt @map("updated_at") @db.Timestamptz()
+
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  property  Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  confirmer Profile? @relation("PaymentConfirmedBy", fields: [confirmedBy], references: [id], onDelete: SetNull)
+
+  @@index([bookingId])
+  @@index([propertyId, status])
+  @@index([wompiTransactionId])
+  @@map("payments")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// iCal sync
+// ─────────────────────────────────────────────────────────────────────────────
+
+model ICalFeed {
+  id              String         @id @default(uuid()) @db.Uuid
+  propertyId      String         @map("property_id") @db.Uuid
+  roomId          String?        @map("room_id") @db.Uuid
+  name            String
+  direction       ICalDirection
+  url             String
+  lastSyncedAt    DateTime?      @map("last_synced_at") @db.Timestamptz()
+  lastSyncError   String?        @map("last_sync_error")
+  isActive        Boolean        @default(true) @map("is_active")
+  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt       DateTime       @updatedAt @map("updated_at") @db.Timestamptz()
+
+  property        Property        @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  room            Room?           @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  externalBlocks  ExternalBlock[]
+
+  @@index([propertyId, direction, isActive])
+  @@index([roomId])
+  @@map("ical_feeds")
+}
+
+model ExternalBlock {
+  id           String   @id @default(uuid()) @db.Uuid
+  icalFeedId   String   @map("ical_feed_id") @db.Uuid
+  propertyId   String   @map("property_id") @db.Uuid
+  roomId       String   @map("room_id") @db.Uuid
+  externalUid  String   @map("external_uid")
+  startDate    DateTime @map("start_date") @db.Date
+  endDate      DateTime @map("end_date") @db.Date
+  summary      String?
+  importedAt   DateTime @default(now()) @map("imported_at") @db.Timestamptz()
+
+  icalFeed ICalFeed @relation(fields: [icalFeedId], references: [id], onDelete: Cascade)
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  room     Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@unique([icalFeedId, externalUid])
+  @@index([roomId, startDate, endDate])
+  @@map("external_blocks")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Configuraciones de integración (1 por propiedad)
+// ─────────────────────────────────────────────────────────────────────────────
+
+model WompiConfig {
+  propertyId              String   @id @map("property_id") @db.Uuid
+  publicKey               String?  @map("public_key")
+  privateKeyEncrypted     String?  @map("private_key_encrypted")
+  eventsSecretEncrypted   String?  @map("events_secret_encrypted")
+  isTestMode              Boolean  @default(true) @map("is_test_mode")
+  createdAt               DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt               DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("wompi_configs")
+}
+
+model WhatsappConfig {
+  propertyId             String   @id @map("property_id") @db.Uuid
+  phoneNumberId          String?  @map("phone_number_id")
+  businessAccountId      String?  @map("business_account_id")
+  accessTokenEncrypted   String?  @map("access_token_encrypted")
+  isActive               Boolean  @default(false) @map("is_active")
+  createdAt              DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt              DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("whatsapp_configs")
+}
+
+model WhatsappMessage {
+  id            String                @id @default(uuid()) @db.Uuid
+  propertyId    String                @map("property_id") @db.Uuid
+  bookingId     String?               @map("booking_id") @db.Uuid
+  direction     MessageDirection
+  toPhone       String                @map("to_phone")
+  fromPhone     String                @map("from_phone")
+  templateName  String?               @map("template_name")
+  body          String?
+  metaMessageId String?               @map("meta_message_id")
+  status        WhatsappMessageStatus @default(sent)
+  error         String?
+  createdAt     DateTime              @default(now()) @map("created_at") @db.Timestamptz()
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  booking  Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+
+  @@index([propertyId, createdAt])
+  @@index([bookingId])
+  @@map("whatsapp_messages")
+}
+
+model EmailLog {
+  id          String       @id @default(uuid()) @db.Uuid
+  propertyId  String?      @map("property_id") @db.Uuid
+  toEmail     String       @map("to_email")
+  template    String
+  subject     String
+  resendId    String?      @map("resend_id")
+  status      EmailStatus  @default(sent)
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz()
+
+  property Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+
+  @@index([propertyId, createdAt])
+  @@map("email_logs")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Auditoria y seguridad
+// ─────────────────────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id           String         @id @default(uuid()) @db.Uuid
+  actorId      String?        @map("actor_id") @db.Uuid
+  actorType    AuditActorType @map("actor_type")
+  action       String
+  resourceType String         @map("resource_type")
+  resourceId   String?        @map("resource_id") @db.Uuid
+  propertyId   String?        @map("property_id") @db.Uuid
+  diff         Json?
+  ip           String?        @db.Inet
+  userAgent    String?        @map("user_agent")
+  createdAt    DateTime       @default(now()) @map("created_at") @db.Timestamptz()
+
+  actor Profile? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([propertyId, createdAt])
+  @@index([actorId, createdAt])
+  @@index([action, createdAt])
+  @@map("audit_logs")
+}
+
+model LoginEvent {
+  id         String         @id @default(uuid()) @db.Uuid
+  userId     String?        @map("user_id") @db.Uuid
+  eventType  LoginEventType @map("event_type")
+  ip         String?        @db.Inet
+  userAgent  String?        @map("user_agent")
+  country    String?
+  createdAt  DateTime       @default(now()) @map("created_at") @db.Timestamptz()
+
+  user Profile? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([eventType, createdAt])
+  @@map("login_events")
+}
