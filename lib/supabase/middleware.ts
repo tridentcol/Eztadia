@@ -12,16 +12,26 @@ import type { Database } from "./database.types";
  *        - /dashboard/** y /admin/** requieren sesion → redirect a /login
  *        - /login, /signup, /reset-password con sesion activa → redirect /dashboard
  *
- * Si el matcher de middleware.ts cubre todas las rutas no-static, basta con
- * esta logica para mantener tokens vivos sin que cada page tenga que hacerlo.
+ * Usa getSession() (lee cookies, no hace fetch) en vez de getUser() (valida
+ * JWT contra Supabase) para ser robusto en Edge runtime. El JWT lo validan
+ * las paginas server-side; el middleware solo decide a donde redirigir.
+ *
+ * Wrap defensivo: cualquier error inesperado deja pasar la request sin
+ * aplicar guards. Las paginas server-side reaplicaran auth via
+ * requirePropertyRole / requireSuperAdmin.
  */
 export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({ request });
+  try {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!url || !key) {
+      // Sin env vars no podemos validar — dejar pasar.
+      return NextResponse.next({ request });
+    }
 
-  const supabase = createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
+    let response = NextResponse.next({ request });
+
+    const supabase = createServerClient<Database>(url, key, {
       cookies: {
         getAll() {
           return request.cookies.getAll();
@@ -36,36 +46,41 @@ export async function updateSession(request: NextRequest) {
           );
         },
       },
-    },
-  );
+    });
 
-  // IMPORTANTE: getUser() valida el JWT contra Supabase, getSession() solo
-  // lee de cookie. Para guards usar getUser().
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user ?? null;
 
-  const pathname = request.nextUrl.pathname;
-  const isProtected = pathname.startsWith("/dashboard") || pathname.startsWith("/admin");
-  const isAuthPage =
-    pathname === "/login" ||
-    pathname === "/signup" ||
-    pathname === "/reset-password" ||
-    pathname.startsWith("/reset-password/");
+    const pathname = request.nextUrl.pathname;
+    const isProtected =
+      pathname.startsWith("/dashboard") || pathname.startsWith("/admin");
+    const isAuthPage =
+      pathname === "/login" ||
+      pathname === "/signup" ||
+      pathname === "/reset-password" ||
+      pathname.startsWith("/reset-password/");
 
-  if (isProtected && !user) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    url.searchParams.set("redirect", pathname);
-    return NextResponse.redirect(url);
+    if (isProtected && !user) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/login";
+      redirectUrl.searchParams.set("redirect", pathname);
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    if (isAuthPage && user) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/dashboard";
+      redirectUrl.searchParams.delete("redirect");
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    return response;
+  } catch {
+    // Edge runtime puede fallar por motivos diversos (cookie corrupta,
+    // network glitch). No bloqueamos al usuario — las paginas server-side
+    // aplican auth de nuevo.
+    return NextResponse.next({ request });
   }
-
-  if (isAuthPage && user) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
-    url.searchParams.delete("redirect");
-    return NextResponse.redirect(url);
-  }
-
-  return response;
 }
