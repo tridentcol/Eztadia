@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@supabase/supabase-js";
+import type { Database } from "./database.types";
 
 /**
  * Cliente Supabase con service_role key — bypasea RLS.
@@ -18,7 +19,7 @@ import { createClient } from "@supabase/supabase-js";
  * Devuelve un cliente singleton (no hidrata session — corre como service_role).
  */
 
-let _admin: ReturnType<typeof createClient> | null = null;
+let _admin: ReturnType<typeof createClient<Database>> | null = null;
 
 export function createAdminClient() {
   if (_admin) return _admin;
@@ -32,7 +33,7 @@ export function createAdminClient() {
     );
   }
 
-  _admin = createClient(url, serviceKey, {
+  _admin = createClient<Database>(url, serviceKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
