@@ -1,0 +1,1523 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Configuración personal · Eztadia</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..700,0..100;1,9..144,400..700,0..100&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --cream:#FBF8F2; --paper:#FFFFFF; --linen:#F2EDE2;
+    --ink:#1F1B16; --ink-soft:#5A5147; --ink-muted:#8B8275;
+    --sage:#5C7567; --sage-soft:#9CB39E; --sage-tint:#E5EDE5;
+    --terracotta:#C76F4C; --clay:#A85A3B;
+    --gold:#B8923E; --gold-dark:#8A6E2E;
+    --gold-tint: rgba(184, 146, 62, 0.14);
+    --terracotta-tint: rgba(199, 111, 76, 0.12);
+    --rule:#E5DFD3; --rule-strong:#D4CCB9;
+    --success:#5E8A5F; --warning:#C49A3C; --danger:#A8483C;
+    --shadow-soft: 0 1px 2px rgba(31,27,22,.04), 0 8px 24px -12px rgba(31,27,22,.08);
+    --shadow-pop:  0 4px 8px -3px rgba(31,27,22,.08), 0 20px 40px -16px rgba(31,27,22,.16);
+    --shadow-modal: 0 20px 60px -20px rgba(31,27,22,0.28), 0 8px 24px -12px rgba(31,27,22,0.14);
+    --ease: cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:#EAE3D2; color: var(--ink);
+    font-family:'Inter', system-ui, sans-serif;
+    font-size:16px; line-height:1.55;
+    font-feature-settings:"ss01","cv11";
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    padding: 56px 32px 96px;
+  }
+  @media (max-width: 1500px){
+    body{ padding: 24px 12px 64px; }
+    .preview-frame.desktop{ width: 100%; max-width: 1440px; }
+  }
+  @media (max-width: 500px){
+    body{ padding: 16px 0 48px; background: var(--cream); }
+    .preview-frame.desktop{ display:none; }
+    .preview-frame.mobile{ width: 100%; border: 0; border-radius: 0; padding: 0; box-shadow: none; }
+    .preview-frame.mobile .phone-notch, .preview-frame.mobile .phone-home, .preview-frame.mobile .phone-statusbar{ display: none; }
+    .preview-frame.mobile .phone-screen{ border-radius: 0; min-height: auto; }
+    .preview-label{ padding: 0 16px; }
+  }
+  img{ display:block; max-width:100%; height:auto; }
+  a{ color:inherit; text-decoration:none; }
+  button{ font:inherit; color:inherit; cursor:pointer; border:0; background:transparent; padding:0; }
+  input,select,textarea{ font:inherit; color: inherit;}
+  :focus-visible{ outline:2px solid var(--sage); outline-offset:3px; border-radius:4px; }
+  .serif{ font-family:'Fraunces', Georgia, serif; font-variation-settings:"SOFT" 50, "opsz" 144; letter-spacing:-0.01em;}
+  .italic{ font-style: italic; }
+  .oldstyle{ font-variant-numeric:oldstyle-nums; font-feature-settings:"onum"; }
+  .mono{ font-family:'JetBrains Mono', monospace; }
+
+  .preview-label{ max-width: 1440px; margin: 0 auto 14px; font-size: 11px; letter-spacing:0.14em; text-transform: uppercase; color: var(--gold-dark); font-weight: 500;}
+  .preview-label .mute{ color: var(--ink-muted); font-weight: 400; margin-left: 10px;}
+  .preview-frame{ margin: 0 auto; background: var(--cream); border: 1px solid var(--rule-strong); border-radius: 18px; overflow: hidden; position: relative; box-shadow: 0 24px 60px -32px rgba(31,27,22,.18); }
+  .preview-frame.desktop{ width: 1440px; }
+  .preview-spacer{ height: 72px; }
+  .preview-frame.mobile{ width: 422px; background: #1F1B16; border: 0; border-radius: 56px; padding: 16px; box-shadow: 0 0 0 1px rgba(255,255,255,0.04) inset, 0 30px 70px -28px rgba(31,27,22,.4);}
+  .phone-screen{ background: var(--cream); border-radius: 42px; overflow: hidden; position: relative; min-height: 820px; isolation: isolate;}
+  .phone-notch{ position: absolute; top:10px; left:50%; transform:translateX(-50%); width:110px; height:30px; background:#1F1B16; border-radius: 999px; z-index:10;}
+  .phone-home{ position: absolute; bottom: 7px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:var(--ink); opacity:.5; border-radius: 999px; z-index:10;}
+  .phone-statusbar{ height: 44px; padding: 0 28px; background: var(--cream); display: flex; align-items: center; justify-content: space-between; font: 600 14px 'Inter'; color: var(--ink); position: relative; z-index: 5;}
+  .phone-statusbar .icons{ display: inline-flex; align-items: center; gap: 6px; }
+
+  /* APP SHELL */
+  .app{ display: grid; grid-template-columns: 240px 1fr; min-height: 920px; position: relative;}
+
+  /* SIDEBAR */
+  .sidebar{ background: var(--cream); border-right: 1px solid var(--rule); padding: 18px 16px 16px; display: flex; flex-direction: column;}
+  .sb-logo{ display:inline-flex; align-items:center; gap:8px; font-family:'Fraunces', serif; font-style:italic; font-weight:500; font-size:22px; color:var(--ink); padding: 6px 8px; margin-bottom: 18px;}
+  .sb-logo::after{ content:""; width:5px; height:5px; border-radius:50%; background: var(--gold); margin-top: -10px;}
+  .sb-prop{ display:flex; align-items:center; gap:10px; padding: 8px 10px; border-radius: 12px; margin-bottom: 24px;}
+  .sb-prop .ph{ width: 32px; height: 32px; border-radius: 8px; background:url('https://images.unsplash.com/photo-1545158535-c3f7168c28b6?auto=format&fit=crop&w=160&q=80') center/cover; border: 1px solid var(--rule);}
+  .sb-prop .name{ font-family:'Fraunces',serif; font-style:italic; font-weight:500; font-size:15px; flex:1;}
+  .sb-section{ margin-bottom: 18px;}
+  .sb-section-label{ display:block; font-size:11px; letter-spacing:0.08em; text-transform: uppercase; color: var(--ink-muted); font-weight: 500; padding: 4px 14px 8px;}
+  .sb-item{ position: relative; display:flex; align-items:center; gap:12px; padding: 9px 14px; border-radius: 10px; font-size:14px; color: var(--ink-soft); margin-bottom: 2px;}
+  .sb-item .ic{ width:18px; height:18px; flex-shrink:0; color: var(--ink-soft);}
+  .sb-item.active{ background: var(--sage-tint); color: var(--sage); font-weight: 500;}
+  .sb-item.active .ic{ color: var(--sage);}
+  .sb-item.active::before{ content:""; position:absolute; left: 4px; top:50%; transform: translateY(-50%); width: 3px; height: 16px; border-radius: 2px; background: var(--sage);}
+  .sb-spacer{ flex: 1;}
+  .sb-user{ display:flex; align-items:center; gap:10px; padding: 8px 10px; border-radius: 12px;}
+  .sb-user .av{ width: 36px; height: 36px; border-radius: 50%; background: var(--sage-tint); color: var(--sage); display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500;}
+  .sb-user .name{ font-size:13px; font-weight:500; flex:1;}
+
+  /* TOPBAR */
+  .topbar{ height: 64px; background: var(--cream); border-bottom: 1px solid var(--rule); display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 24px; padding: 0 32px;}
+  .crumbs{ display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-muted);}
+  .crumbs .sep{ opacity: 0.4;}
+  .crumbs .cur{ color: var(--ink); font-weight: 500;}
+  .search-top{ position: relative; max-width: 360px; width: 100%; justify-self: center;}
+  .search-top input{ width: 100%; height: 38px; background: var(--linen); border: 1px solid transparent; border-radius: 12px; padding: 0 14px 0 38px; font: 400 14px 'Inter'; color: var(--ink);}
+  .search-top .ic{ position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width:16px; height:16px; color: var(--ink-muted);}
+  .top-av{ width: 34px; height: 34px; border-radius: 50%; background: var(--sage-tint); color: var(--sage); display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500;}
+  .top-actions{ display: inline-flex; align-items: center; gap: 14px;}
+  .lang{ display: inline-flex; align-items: center; gap: 6px; font-size: 11px; letter-spacing:0.08em; text-transform: uppercase; color: var(--ink-muted); font-weight: 500;}
+  .lang .on{ color: var(--ink);}
+  .lang .sep{ opacity: 0.4;}
+
+  /* SETTINGS LAYOUT */
+  .settings{
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 760px;
+  }
+  .settings-tabs{
+    padding: 32px 16px;
+    border-right: 1px solid var(--rule);
+    background: var(--cream);
+  }
+  .settings-tabs-label{
+    font: 500 11px 'Inter'; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--gold-dark); padding: 0 12px 14px;
+  }
+  .settings-tab{
+    position: relative;
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font: 500 14px 'Inter';
+    color: var(--ink-soft);
+    margin-bottom: 2px;
+  }
+  .settings-tab .ic{ width: 17px; height: 17px; color: var(--ink-muted); flex-shrink: 0;}
+  .settings-tab:hover{ background: var(--linen); color: var(--ink); }
+  .settings-tab.on{
+    background: var(--linen); color: var(--ink); font-weight: 500;
+  }
+  .settings-tab.on::before{
+    content:""; position: absolute;
+    left: 4px; top: 50%; transform: translateY(-50%);
+    width: 2px; height: 22px; border-radius: 2px;
+    background: var(--sage);
+  }
+  .settings-tab.on .ic{ color: var(--ink); }
+  .settings-tab .badge{
+    margin-left: auto;
+    background: var(--gold-tint); color: var(--gold-dark);
+    font: 600 9px 'Inter'; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 999px;
+  }
+
+  .settings-content{ padding: 40px 48px 96px; max-width: 1100px;}
+
+  /* HEADERS */
+  .sect-title{
+    font-family:'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 32px; line-height: 1.05; margin: 0 0 10px;
+    letter-spacing: -0.025em;
+  }
+  .sect-sub{ font-size: 14px; color: var(--ink-soft); margin: 0 0 32px; max-width: 56ch; line-height: 1.55;}
+
+  /* FIELDS */
+  .field{ margin-bottom: 20px;}
+  .field-label{ display: block; font: 500 11px 'Inter'; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 8px;}
+  .field-helper{ font: 400 12px 'Inter'; color: var(--ink-muted); margin-top: 8px; line-height: 1.55;}
+  .input, .select, .textarea{
+    width: 100%; background: var(--paper); border: 1px solid var(--rule-strong);
+    border-radius: 10px;
+    font: 400 15px 'Inter'; color: var(--ink); outline: 0;
+    transition: border-color 200ms var(--ease), box-shadow 200ms var(--ease);
+  }
+  .input, .select{ height: 44px; padding: 0 14px;}
+  .textarea{ min-height: 96px; padding: 12px 14px; line-height: 1.5; resize: vertical;}
+  .input::placeholder, .textarea::placeholder{ color: var(--ink-muted);}
+  .input:focus, .select:focus, .textarea:focus{ border-color: var(--sage); box-shadow: 0 0 0 3px var(--sage-tint);}
+  .input.readonly, .input.mono-readonly{
+    background: var(--linen); color: var(--ink-soft);
+    cursor: default;
+    font-family:'JetBrains Mono', monospace; font-size: 13px; letter-spacing: -0.01em;
+  }
+  .select{
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B8275' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
+    background-repeat: no-repeat; background-position: right 14px center;
+    padding-right: 36px;
+  }
+
+  /* Phone field */
+  .field-phone{
+    display: flex; height: 44px;
+    border: 1px solid var(--rule-strong); border-radius: 10px;
+    overflow: hidden; background: var(--paper);
+  }
+  .field-phone .prefix{
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 0 14px;
+    border-right: 1px solid var(--rule);
+    font: 500 14px 'Inter'; color: var(--ink);
+    background: var(--cream);
+  }
+  .field-phone input{
+    flex: 1; border: 0; outline: 0; background: transparent;
+    padding: 0 14px; font: 400 15px 'Inter';
+  }
+  .flag{ width: 18px; height: 13px; border-radius: 2px; overflow: hidden; flex-shrink: 0; border: 1px solid var(--rule); display: inline-block;}
+  .flag-co{ background: linear-gradient(to bottom, #FCD116 0 50%, #003893 50% 75%, #CE1126 75% 100%);}
+  .flag-us{ background: linear-gradient(to bottom, #B22234 0 7.7%, #fff 7.7% 15.4%, #B22234 15.4% 23.1%, #fff 23.1% 30.8%, #B22234 30.8% 38.5%, #fff 38.5% 46.2%, #3C3B6E 46.2% 100%);}
+
+  /* DIVIDER */
+  .sect-divider{ height: 1px; background: var(--rule); margin: 32px 0;}
+  .sect-sub-overline{
+    display: block;
+    font: 500 11px 'Inter'; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 14px;
+  }
+
+  /* BUTTONS */
+  .btn{
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    height: 40px; padding: 0 18px; border-radius: 12px;
+    font: 500 14px 'Inter'; letter-spacing: -0.005em;
+    transition: background-color 200ms var(--ease), color 200ms var(--ease), border-color 200ms var(--ease);
+    border: 1px solid transparent;
+  }
+  .btn.sage{ background: var(--sage); color: var(--cream);}
+  .btn.sage:hover{ background: #4F6759;}
+  .btn.terracotta{ background: var(--terracotta); color: var(--cream);}
+  .btn.terracotta:hover{ background: var(--clay);}
+  .btn.outline-sage{ background: transparent; color: var(--sage); border: 1px solid var(--sage);}
+  .btn.outline-sage:hover{ background: var(--sage-tint);}
+  .btn.outline-danger{ background: transparent; color: var(--danger); border: 1px solid var(--danger);}
+  .btn.outline-danger:hover{ background: rgba(168,72,60,.08);}
+  .btn.ghost{ background: var(--cream); color: var(--ink-soft); border: 1px solid var(--rule);}
+  .btn.ghost:hover{ background: var(--linen); color: var(--ink); border-color: var(--rule-strong);}
+  .btn.ghost-danger-sm{
+    color: var(--clay); font: 500 13px 'Inter';
+    height: 30px; padding: 0;
+    text-decoration: underline; text-underline-offset: 3px;
+    text-decoration-color: rgba(168,72,60,.4);
+  }
+  .btn.ghost-danger-sm:hover{ text-decoration-color: var(--danger);}
+  .btn.full{ width: 100%; }
+
+  /* PROFILE LAYOUT */
+  .profile-layout{
+    display: grid; grid-template-columns: 320px 1fr; gap: 48px;
+  }
+  .profile-card{
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 20px;
+    padding: 32px;
+    text-align: center;
+  }
+  .profile-av-big{
+    width: 144px; height: 144px; border-radius: 50%;
+    background: var(--sage-tint); color: var(--sage);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family:'Fraunces', serif; font-weight: 500; font-size: 56px;
+    letter-spacing: -0.02em;
+    margin: 0 auto 20px;
+  }
+  .profile-actions{ display: flex; flex-direction: column; gap: 8px; align-items: center; margin-bottom: 24px;}
+  .profile-name{
+    font-family:'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 22px; color: var(--ink); margin: 24px 0 4px;
+    letter-spacing: -0.015em;
+  }
+  .profile-email{ font: 400 13px 'Inter'; color: var(--ink-muted); margin: 0 0 14px;}
+  .profile-role{
+    display: inline-flex; padding: 3px 11px; border-radius: 999px;
+    background: var(--gold-tint); color: var(--gold-dark);
+    font: 500 10.5px 'Inter'; letter-spacing: 0.08em; text-transform: uppercase;
+    border: 1px solid rgba(184,146,62,0.22);
+  }
+
+  /* BANNERS */
+  .banner-2fa{
+    display: flex; gap: 16px; align-items: center;
+    background: var(--gold-tint);
+    border-left: 3px solid var(--gold);
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin-bottom: 32px;
+  }
+  .banner-2fa .ic{ width: 26px; height: 26px; color: var(--gold-dark); flex-shrink: 0;}
+  .banner-2fa .info{ flex: 1;}
+  .banner-2fa .info .t{
+    font-family:'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 17px; color: var(--ink); margin: 0 0 2px;
+    letter-spacing: -0.01em;
+  }
+  .banner-2fa .info .d{ font: 400 13px 'Inter'; color: var(--ink-soft); margin: 0;}
+
+  /* PASSWORD STRENGTH (reused mini) */
+  .strength{ margin-top: 8px;}
+  .strength .bars{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 6px;}
+  .strength .seg{ height: 3px; border-radius: 999px; background: var(--rule);}
+  .strength.on3 .seg:nth-child(-n+3){ background: var(--gold);}
+  .strength .helper{ font: 400 11px 'Inter'; color: var(--ink-muted);}
+
+  /* 2FA STATUS BLOCK */
+  .twofa-status{
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    margin-bottom: 4px;
+  }
+  .twofa-status .text{
+    display: flex; align-items: center; gap: 10px;
+    font: 500 14px 'Inter'; color: var(--ink);
+  }
+  .twofa-status .text .ic{ width: 16px; height: 16px; color: var(--gold-dark);}
+  .twofa-helper{ font: 400 12.5px 'Inter'; color: var(--ink-soft); margin: 0 0 16px; line-height: 1.5;}
+
+  /* SESSION CARD */
+  .session-list{ display: flex; flex-direction: column; gap: 10px;}
+  .session-card{
+    display: flex; align-items: center; gap: 16px;
+    background: var(--paper); border: 1px solid var(--rule);
+    border-radius: 16px; padding: 20px 24px;
+  }
+  .session-card .ic-device{
+    width: 40px; height: 40px;
+    color: var(--ink-soft);
+    flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .session-card .ic-device svg{ width: 28px; height: 28px;}
+  .session-card .info{ flex: 1; min-width: 0;}
+  .session-card .name{
+    font-family:'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 17px; color: var(--ink); margin: 0 0 2px;
+    letter-spacing: -0.01em;
+  }
+  .session-card .loc{ font: 400 13px 'Inter'; color: var(--ink-soft); margin: 0 0 4px;}
+  .session-card .status{
+    display: inline-flex; align-items: center; gap: 6px;
+    font: 400 12px 'Inter'; color: var(--ink-muted);
+  }
+  .session-card .status.current{
+    padding: 2px 10px; border-radius: 999px;
+    background: var(--sage-tint); color: var(--sage);
+    font: 500 10px 'Inter'; letter-spacing: 0.08em; text-transform: uppercase;
+    border: 1px solid rgba(92,117,103,0.18);
+  }
+  .session-card .status.current::before{
+    content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--sage);
+  }
+
+  /* NOTIFICATIONS TABLE */
+  .notif-table{
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .notif-table thead th{
+    text-align: left;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    font: 500 11px 'Inter'; color: var(--ink-muted);
+    padding: 14px 12px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .notif-table thead th.col-channel{ text-align: center; width: 100px;}
+  .notif-table tbody td{
+    padding: 16px 12px;
+    border-bottom: 1px solid var(--rule);
+    font-size: 14px; color: var(--ink);
+    vertical-align: middle;
+  }
+  .notif-table tbody td.col-channel{ text-align: center;}
+  .notif-event{ display: flex; flex-direction: column; gap: 2px;}
+  .notif-event .e-title{ font: 500 14px 'Inter'; color: var(--ink);}
+  .notif-event .e-sub{ font: 400 12px 'Inter'; color: var(--ink-muted);}
+
+  /* TOGGLE SWITCH */
+  .switch{
+    width: 36px; height: 20px; border-radius: 999px;
+    background: var(--rule-strong);
+    position: relative; display: inline-block;
+    transition: background-color 200ms var(--ease);
+    cursor: pointer;
+  }
+  .switch::after{
+    content:""; position: absolute;
+    top: 2px; left: 2px;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: var(--paper);
+    box-shadow: 0 1px 2px rgba(31,27,22,.12);
+    transition: transform 200ms var(--ease);
+  }
+  .switch.on{ background: var(--sage);}
+  .switch.on::after{ transform: translateX(16px);}
+
+  /* LANG RADIO CARDS */
+  .lang-cards{ display: grid; grid-template-columns: 1fr 1fr; gap: 12px;}
+  .lang-card{
+    position: relative;
+    background: var(--paper); border: 1px solid var(--rule);
+    border-radius: 14px; padding: 14px 16px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 12px;
+    transition: all 200ms var(--ease);
+    text-align: left;
+  }
+  .lang-card.on{ border: 2px solid var(--sage); background: rgba(229,237,229,0.35); padding: 13px 15px;}
+  .lang-card .radio{ width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--rule-strong); flex-shrink: 0;}
+  .lang-card.on .radio{ border-color: var(--sage); background: radial-gradient(circle, var(--sage) 0 4px, transparent 4px);}
+  .lang-card .info{ flex: 1;}
+  .lang-card .label{ font: 500 14px 'Inter'; color: var(--ink); margin: 0 0 2px; display: flex; align-items: center; gap: 8px;}
+  .lang-card .sub{ font: 400 11px 'Inter'; color: var(--ink-muted); margin: 0;}
+
+  /* Format radio row */
+  .format-radio{ display: flex; flex-direction: column; gap: 8px;}
+  .format-opt{
+    display: flex; align-items: center; gap: 10px;
+    background: var(--paper); border: 1px solid var(--rule);
+    border-radius: 12px; padding: 12px 16px;
+    cursor: pointer;
+    transition: all 200ms var(--ease);
+  }
+  .format-opt.on{ border: 2px solid var(--sage); background: rgba(229,237,229,0.35); padding: 11px 15px;}
+  .format-opt .radio{ width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--rule-strong); flex-shrink: 0;}
+  .format-opt.on .radio{ border-color: var(--sage); background: radial-gradient(circle, var(--sage) 0 4px, transparent 4px);}
+  .format-opt .label{ font: 500 14px 'Inter'; color: var(--ink); flex: 1;}
+  .format-opt .label .example{ font-family:'Fraunces',serif; font-weight: 500; font-variant-numeric: oldstyle-nums; font-feature-settings: "onum"; color: var(--ink-soft); margin-left: 8px;}
+
+  /* PLAN PLACEHOLDER */
+  .plan-card{
+    background: var(--paper); border: 1px solid var(--rule);
+    border-radius: 24px; padding: 56px 40px;
+    text-align: center;
+    max-width: 640px; margin: 0 auto;
+  }
+  .plan-orn{
+    color: var(--gold); opacity: .75;
+    margin: 0 auto 24px;
+  }
+  .plan-orn svg{ width: 100px; height: 32px;}
+  .plan-title{
+    font-family:'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 32px; color: var(--ink); margin: 0 0 14px;
+    letter-spacing: -0.025em;
+  }
+  .plan-sub{ font: 400 16px 'Inter'; color: var(--ink-soft); margin: 0 auto 28px; max-width: 44ch; line-height: 1.55;}
+
+  /* MODAL 2FA */
+  .modal-backdrop{
+    position: absolute; inset: 0;
+    background: rgba(31,27,22, 0.32);
+    z-index: 90;
+  }
+  .modal{
+    position: absolute;
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 540px;
+    background: var(--paper); border-radius: 28px;
+    padding: 40px;
+    box-shadow: var(--shadow-modal);
+    z-index: 100;
+  }
+  .modal-close{
+    position: absolute; top: 20px; right: 20px;
+    width: 36px; height: 36px; border-radius: 10px;
+    color: var(--ink-soft);
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .modal-close:hover{ background: var(--linen); color: var(--ink);}
+
+  /* Mini stepper inside modal */
+  .mini-stepper{
+    display: flex; align-items: center; gap: 6px;
+    margin-bottom: 28px;
+  }
+  .mini-step-dot{
+    width: 8px; height: 8px; border-radius: 50%; background: var(--sage);
+  }
+  .mini-step-dot.current{ position: relative;}
+  .mini-step-dot.current::after{ content:""; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid var(--sage-tint);}
+  .mini-step-dot.future{ background: transparent; border: 1.5px solid var(--ink-muted);}
+  .mini-step-line{ flex: 0 0 32px; height: 1px; background: var(--rule);}
+  .mini-step-line.done{ background: var(--sage);}
+  .mini-step-text{
+    margin-left: auto;
+    font: 500 11px 'Inter'; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  .mini-step-text .cur{ color: var(--sage);}
+
+  .modal-title{
+    font-family:'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 24px; color: var(--ink); margin: 0 0 10px;
+    letter-spacing: -0.02em;
+  }
+  .modal-sub{ font: 400 14px 'Inter'; color: var(--ink-soft); margin: 0 0 24px; line-height: 1.55;}
+
+  /* QR card */
+  .qr-card{
+    background: var(--linen); border-radius: 20px;
+    padding: 32px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 18px;
+  }
+  .qr-img{ width: 220px; height: 220px; background: white; padding: 14px; border-radius: 12px; border: 1px solid var(--rule);}
+  .qr-manual{
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 14px; background: var(--linen); border-radius: 12px;
+    margin-bottom: 24px;
+  }
+  .qr-manual .help{ flex: 1; font: 400 12.5px 'Inter'; color: var(--ink-soft);}
+  .qr-manual .help .code{ font-family:'JetBrains Mono', monospace; font-size: 13px; color: var(--ink); margin-left: 6px; letter-spacing: -0.01em;}
+  .qr-manual .copy{
+    width: 30px; height: 30px; border-radius: 8px;
+    color: var(--ink-muted);
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .qr-manual .copy:hover{ background: var(--paper); color: var(--ink);}
+
+  .modal-cta-row{
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 28px;
+  }
+
+  /* MOBILE */
+  .topbar-mob{ height: 56px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--rule); background: var(--cream);}
+  .topbar-mob .ham{ width: 38px; height: 38px; border-radius: 10px; color: var(--ink); display: inline-flex; align-items: center; justify-content: center;}
+  .topbar-mob .center{ font-family:'Fraunces',serif; font-style:italic; font-weight:500; font-size: 16px; color: var(--ink); text-align: center;}
+  .topbar-mob .av{ width: 32px; height: 32px; border-radius: 50%; background: var(--sage-tint); color: var(--sage); display: inline-flex; align-items: center; justify-content: center; font: 500 12px 'Inter';}
+
+  .page-mob{ padding: 20px 16px 100px;}
+  .settings-tab-trigger-mob{
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%; height: 48px; padding: 0 14px;
+    background: var(--paper); border: 1px solid var(--rule);
+    border-radius: 12px;
+    font: 500 14px 'Inter'; color: var(--ink);
+    margin-bottom: 22px;
+  }
+  .settings-tab-trigger-mob .left{ display: inline-flex; align-items: center; gap: 10px;}
+  .settings-tab-trigger-mob .left .ic{ width: 16px; height: 16px; color: var(--sage);}
+
+  /* Notification mobile card */
+  .notif-card-mob{
+    background: var(--paper); border: 1px solid var(--rule);
+    border-radius: 14px; padding: 16px 18px;
+    margin-bottom: 10px;
+  }
+  .notif-card-mob .e-title{ font: 500 14px 'Inter'; color: var(--ink); margin: 0 0 12px;}
+  .notif-card-mob .chans{ display: flex; flex-direction: column; gap: 10px;}
+  .notif-card-mob .chan{
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+  }
+  .notif-card-mob .chan .name{
+    font: 500 12px 'Inter'; color: var(--ink-soft);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .notif-card-mob .chan .name svg{ width: 14px; height: 14px;}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     TAB · PERFIL · DESKTOP
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="preview-label">Tab Perfil · Desktop <span class="mute">/dashboard/settings</span></div>
+<div class="preview-frame desktop">
+  <div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <a class="sb-logo">Eztadia</a>
+      <button class="sb-prop"><span class="ph"></span><span class="name">Casa Marina</span></button>
+      <div class="sb-section">
+        <span class="sb-section-label">Operación</span>
+        <a class="sb-item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2v-9z"/></svg>Resumen</a>
+        <a class="sb-item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/></svg>Calendario</a>
+      </div>
+      <div class="sb-section">
+        <span class="sb-section-label">Cuenta</span>
+        <a class="sb-item active"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/></svg>Configuración</a>
+      </div>
+      <div class="sb-spacer"></div>
+      <button class="sb-user"><span class="av">CS</span><span class="name">Carlos</span></button>
+    </aside>
+
+    <!-- MAIN -->
+    <div>
+      <header class="topbar">
+        <nav class="crumbs"><span>Cuenta</span><span class="sep">/</span><span class="cur">Configuración</span></nav>
+        <div class="search-top"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input placeholder="Buscar..." /></div>
+        <div class="top-actions"><div class="lang"><button class="on">ES</button><span class="sep">·</span><button>EN</button></div><button class="top-av">CS</button></div>
+      </header>
+
+      <div class="settings">
+        <aside class="settings-tabs">
+          <span class="settings-tabs-label">Tu cuenta</span>
+          <a class="settings-tab on">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+            Perfil
+          </a>
+          <a class="settings-tab">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 7v6c0 4.5 3 8 8 9 5-1 8-4.5 8-9V7z"/></svg>
+            Seguridad
+            <span class="badge">2FA</span>
+          </a>
+          <a class="settings-tab">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="14" height="10" rx="1.5"/><path d="M3 18h14"/><rect x="16" y="11" width="5" height="9" rx="1"/></svg>
+            Sesiones activas
+          </a>
+          <a class="settings-tab">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17h12l-1.5-2.5V11a4.5 4.5 0 0 0-9 0v3.5L6 17z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+            Notificaciones
+          </a>
+          <a class="settings-tab">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a13 13 0 0 1 0 18M12 3a13 13 0 0 0 0 18"/></svg>
+            Idioma y región
+          </a>
+          <a class="settings-tab">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/></svg>
+            Plan y facturación
+            <span class="badge">Pronto</span>
+          </a>
+        </aside>
+
+        <div class="settings-content">
+          <h1 class="sect-title">Tu perfil</h1>
+          <p class="sect-sub">Estos datos solo los ves tú y tu equipo. No son públicos.</p>
+
+          <div class="profile-layout">
+            <!-- LEFT -->
+            <aside class="profile-card">
+              <span class="profile-av-big">CSJ</span>
+              <div class="profile-actions">
+                <button class="btn outline-sage">Cambiar foto</button>
+                <button class="btn ghost-danger-sm">Eliminar foto</button>
+              </div>
+              <p class="profile-name">Carlos San Juan</p>
+              <p class="profile-email">carlos@casamarina.co</p>
+              <span class="profile-role">Owner</span>
+            </aside>
+
+            <!-- RIGHT FORM -->
+            <div style="max-width: 540px;">
+              <div class="field">
+                <label class="field-label">Nombre completo</label>
+                <input class="input" value="Carlos San Juan" />
+              </div>
+              <div class="field">
+                <label class="field-label">Email</label>
+                <div style="position: relative;">
+                  <input class="input readonly" value="carlos@casamarina.co" readonly />
+                  <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--ink-muted); cursor: help;" title="Para cambiar tu email contacta a soporte">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a3 3 0 0 1 5.5 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+                  </span>
+                </div>
+                <p class="field-helper">Para cambiar tu email <a class="link" style="color:var(--sage); text-decoration: underline; text-underline-offset: 3px;">contacta a soporte</a>.</p>
+              </div>
+              <div class="field">
+                <label class="field-label">Teléfono</label>
+                <div class="field-phone">
+                  <span class="prefix"><span class="flag flag-co"></span>+57
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                  </span>
+                  <input value="311 222 3344" />
+                </div>
+              </div>
+
+              <div class="sect-divider"></div>
+
+              <div class="field">
+                <label class="field-label">Bio corta <span style="text-transform:none; font-weight:400; color:var(--ink-muted); letter-spacing:0;">— opcional</span></label>
+                <textarea class="textarea" placeholder="Cuéntanos sobre ti en una o dos frases.">Hospedando con calma desde Casa Marina, en el centro histórico de Cartagena.</textarea>
+                <p class="field-helper">Visible en facturas y emails que envías a huéspedes.</p>
+              </div>
+
+              <div class="sect-divider"></div>
+
+              <span class="sect-sub-overline">Cuenta</span>
+              <div class="field">
+                <label class="field-label">ID de cuenta</label>
+                <div style="display: flex; gap: 8px;">
+                  <input class="input mono-readonly" value="usr_3KdSn4xJ2HpL" readonly style="flex:1;" />
+                  <button class="btn ghost">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h2"/></svg>
+                    Copiar
+                  </button>
+                </div>
+              </div>
+              <div class="field" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div>
+                  <label class="field-label">Cuenta creada</label>
+                  <p style="font-family:'Fraunces',serif; font-weight: 500; font-size: 15px; font-variant-numeric: oldstyle-nums; font-feature-settings:'onum'; color: var(--ink); margin: 0;">5 marzo 2026</p>
+                </div>
+                <div>
+                  <label class="field-label">Última conexión</label>
+                  <p style="font-family:'Fraunces',serif; font-weight: 500; font-size: 15px; font-variant-numeric: oldstyle-nums; font-feature-settings:'onum'; color: var(--ink); margin: 0;">Hoy, 14:30</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="preview-spacer"></div>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     TAB · SEGURIDAD (con banner 2FA) · DESKTOP
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="preview-label">Tab Seguridad · Desktop <span class="mute">Banner 2FA visible</span></div>
+<div class="preview-frame desktop">
+  <div class="app">
+
+    <aside class="sidebar">
+      <a class="sb-logo">Eztadia</a>
+      <button class="sb-prop"><span class="ph"></span><span class="name">Casa Marina</span></button>
+      <div class="sb-spacer"></div>
+      <button class="sb-user"><span class="av">CS</span><span class="name">Carlos</span></button>
+    </aside>
+
+    <div>
+      <header class="topbar">
+        <nav class="crumbs"><span>Cuenta</span><span class="sep">/</span><span>Configuración</span><span class="sep">/</span><span class="cur">Seguridad</span></nav>
+        <div class="search-top"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input placeholder="Buscar..." /></div>
+        <div class="top-actions"><button class="top-av">CS</button></div>
+      </header>
+
+      <div class="settings">
+        <aside class="settings-tabs">
+          <span class="settings-tabs-label">Tu cuenta</span>
+          <a class="settings-tab"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Perfil</a>
+          <a class="settings-tab on"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 7v6c0 4.5 3 8 8 9 5-1 8-4.5 8-9V7z"/></svg>Seguridad<span class="badge">2FA</span></a>
+          <a class="settings-tab"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="14" height="10" rx="1.5"/></svg>Sesiones activas</a>
+          <a class="settings-tab"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17h12l-1.5-2.5V11a4.5 4.5 0 0 0-9 0v3.5L6 17z"/></svg>Notificaciones</a>
+          <a class="settings-tab"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/></svg>Idioma y región</a>
+          <a class="settings-tab"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/></svg>Plan y facturación<span class="badge">Pronto</span></a>
+        </aside>
+
+        <div class="settings-content">
+          <h1 class="sect-title">Mantén tu cuenta segura</h1>
+          <p class="sect-sub">Tu cuenta tiene acceso a datos de tus huéspedes. Protegerla protege a tu negocio.</p>
+
+          <!-- 2FA banner -->
+          <div class="banner-2fa">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3 4 7v6c0 4.5 3 8 8 9 5-1 8-4.5 8-9V7z"/>
+              <path d="M12 8v4"/>
+              <path d="M12 15h.01"/>
+            </svg>
+            <div class="info">
+              <p class="t">Activa la autenticación en dos pasos</p>
+              <p class="d">Una capa extra de seguridad. Toma <span class="oldstyle">2</span> minutos.</p>
+            </div>
+            <button class="btn sage">Activar 2FA →</button>
+          </div>
+
+          <!-- CONTRASEÑA -->
+          <span class="sect-sub-overline">Contraseña</span>
+          <div style="max-width: 460px;">
+            <div class="field">
+              <label class="field-label">Contraseña actual</label>
+              <input class="input" type="password" value="••••••••" />
+            </div>
+            <div class="field">
+              <label class="field-label">Nueva contraseña</label>
+              <input class="input" type="password" value="••••••••••" />
+              <div class="strength on3">
+                <div class="bars"><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span></div>
+                <p class="helper">Casi. Agrega un símbolo para hacerla sólida.</p>
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">Confirmar nueva contraseña</label>
+              <input class="input" type="password" value="••••••••••" />
+            </div>
+            <button class="btn outline-sage">Cambiar contraseña</button>
+          </div>
+
+          <div class="sect-divider"></div>
+
+          <!-- 2FA SECTION -->
+          <span class="sect-sub-overline">Autenticación en 2 pasos</span>
+          <div class="twofa-status">
+            <span class="text">
+              <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11v-3a4 4 0 0 1 8 0"/></svg>
+              Sin 2FA activado
+            </span>
+            <button class="btn terracotta">Activar 2FA</button>
+          </div>
+          <p class="twofa-helper">Recomendado activar para cuentas con propiedades activas. Toma <span class="oldstyle">2</span> minutos.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="preview-spacer"></div>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     SEGURIDAD · MODAL ACTIVAR 2FA · PASO 1 (QR)
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="preview-label">Modal Activar 2FA · Paso 1 — escanear QR</div>
+<div class="preview-frame desktop" style="min-height: 920px;">
+  <div class="app">
+    <aside class="sidebar">
+      <a class="sb-logo">Eztadia</a>
+      <button class="sb-prop"><span class="ph"></span><span class="name">Casa Marina</span></button>
+      <div class="sb-spacer"></div>
+      <button class="sb-user"><span class="av">CS</span><span class="name">Carlos</span></button>
+    </aside>
+
+    <div>
+      <header class="topbar">
+        <nav class="crumbs"><span>Cuenta</span><span class="sep">/</span><span>Configuración</span><span class="sep">/</span><span class="cur">Seguridad</span></nav>
+        <div class="search-top"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input placeholder="Buscar..." /></div>
+        <div class="top-actions"><button class="top-av">CS</button></div>
+      </header>
+      <div class="settings" style="opacity:.4;">
+        <aside class="settings-tabs">
+          <span class="settings-tabs-label">Tu cuenta</span>
+          <a class="settings-tab on">Seguridad</a>
+        </aside>
+        <div class="settings-content"><h1 class="sect-title">Mantén tu cuenta segura</h1></div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-backdrop"></div>
+    <div class="modal">
+      <button class="modal-close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6l-12 12"/></svg>
+      </button>
+
+      <div class="mini-stepper">
+        <span class="mini-step-dot current"></span>
+        <span class="mini-step-line"></span>
+        <span class="mini-step-dot future"></span>
+        <span class="mini-step-line"></span>
+        <span class="mini-step-dot future"></span>
+        <span class="mini-step-text"><span class="cur">Paso 1</span> · de 3</span>
+      </div>
+
+      <h2 class="modal-title">Escanea con tu app de autenticación</h2>
+      <p class="modal-sub">Usa <em class="italic">Google Authenticator</em>, <em class="italic">Authy</em>, <em class="italic">1Password</em> o cualquier otra app TOTP compatible.</p>
+
+      <div class="qr-card">
+        <!-- Visual QR placeholder -->
+        <div class="qr-img">
+          <svg viewBox="0 0 200 200" width="100%" height="100%" aria-hidden>
+            <rect width="200" height="200" fill="white"/>
+            <!-- Three big squares (finder patterns) -->
+            <g fill="#1F1B16">
+              <rect x="8" y="8" width="50" height="50"/>
+              <rect x="14" y="14" width="38" height="38" fill="white"/>
+              <rect x="22" y="22" width="22" height="22"/>
+              <rect x="142" y="8" width="50" height="50"/>
+              <rect x="148" y="14" width="38" height="38" fill="white"/>
+              <rect x="156" y="22" width="22" height="22"/>
+              <rect x="8" y="142" width="50" height="50"/>
+              <rect x="14" y="148" width="38" height="38" fill="white"/>
+              <rect x="22" y="156" width="22" height="22"/>
+            </g>
+            <!-- Data modules pattern -->
+            <g fill="#1F1B16">
+              <rect x="70" y="10" width="8" height="8"/>
+              <rect x="86" y="10" width="8" height="8"/>
+              <rect x="110" y="10" width="8" height="8"/>
+              <rect x="126" y="10" width="8" height="8"/>
+              <rect x="70" y="26" width="8" height="8"/>
+              <rect x="94" y="26" width="8" height="8"/>
+              <rect x="118" y="26" width="8" height="8"/>
+              <rect x="78" y="42" width="8" height="8"/>
+              <rect x="102" y="42" width="8" height="8"/>
+              <rect x="118" y="42" width="8" height="8"/>
+              <rect x="134" y="42" width="8" height="8"/>
+              <rect x="10" y="70" width="8" height="8"/>
+              <rect x="26" y="70" width="8" height="8"/>
+              <rect x="42" y="70" width="8" height="8"/>
+              <rect x="62" y="70" width="8" height="8"/>
+              <rect x="78" y="70" width="8" height="8"/>
+              <rect x="94" y="70" width="8" height="8"/>
+              <rect x="110" y="70" width="8" height="8"/>
+              <rect x="134" y="70" width="8" height="8"/>
+              <rect x="158" y="70" width="8" height="8"/>
+              <rect x="174" y="70" width="8" height="8"/>
+              <rect x="190" y="70" width="8" height="8"/>
+              <rect x="18" y="86" width="8" height="8"/>
+              <rect x="42" y="86" width="8" height="8"/>
+              <rect x="66" y="86" width="8" height="8"/>
+              <rect x="86" y="86" width="8" height="8"/>
+              <rect x="118" y="86" width="8" height="8"/>
+              <rect x="142" y="86" width="8" height="8"/>
+              <rect x="166" y="86" width="8" height="8"/>
+              <rect x="182" y="86" width="8" height="8"/>
+              <rect x="10" y="102" width="8" height="8"/>
+              <rect x="34" y="102" width="8" height="8"/>
+              <rect x="58" y="102" width="8" height="8"/>
+              <rect x="74" y="102" width="8" height="8"/>
+              <rect x="98" y="102" width="8" height="8"/>
+              <rect x="126" y="102" width="8" height="8"/>
+              <rect x="150" y="102" width="8" height="8"/>
+              <rect x="174" y="102" width="8" height="8"/>
+              <rect x="26" y="118" width="8" height="8"/>
+              <rect x="50" y="118" width="8" height="8"/>
+              <rect x="82" y="118" width="8" height="8"/>
+              <rect x="106" y="118" width="8" height="8"/>
+              <rect x="130" y="118" width="8" height="8"/>
+              <rect x="158" y="118" width="8" height="8"/>
+              <rect x="190" y="118" width="8" height="8"/>
+              <rect x="14" y="134" width="8" height="8"/>
+              <rect x="38" y="134" width="8" height="8"/>
+              <rect x="70" y="134" width="8" height="8"/>
+              <rect x="94" y="134" width="8" height="8"/>
+              <rect x="118" y="134" width="8" height="8"/>
+              <rect x="142" y="134" width="8" height="8"/>
+              <rect x="174" y="134" width="8" height="8"/>
+              <rect x="70" y="158" width="8" height="8"/>
+              <rect x="94" y="158" width="8" height="8"/>
+              <rect x="118" y="158" width="8" height="8"/>
+              <rect x="142" y="158" width="8" height="8"/>
+              <rect x="158" y="158" width="8" height="8"/>
+              <rect x="182" y="158" width="8" height="8"/>
+              <rect x="78" y="174" width="8" height="8"/>
+              <rect x="102" y="174" width="8" height="8"/>
+              <rect x="134" y="174" width="8" height="8"/>
+              <rect x="174" y="174" width="8" height="8"/>
+              <rect x="70" y="190" width="8" height="8"/>
+              <rect x="118" y="190" width="8" height="8"/>
+              <rect x="158" y="190" width="8" height="8"/>
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <div class="qr-manual">
+        <span class="help">¿No puedes escanear? Código manual:<span class="code">JBSWY3DPEHPK3PXP</span></span>
+        <button class="copy" aria-label="Copiar código">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h2"/></svg>
+        </button>
+      </div>
+
+      <div class="modal-cta-row">
+        <button class="btn ghost">Cancelar</button>
+        <button class="btn sage">Continuar →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="preview-spacer"></div>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     TAB · SESIONES ACTIVAS
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="preview-label">Tab Sesiones activas · Desktop</div>
+<div class="preview-frame desktop" style="min-height: 740px;">
+  <div class="app">
+    <aside class="sidebar">
+      <a class="sb-logo">Eztadia</a>
+      <button class="sb-prop"><span class="ph"></span><span class="name">Casa Marina</span></button>
+      <div class="sb-spacer"></div>
+      <button class="sb-user"><span class="av">CS</span><span class="name">Carlos</span></button>
+    </aside>
+
+    <div>
+      <header class="topbar">
+        <nav class="crumbs"><span>Cuenta</span><span class="sep">/</span><span>Configuración</span><span class="sep">/</span><span class="cur">Sesiones activas</span></nav>
+        <div class="search-top"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input placeholder="Buscar..." /></div>
+        <div class="top-actions"><button class="top-av">CS</button></div>
+      </header>
+
+      <div class="settings">
+        <aside class="settings-tabs">
+          <span class="settings-tabs-label">Tu cuenta</span>
+          <a class="settings-tab"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/></svg>Perfil</a>
+          <a class="settings-tab"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 7v6c0 4.5 3 8 8 9 5-1 8-4.5 8-9V7z"/></svg>Seguridad<span class="badge">2FA</span></a>
+          <a class="settings-tab on"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="14" height="10" rx="1.5"/><path d="M3 18h14"/><rect x="16" y="11" width="5" height="9" rx="1"/></svg>Sesiones activas</a>
+          <a class="settings-tab"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17h12l-1.5-2.5V11a4.5 4.5 0 0 0-9 0v3.5L6 17z"/></svg>Notificaciones</a>
+          <a class="settings-tab"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/></svg>Idioma y región</a>
+          <a class="settings-tab"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/></svg>Plan y facturación<span class="badge">Pronto</span></a>
+        </aside>
+
+        <div class="settings-content">
+          <h1 class="sect-title">Sesiones activas</h1>
+          <p class="sect-sub">Dispositivos donde tu cuenta tiene la sesión iniciada. Si ves alguna que no reconoces, ciérrala.</p>
+
+          <div class="session-list" style="max-width: 720px;">
+
+            <article class="session-card">
+              <span class="ic-device">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="5" width="14" height="10" rx="1.5"/>
+                  <path d="M3 18h14"/>
+                  <rect x="16" y="11" width="5" height="9" rx="1"/>
+                </svg>
+              </span>
+              <div class="info">
+                <p class="name">Mac · Safari</p>
+                <p class="loc">Bogotá, Colombia · IP <span class="oldstyle">190.85.x.x</span></p>
+                <span class="status current">Esta sesión</span>
+              </div>
+            </article>
+
+            <article class="session-card">
+              <span class="ic-device">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="6" y="2" width="12" height="20" rx="2.5"/>
+                  <path d="M11 18h2"/>
+                </svg>
+              </span>
+              <div class="info">
+                <p class="name">iPhone · App</p>
+                <p class="loc">Bogotá, Colombia · IP <span class="oldstyle">190.85.x.x</span></p>
+                <p class="status">Última actividad hace <span class="oldstyle">3</span> horas</p>
+              </div>
+              <button class="btn ghost-danger-sm" style="text-decoration: none; padding: 0 12px; height: 32px; border: 1px solid rgba(168,72,60,0.25); border-radius: 8px;">Cerrar sesión</button>
+            </article>
+
+            <article class="session-card">
+              <span class="ic-device">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="5" width="18" height="13" rx="1.5"/>
+                  <path d="M3 9h18"/>
+                  <circle cx="7" cy="7" r="0.5" fill="currentColor"/>
+                  <circle cx="9.5" cy="7" r="0.5" fill="currentColor"/>
+                </svg>
+              </span>
+              <div class="info">
+                <p class="name">Windows · Chrome</p>
+                <p class="loc">Medellín, Colombia · IP <span class="oldstyle">200.20.x.x</span></p>
+                <p class="status">Última actividad hace <span class="oldstyle">5</span> días</p>
+              </div>
+              <button class="btn ghost-danger-sm" style="text-decoration: none; padding: 0 12px; height: 32px; border: 1px solid rgba(168,72,60,0.25); border-radius: 8px;">Cerrar sesión</button>
+            </article>
+          </div>
+
+          <button class="btn outline-danger" style="margin-top: 24px;">Cerrar todas las demás sesiones</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="preview-spacer"></div>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     TAB · NOTIFICACIONES
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="preview-label">Tab Notificaciones · Desktop</div>
+<div class="preview-frame desktop" style="min-height: 820px;">
+  <div class="app">
+    <aside class="sidebar">
+      <a class="sb-logo">Eztadia</a>
+      <button class="sb-prop"><span class="ph"></span><span class="name">Casa Marina</span></button>
+      <div class="sb-spacer"></div>
+      <button class="sb-user"><span class="av">CS</span><span class="name">Carlos</span></button>
+    </aside>
+
+    <div>
+      <header class="topbar">
+        <nav class="crumbs"><span>Cuenta</span><span class="sep">/</span><span>Configuración</span><span class="sep">/</span><span class="cur">Notificaciones</span></nav>
+        <div class="search-top"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input placeholder="Buscar..." /></div>
+        <div class="top-actions"><button class="top-av">CS</button></div>
+      </header>
+
+      <div class="settings">
+        <aside class="settings-tabs">
+          <span class="settings-tabs-label">Tu cuenta</span>
+          <a class="settings-tab">Perfil</a>
+          <a class="settings-tab">Seguridad<span class="badge">2FA</span></a>
+          <a class="settings-tab">Sesiones activas</a>
+          <a class="settings-tab on"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17h12l-1.5-2.5V11a4.5 4.5 0 0 0-9 0v3.5L6 17z"/></svg>Notificaciones</a>
+          <a class="settings-tab">Idioma y región</a>
+          <a class="settings-tab">Plan y facturación<span class="badge">Pronto</span></a>
+        </aside>
+
+        <div class="settings-content">
+          <h1 class="sect-title">Qué quieres saber</h1>
+          <p class="sect-sub">Elige qué te notificamos y cómo. Los toggles guardan automáticamente.</p>
+
+          <table class="notif-table">
+            <thead>
+              <tr>
+                <th>Evento</th>
+                <th class="col-channel">Email</th>
+                <th class="col-channel">WhatsApp</th>
+                <th class="col-channel">In-app</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="notif-event">
+                    <span class="e-title">Nueva reserva confirmada</span>
+                    <span class="e-sub">Cuando un huésped completa el pago y la reserva queda confirmada.</span>
+                  </div>
+                </td>
+                <td class="col-channel"><span class="switch on"></span></td>
+                <td class="col-channel"><span class="switch on"></span></td>
+                <td class="col-channel"><span class="switch on"></span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="notif-event">
+                    <span class="e-title">Reserva pendiente de pago (manual)</span>
+                    <span class="e-sub">Cuando un huésped sube comprobante de transferencia para tu revisión.</span>
+                  </div>
+                </td>
+                <td class="col-channel"><span class="switch on"></span></td>
+                <td class="col-channel"><span class="switch on"></span></td>
+                <td class="col-channel"><span class="switch on"></span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="notif-event">
+                    <span class="e-title">Check-in hoy</span>
+                    <span class="e-sub">Recordatorio matutino de quién llega hoy.</span>
+                  </div>
+                </td>
+                <td class="col-channel"><span class="switch"></span></td>
+                <td class="col-channel"><span class="switch on"></span></td>
+                <td class="col-channel"><span class="switch on"></span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="notif-event">
+                    <span class="e-title">Check-out hoy</span>
+                    <span class="e-sub">Recordatorio matutino de quién se va hoy.</span>
+                  </div>
+                </td>
+                <td class="col-channel"><span class="switch"></span></td>
+                <td class="col-channel"><span class="switch"></span></td>
+                <td class="col-channel"><span class="switch on"></span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="notif-event">
+                    <span class="e-title">Mensaje nuevo de huésped</span>
+                    <span class="e-sub">Cuando alguien te escribe por WhatsApp o el chat interno.</span>
+                  </div>
+                </td>
+                <td class="col-channel"><span class="switch"></span></td>
+                <td class="col-channel"><span class="switch on"></span></td>
+                <td class="col-channel"><span class="switch on"></span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="notif-event">
+                    <span class="e-title">Cancelación de reserva</span>
+                    <span class="e-sub">Cuando un huésped cancela su reserva o caduca un hold.</span>
+                  </div>
+                </td>
+                <td class="col-channel"><span class="switch on"></span></td>
+                <td class="col-channel"><span class="switch on"></span></td>
+                <td class="col-channel"><span class="switch on"></span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="notif-event">
+                    <span class="e-title">Error en webhook de pago</span>
+                    <span class="e-sub">Si Wompi tiene un fallo procesando un pago.</span>
+                  </div>
+                </td>
+                <td class="col-channel"><span class="switch on"></span></td>
+                <td class="col-channel"><span class="switch"></span></td>
+                <td class="col-channel"><span class="switch on"></span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="notif-event">
+                    <span class="e-title">Resumen semanal</span>
+                    <span class="e-sub">Cada lunes en la mañana, tus números de la semana anterior.</span>
+                  </div>
+                </td>
+                <td class="col-channel"><span class="switch on"></span></td>
+                <td class="col-channel"><span class="switch"></span></td>
+                <td class="col-channel"><span class="switch"></span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="notif-event">
+                    <span class="e-title">Producto: novedades de Eztadia</span>
+                    <span class="e-sub">Una vez al mes o menos. Sin spam.</span>
+                  </div>
+                </td>
+                <td class="col-channel"><span class="switch on"></span></td>
+                <td class="col-channel"><span class="switch"></span></td>
+                <td class="col-channel"><span class="switch"></span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="preview-spacer"></div>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     TAB · IDIOMA Y REGIÓN
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="preview-label">Tab Idioma y región · Desktop</div>
+<div class="preview-frame desktop" style="min-height: 700px;">
+  <div class="app">
+    <aside class="sidebar">
+      <a class="sb-logo">Eztadia</a>
+      <button class="sb-prop"><span class="ph"></span><span class="name">Casa Marina</span></button>
+      <div class="sb-spacer"></div>
+      <button class="sb-user"><span class="av">CS</span><span class="name">Carlos</span></button>
+    </aside>
+
+    <div>
+      <header class="topbar">
+        <nav class="crumbs"><span>Cuenta</span><span class="sep">/</span><span>Configuración</span><span class="sep">/</span><span class="cur">Idioma y región</span></nav>
+        <div class="search-top"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input placeholder="Buscar..." /></div>
+        <div class="top-actions"><button class="top-av">CS</button></div>
+      </header>
+
+      <div class="settings">
+        <aside class="settings-tabs">
+          <span class="settings-tabs-label">Tu cuenta</span>
+          <a class="settings-tab">Perfil</a>
+          <a class="settings-tab">Seguridad<span class="badge">2FA</span></a>
+          <a class="settings-tab">Sesiones activas</a>
+          <a class="settings-tab">Notificaciones</a>
+          <a class="settings-tab on"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a13 13 0 0 1 0 18M12 3a13 13 0 0 0 0 18"/></svg>Idioma y región</a>
+          <a class="settings-tab">Plan y facturación<span class="badge">Pronto</span></a>
+        </aside>
+
+        <div class="settings-content">
+          <h1 class="sect-title">Idioma y región</h1>
+          <p class="sect-sub">Cómo te mostramos fechas, números y mensajes en la plataforma.</p>
+
+          <div style="max-width: 540px;">
+            <span class="sect-sub-overline">Idioma de la plataforma</span>
+            <div class="lang-cards">
+              <button class="lang-card on">
+                <span class="radio"></span>
+                <div class="info">
+                  <p class="label"><span class="flag flag-co"></span>Español</p>
+                  <p class="sub">Colombia neutral</p>
+                </div>
+              </button>
+              <button class="lang-card">
+                <span class="radio"></span>
+                <div class="info">
+                  <p class="label"><span class="flag flag-us"></span>English</p>
+                  <p class="sub">United States</p>
+                </div>
+              </button>
+            </div>
+
+            <div class="sect-divider"></div>
+
+            <span class="sect-sub-overline">Formato de fecha</span>
+            <div class="format-radio">
+              <button class="format-opt on">
+                <span class="radio"></span>
+                <span class="label">Día / Mes / Año<span class="example">21/05/2026</span></span>
+              </button>
+              <button class="format-opt">
+                <span class="radio"></span>
+                <span class="label">Mes / Día / Año<span class="example">05/21/2026</span></span>
+              </button>
+              <button class="format-opt">
+                <span class="radio"></span>
+                <span class="label">Año-Mes-Día (ISO)<span class="example">2026-05-21</span></span>
+              </button>
+            </div>
+
+            <div class="sect-divider"></div>
+
+            <span class="sect-sub-overline">Formato de número</span>
+            <div class="format-radio">
+              <button class="format-opt on">
+                <span class="radio"></span>
+                <span class="label">Coma decimal<span class="example">1.234.567,89</span></span>
+              </button>
+              <button class="format-opt">
+                <span class="radio"></span>
+                <span class="label">Punto decimal<span class="example">1,234,567.89</span></span>
+              </button>
+            </div>
+
+            <div class="sect-divider"></div>
+
+            <div class="field">
+              <label class="field-label">Zona horaria</label>
+              <select class="select">
+                <option>America/Bogotá (GMT-5)</option>
+                <option>America/Mexico_City (GMT-6)</option>
+                <option>America/Lima (GMT-5)</option>
+              </select>
+              <p class="field-helper">Define cómo se muestran las horas en el calendario y las reservas.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="preview-spacer"></div>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     TAB · PLAN Y FACTURACIÓN (placeholder)
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="preview-label">Tab Plan y facturación · Desktop <span class="mute">placeholder pre-MVP</span></div>
+<div class="preview-frame desktop" style="min-height: 700px;">
+  <div class="app">
+    <aside class="sidebar">
+      <a class="sb-logo">Eztadia</a>
+      <button class="sb-prop"><span class="ph"></span><span class="name">Casa Marina</span></button>
+      <div class="sb-spacer"></div>
+      <button class="sb-user"><span class="av">CS</span><span class="name">Carlos</span></button>
+    </aside>
+
+    <div>
+      <header class="topbar">
+        <nav class="crumbs"><span>Cuenta</span><span class="sep">/</span><span>Configuración</span><span class="sep">/</span><span class="cur">Plan y facturación</span></nav>
+        <div class="search-top"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input placeholder="Buscar..." /></div>
+        <div class="top-actions"><button class="top-av">CS</button></div>
+      </header>
+
+      <div class="settings">
+        <aside class="settings-tabs">
+          <span class="settings-tabs-label">Tu cuenta</span>
+          <a class="settings-tab">Perfil</a>
+          <a class="settings-tab">Seguridad<span class="badge">2FA</span></a>
+          <a class="settings-tab">Sesiones activas</a>
+          <a class="settings-tab">Notificaciones</a>
+          <a class="settings-tab">Idioma y región</a>
+          <a class="settings-tab on"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/></svg>Plan y facturación<span class="badge">Pronto</span></a>
+        </aside>
+
+        <div class="settings-content">
+          <div class="plan-card">
+            <div class="plan-orn">
+              <svg viewBox="0 0 200 60" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden>
+                <path d="M 8 40 C 30 12, 60 56, 100 28 S 170 22, 192 20"/>
+              </svg>
+            </div>
+            <h1 class="plan-title">Estás en el plan <em class="italic">gratis</em>.</h1>
+            <p class="plan-sub">Y así seguirá hasta que tengas más de <span class="oldstyle">30</span> habitaciones. Cuando llegue el momento, te avisaremos con tiempo.</p>
+            <button class="btn outline-sage">Conocer el plan Pro (próximamente)</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="preview-spacer"></div>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     MOBILE · TAB SEGURIDAD (con banner 2FA)
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="preview-label">Mobile · Tab Seguridad</div>
+<div class="preview-frame mobile">
+  <span class="phone-notch" aria-hidden></span>
+  <div class="phone-screen">
+    <div class="phone-statusbar">
+      <span class="oldstyle">9:41</span>
+      <span class="icons" aria-hidden>
+        <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect y="7" width="3" height="4" rx=".5"/><rect x="4.5" y="5" width="3" height="6" rx=".5"/><rect x="9" y="2.5" width="3" height="8.5" rx=".5"/><rect x="13.5" width="3" height="11" rx=".5"/></svg>
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 4a10 10 0 0 1 12 0"/><path d="M4.5 6.5a6.5 6.5 0 0 1 7 0"/><path d="M7 9a2.5 2.5 0 0 1 2 0"/></svg>
+        <svg width="26" height="11" viewBox="0 0 26 11" fill="none" stroke="currentColor" stroke-width="1"><rect x=".5" y=".5" width="22" height="10" rx="2.5"/><rect x="2.5" y="2.5" width="14" height="6" rx="1" fill="currentColor" stroke="none"/><path d="M24 4v3" stroke-linecap="round"/></svg>
+      </span>
+    </div>
+
+    <header class="topbar-mob">
+      <button class="ham"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg></button>
+      <span class="center">Configuración</span>
+      <button class="av">CS</button>
+    </header>
+
+    <div class="page-mob">
+      <button class="settings-tab-trigger-mob">
+        <span class="left">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 7v6c0 4.5 3 8 8 9 5-1 8-4.5 8-9V7z"/></svg>
+          Seguridad
+        </span>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+
+      <h1 class="sect-title" style="font-size: 26px;">Mantén tu cuenta segura</h1>
+      <p class="sect-sub" style="font-size: 13px;">Tu cuenta tiene acceso a datos de tus huéspedes.</p>
+
+      <div class="banner-2fa" style="padding: 16px; gap: 12px; margin-bottom: 24px;">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width: 22px; height: 22px;"><path d="M12 3 4 7v6c0 4.5 3 8 8 9 5-1 8-4.5 8-9V7z"/><path d="M12 8v4"/><path d="M12 15h.01"/></svg>
+        <div class="info">
+          <p class="t" style="font-size: 15px;">Activa la autenticación en dos pasos</p>
+          <p class="d" style="font-size: 12px;">Una capa extra. Toma <span class="oldstyle">2</span> minutos.</p>
+        </div>
+      </div>
+      <button class="btn sage full" style="margin-bottom: 32px;">Activar 2FA →</button>
+
+      <span class="sect-sub-overline">Contraseña</span>
+      <div class="field">
+        <label class="field-label">Contraseña actual</label>
+        <input class="input" type="password" value="••••••••" />
+      </div>
+      <div class="field">
+        <label class="field-label">Nueva contraseña</label>
+        <input class="input" type="password" />
+      </div>
+      <button class="btn outline-sage full">Cambiar contraseña</button>
+    </div>
+
+    <span class="phone-home" aria-hidden></span>
+  </div>
+</div>
+
+<div class="preview-spacer"></div>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     MOBILE · TAB NOTIFICACIONES (cards)
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="preview-label">Mobile · Tab Notificaciones</div>
+<div class="preview-frame mobile">
+  <span class="phone-notch" aria-hidden></span>
+  <div class="phone-screen">
+    <div class="phone-statusbar">
+      <span class="oldstyle">9:41</span>
+      <span class="icons" aria-hidden>
+        <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect y="7" width="3" height="4" rx=".5"/><rect x="4.5" y="5" width="3" height="6" rx=".5"/><rect x="9" y="2.5" width="3" height="8.5" rx=".5"/><rect x="13.5" width="3" height="11" rx=".5"/></svg>
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 4a10 10 0 0 1 12 0"/><path d="M4.5 6.5a6.5 6.5 0 0 1 7 0"/><path d="M7 9a2.5 2.5 0 0 1 2 0"/></svg>
+        <svg width="26" height="11" viewBox="0 0 26 11" fill="none" stroke="currentColor" stroke-width="1"><rect x=".5" y=".5" width="22" height="10" rx="2.5"/><rect x="2.5" y="2.5" width="14" height="6" rx="1" fill="currentColor" stroke="none"/><path d="M24 4v3" stroke-linecap="round"/></svg>
+      </span>
+    </div>
+
+    <header class="topbar-mob">
+      <button class="ham"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg></button>
+      <span class="center">Configuración</span>
+      <button class="av">CS</button>
+    </header>
+
+    <div class="page-mob">
+      <button class="settings-tab-trigger-mob">
+        <span class="left">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17h12l-1.5-2.5V11a4.5 4.5 0 0 0-9 0v3.5L6 17z"/></svg>
+          Notificaciones
+        </span>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+
+      <h1 class="sect-title" style="font-size: 26px;">Qué quieres saber</h1>
+      <p class="sect-sub" style="font-size: 13px;">Toggles guardan automáticamente.</p>
+
+      <div class="notif-card-mob">
+        <p class="e-title">Nueva reserva confirmada</p>
+        <div class="chans">
+          <div class="chan">
+            <span class="name"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>Email</span>
+            <span class="switch on"></span>
+          </div>
+          <div class="chan">
+            <span class="name"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.91-7.01A9.83 9.83 0 0 0 12.04 2z"/></svg>WhatsApp</span>
+            <span class="switch on"></span>
+          </div>
+          <div class="chan">
+            <span class="name"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17h12l-1.5-2.5V11a4.5 4.5 0 0 0-9 0v3.5L6 17z"/></svg>In-app</span>
+            <span class="switch on"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="notif-card-mob">
+        <p class="e-title">Check-in hoy</p>
+        <div class="chans">
+          <div class="chan">
+            <span class="name"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/></svg>Email</span>
+            <span class="switch"></span>
+          </div>
+          <div class="chan">
+            <span class="name"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.91-7.01A9.83 9.83 0 0 0 12.04 2z"/></svg>WhatsApp</span>
+            <span class="switch on"></span>
+          </div>
+          <div class="chan">
+            <span class="name"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17h12l-1.5-2.5V11a4.5 4.5 0 0 0-9 0v3.5L6 17z"/></svg>In-app</span>
+            <span class="switch on"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="notif-card-mob">
+        <p class="e-title">Mensaje nuevo de huésped</p>
+        <div class="chans">
+          <div class="chan">
+            <span class="name">Email</span><span class="switch"></span>
+          </div>
+          <div class="chan">
+            <span class="name">WhatsApp</span><span class="switch on"></span>
+          </div>
+          <div class="chan">
+            <span class="name">In-app</span><span class="switch on"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="notif-card-mob">
+        <p class="e-title">Resumen semanal</p>
+        <div class="chans">
+          <div class="chan">
+            <span class="name">Email</span><span class="switch on"></span>
+          </div>
+          <div class="chan">
+            <span class="name">WhatsApp</span><span class="switch"></span>
+          </div>
+          <div class="chan">
+            <span class="name">In-app</span><span class="switch"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <span class="phone-home" aria-hidden></span>
+  </div>
+</div>
+
+</body>
+</html>

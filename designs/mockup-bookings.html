@@ -1,0 +1,2080 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Reservas · Casa Marina — Eztadia</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..700,0..100;1,9..144,400..700,0..100&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --cream:#FBF8F2; --paper:#FFFFFF; --linen:#F2EDE2;
+    --ink:#1F1B16; --ink-soft:#5A5147; --ink-muted:#8B8275;
+    --sage:#5C7567; --sage-soft:#9CB39E; --sage-tint:#E5EDE5;
+    --terracotta:#C76F4C; --clay:#A85A3B; --gold:#B8923E;
+    --gold-tint: rgba(184, 146, 62, 0.14);
+    --gold-dark:#8A6E2E;
+    --terracotta-tint: rgba(199, 111, 76, 0.12);
+    --rule:#E5DFD3; --rule-strong:#D4CCB9;
+    --success:#5E8A5F; --warning:#C49A3C; --danger:#A8483C; --info:#5B7B96;
+    --shadow-soft: 0 1px 2px rgba(31,27,22,.04), 0 8px 24px -12px rgba(31,27,22,.08);
+    --shadow-pop:  0 4px 8px -3px rgba(31,27,22,.08), 0 20px 40px -16px rgba(31,27,22,.16);
+    --shadow-drawer: -28px 0 60px -32px rgba(31,27,22,.18), -8px 0 24px -16px rgba(31,27,22,.06);
+    --ease: cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  html{ -webkit-text-size-adjust:100%; }
+  body{
+    background:#EAE3D2;
+    color: var(--ink);
+    font-family:'Inter', system-ui, sans-serif;
+    font-size:16px; line-height:1.55;
+    font-feature-settings:"ss01","cv11";
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    padding: 56px 32px 96px;
+  }
+  @media (max-width: 1500px){
+    body{ padding: 24px 12px 64px; }
+    .preview-frame.desktop{ width: 100%; max-width: 1440px; }
+  }
+  @media (max-width: 500px){
+    body{ padding: 16px 0 48px; background: var(--cream); }
+    .preview-frame.desktop{ display:none; }
+    .preview-frame.mobile{ width: 100%; max-width: 100%; border: 0; border-radius: 0; box-shadow: none;}
+    .preview-frame.mobile .phone-chrome{ display:none; }
+    .preview-label{ padding: 0 16px; }
+  }
+  img{ display:block; max-width:100%; height:auto; }
+  a{ color:inherit; text-decoration:none; }
+  button{ font:inherit; color:inherit; cursor:pointer; border:0; background:transparent; padding:0; }
+  :focus-visible{ outline:2px solid var(--sage); outline-offset:3px; border-radius:4px; }
+
+  .serif{
+    font-family:'Fraunces', Georgia, serif;
+    font-variation-settings:"SOFT" 50, "opsz" 144;
+    letter-spacing:-0.01em;
+  }
+  .italic{ font-style: italic; }
+  .oldstyle{ font-variant-numeric:oldstyle-nums; font-feature-settings:"onum"; }
+  .tnum{ font-variant-numeric:tabular-nums; font-feature-settings:"tnum"; }
+  .mono{ font-family:'JetBrains Mono', ui-monospace, monospace; }
+
+  /* ─────────── PREVIEW SCAFFOLDING ─────────── */
+  .preview-label{
+    max-width: 1440px; margin: 0 auto 14px;
+    font-size: 11px; letter-spacing:0.14em; text-transform: uppercase;
+    color: var(--gold-dark); font-weight: 500;
+  }
+  .preview-label .mute{ color: var(--ink-muted); font-weight: 400; margin-left: 10px;}
+  .preview-frame{
+    margin: 0 auto;
+    background: var(--cream);
+    border: 1px solid var(--rule-strong);
+    border-radius: 18px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 24px 60px -32px rgba(31,27,22,.18);
+  }
+  .preview-frame.desktop{ width: 1440px; }
+
+  /* iPhone-like mobile frame */
+  .preview-frame.mobile{
+    width: 422px;
+    background: #1F1B16;
+    border: 0;
+    border-radius: 56px;
+    padding: 16px;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.04) inset,
+      0 30px 70px -28px rgba(31,27,22,.4);
+  }
+  .phone-screen{
+    background: var(--cream);
+    border-radius: 42px;
+    overflow: hidden;
+    position: relative;
+    min-height: 820px;
+    isolation: isolate;
+  }
+  .phone-statusbar{
+    height: 44px;
+    background: var(--cream);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 28px 0 28px;
+    font: 600 14px 'Inter';
+    color: var(--ink);
+    position: relative;
+    z-index: 5;
+  }
+  .phone-statusbar .icons{
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--ink);
+  }
+  .phone-notch{
+    position: absolute;
+    top: 10px; left: 50%; transform: translateX(-50%);
+    width: 110px; height: 30px;
+    background: #1F1B16;
+    border-radius: 999px;
+    z-index: 10;
+  }
+  .phone-home{
+    position: absolute;
+    bottom: 7px; left: 50%; transform: translateX(-50%);
+    width: 134px; height: 5px;
+    background: var(--ink);
+    opacity: 0.5;
+    border-radius: 999px;
+    z-index: 10;
+  }
+  .preview-spacer{ height: 72px; }
+
+  /* ─────────── APP SHELL ─────────── */
+  .app{
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 880px;
+    position: relative;
+  }
+  .app.mobile{ grid-template-columns: 1fr; min-height: 780px; }
+
+  /* ─────────── SIDEBAR ─────────── */
+  .sidebar{
+    background: var(--cream);
+    border-right: 1px solid var(--rule);
+    padding: 18px 16px 16px;
+    display: flex; flex-direction: column;
+  }
+  .sb-logo{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'Fraunces', serif; font-style:italic; font-weight:500;
+    font-size:22px; color:var(--ink); letter-spacing:-0.01em;
+    padding: 6px 8px; margin-bottom: 18px;
+  }
+  .sb-logo::after{
+    content:""; width:5px; height:5px; border-radius:50%;
+    background: var(--gold); margin-top: -10px;
+  }
+  .sb-prop{
+    display:flex; align-items:center; gap:10px;
+    padding: 8px 10px; border-radius: 12px;
+    margin-bottom: 24px;
+  }
+  .sb-prop:hover{ background: var(--linen); }
+  .sb-prop .ph{
+    width: 32px; height: 32px; border-radius: 8px;
+    background:url('https://images.unsplash.com/photo-1545158535-c3f7168c28b6?auto=format&fit=crop&w=160&q=80') center/cover;
+    border: 1px solid var(--rule);
+  }
+  .sb-prop .name{ font-family:'Fraunces',serif; font-style:italic; font-weight:500; font-size:15px; flex:1;}
+  .sb-prop .chev{ color: var(--ink-muted); }
+
+  .sb-section{ margin-bottom: 18px; }
+  .sb-section-label{
+    display:block; font-size:11px; letter-spacing:0.08em; text-transform: uppercase;
+    color: var(--ink-muted); font-weight: 500; padding: 4px 14px 8px;
+  }
+  .sb-item{
+    position: relative;
+    display:flex; align-items:center; gap:12px;
+    padding: 9px 14px; border-radius: 10px;
+    font-size:14px; color: var(--ink-soft);
+    margin-bottom: 2px;
+  }
+  .sb-item:hover{ background: var(--linen); color: var(--ink); }
+  .sb-item .ic{ width:18px; height:18px; flex-shrink:0; color: var(--ink-soft); }
+  .sb-item.active{ background: var(--sage-tint); color: var(--sage); font-weight: 500; }
+  .sb-item.active .ic{ color: var(--sage); }
+  .sb-item.active::before{
+    content:""; position:absolute; left: 4px; top:50%; transform: translateY(-50%);
+    width: 3px; height: 16px; border-radius: 2px; background: var(--sage);
+  }
+  .sb-badge{
+    margin-left: auto;
+    background: var(--sage); color: var(--cream);
+    font-size: 11px; font-weight: 500;
+    padding: 1px 7px; border-radius: 999px; line-height: 1.4;
+  }
+  .sb-spacer{ flex: 1; }
+  .sb-user{
+    display:flex; align-items:center; gap:10px;
+    padding: 8px 10px; border-radius: 12px;
+  }
+  .sb-user:hover{ background: var(--linen); }
+  .sb-user .av{
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--sage-tint); color: var(--sage);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 500;
+  }
+  .sb-user .name{ font-size:13px; font-weight:500; flex:1; }
+
+  /* ─────────── TOPBAR ─────────── */
+  .topbar{
+    height: 64px;
+    background: var(--cream);
+    border-bottom: 1px solid var(--rule);
+    display: grid; grid-template-columns: auto 1fr auto;
+    align-items: center; gap: 24px;
+    padding: 0 32px;
+  }
+  .crumbs{
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; color: var(--ink-muted);
+  }
+  .crumbs .sep{ opacity: 0.4; }
+  .crumbs .cur{ color: var(--ink); font-weight: 500; }
+  .search-top{
+    position: relative; max-width: 360px; width: 100%;
+    justify-self: center;
+  }
+  .search-top input{
+    width: 100%; height: 38px;
+    background: var(--linen); border: 1px solid transparent;
+    border-radius: 12px;
+    padding: 0 14px 0 38px;
+    font: 400 14px 'Inter';
+    color: var(--ink);
+  }
+  .search-top input::placeholder{ color: var(--ink-muted); }
+  .search-top input:focus{ outline: none; background: var(--paper); border-color: var(--rule-strong); }
+  .search-top .ic{ position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width:16px; height:16px; color: var(--ink-muted);}
+  .top-actions{ display: inline-flex; align-items: center; gap: 14px; }
+  .top-btn{
+    width: 38px; height: 38px; border-radius: 10px;
+    color: var(--ink-soft);
+    display: inline-flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .top-btn:hover{ background: var(--linen); color: var(--ink); }
+  .top-btn .dot{
+    position: absolute; top: 8px; right: 9px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--sage); border: 2px solid var(--cream);
+  }
+  .lang{
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; letter-spacing:0.08em; text-transform: uppercase;
+    color: var(--ink-muted); font-weight: 500;
+  }
+  .lang button{ padding: 4px 2px; }
+  .lang .on{ color: var(--ink); }
+  .lang .sep{ opacity: 0.4; }
+  .top-av{
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--sage-tint); color: var(--sage);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 500;
+  }
+
+  /* ─────────── PROPERTY TABS ─────────── */
+  .ptabs{
+    display: flex; gap: 28px;
+    border-bottom: 1px solid var(--rule);
+    padding: 0 32px;
+    overflow-x: auto;
+  }
+  .ptab{
+    white-space: nowrap; padding: 16px 0 12px;
+    font-size:14px; font-weight:500;
+    color: var(--ink-soft); border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+  .ptab:hover{ color: var(--ink); }
+  .ptab.on{ color: var(--ink); border-bottom-color: var(--sage); }
+
+  /* ─────────── PAGE BODY ─────────── */
+  .page{
+    padding: 32px 32px 80px;
+  }
+  .page-head{
+    display: flex; justify-content: space-between; align-items: flex-end;
+    gap: 24px; flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+  .page-title{
+    font-family:'Fraunces',serif; font-style: italic; font-weight: 500;
+    font-size: 32px; line-height: 1.05;
+    letter-spacing: -0.02em; margin: 0 0 8px;
+  }
+  .page-sub{
+    font-size: 14px; color: var(--ink-muted); margin: 0;
+  }
+  .page-sub .num{ color: var(--ink-soft); font-weight: 500; }
+  .page-actions{ display: inline-flex; gap: 10px; }
+
+  .btn{
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    height: 40px; padding: 0 18px; border-radius: 12px;
+    font: 500 14px 'Inter'; letter-spacing: -0.005em;
+    transition: background-color 200ms var(--ease), color 200ms var(--ease), border-color 200ms var(--ease);
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+  .btn .ic{ width: 15px; height: 15px; }
+  .btn.outline-sage{
+    background: transparent; color: var(--sage);
+    border-color: var(--sage);
+  }
+  .btn.outline-sage:hover{ background: var(--sage-tint); }
+  .btn.terracotta{
+    background: var(--terracotta); color: var(--cream);
+  }
+  .btn.terracotta:hover{ background: var(--clay); }
+  .btn.sage{
+    background: var(--sage); color: var(--cream);
+  }
+  .btn.sage:hover{ background: #4F6759; }
+  .btn.ghost{
+    background: var(--cream); color: var(--ink-soft);
+    border-color: var(--rule);
+  }
+  .btn.ghost:hover{ background: var(--linen); color: var(--ink); border-color: var(--rule-strong);}
+  .btn.ghost-danger{
+    background: transparent; color: var(--danger);
+    border-color: rgba(168,72,60,.25);
+  }
+  .btn.ghost-danger:hover{ background: rgba(168,72,60,.08); }
+  .btn.sm{ height: 34px; padding: 0 14px; font-size: 13px; border-radius: 10px; }
+
+  /* ─────────── FILTERS ─────────── */
+  .filters{
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 0 18px;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 14px;
+  }
+  .filters-search{
+    position: relative; width: 320px;
+  }
+  .filters-search input{
+    width: 100%; height: 38px;
+    background: transparent; border: 1px solid transparent;
+    border-radius: 12px;
+    padding: 0 14px 0 38px;
+    font: 400 14px 'Inter';
+    color: var(--ink);
+  }
+  .filters-search input::placeholder{ color: var(--ink-muted); }
+  .filters-search input:hover{ background: var(--linen); }
+  .filters-search input:focus{ outline: none; background: var(--linen); border-color: var(--rule-strong); }
+  .filters-search .ic{ position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width:16px; height:16px; color: var(--ink-muted);}
+  .filters-divider{ width: 1px; height: 24px; background: var(--rule); }
+  .chip{
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 32px; padding: 0 14px; border-radius: 999px;
+    font: 500 13px 'Inter';
+    background: var(--cream);
+    border: 1px solid var(--rule);
+    color: var(--ink-soft);
+    transition: background-color 150ms var(--ease), color 150ms var(--ease), border-color 150ms var(--ease);
+  }
+  .chip:hover{ background: var(--linen); color: var(--ink); border-color: var(--rule-strong); }
+  .chip .chev{ color: var(--ink-muted); width: 11px; height: 11px; }
+  .chip.on{
+    background: var(--sage-tint); color: var(--sage);
+    border-color: rgba(92,117,103,.2);
+  }
+  .chip.on .x{ width: 12px; height: 12px; opacity: .75; }
+  .chip.on .x:hover{ opacity: 1;}
+  .filters-clear{
+    margin-left: auto;
+    font-size: 13px; color: var(--sage);
+    text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px;
+    text-decoration-color: rgba(92,117,103,.4);
+  }
+  .filters-clear:hover{ text-decoration-color: var(--sage); }
+
+  /* ─────────── TABLE ─────────── */
+  .tbl-wrap{ overflow: hidden; }
+  table.bookings{
+    width: 100%; border-collapse: collapse;
+  }
+  table.bookings thead th{
+    text-align: left;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    font: 500 11px 'Inter';
+    color: var(--ink-muted);
+    padding: 14px 14px;
+    border-bottom: 1px solid var(--rule);
+    white-space: nowrap;
+    background: var(--cream);
+  }
+  table.bookings thead th .sort{
+    display: inline-flex; align-items: center; gap: 4px;
+    opacity: 0; transition: opacity 150ms var(--ease);
+  }
+  table.bookings thead th:hover .sort{ opacity: 1; }
+  table.bookings thead th .sort svg{ width: 9px; height: 9px;}
+  table.bookings tbody td{
+    padding: 16px 14px;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: middle;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  table.bookings tbody tr.zebra td{ background: var(--paper); }
+  table.bookings tbody tr{ transition: background-color 150ms var(--ease); cursor: pointer; }
+  table.bookings tbody tr:hover td{ background: var(--linen) !important; }
+  table.bookings tbody tr.selected td{ background: var(--linen) !important; }
+  table.bookings tbody tr.selected td:first-child{ box-shadow: inset 3px 0 0 var(--sage); }
+
+  .col-code{ font-family:'JetBrains Mono', monospace; font-size: 12.5px; color: var(--ink-soft); letter-spacing: -0.02em;}
+  .col-guest{
+    display: inline-flex; align-items: center; gap: 12px;
+    white-space: nowrap;
+  }
+  .col-guest .av{
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--sage-tint); color: var(--sage);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 500;
+    background-size: cover; background-position: center;
+  }
+  .col-guest .av.fr{ background-image: url('https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=120&h=120&q=80'); color: transparent; }
+  .col-guest .name{ font-family:'Fraunces',serif; font-style: italic; font-weight: 500; font-size: 15px; color: var(--ink); }
+  .col-room .num{ font-family:'Fraunces',serif; font-weight: 500; font-size: 16px; color: var(--ink); margin-right: 6px; }
+  .col-room .type{ font-size: 12px; color: var(--ink-muted); }
+  .col-date .d{ font-size: 14px; color: var(--ink); }
+  .col-date .day{ display: block; font-size: 11px; color: var(--ink-muted); margin-top: 2px;}
+  .col-total{
+    font-family:'Fraunces', serif; font-weight: 500; font-size: 17px; color: var(--ink);
+    font-variant-numeric: tabular-nums oldstyle-nums;
+    font-feature-settings: "onum","tnum";
+    white-space: nowrap;
+  }
+  .col-actions{ width: 44px; }
+  .dots{
+    width: 30px; height: 30px; border-radius: 8px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--ink-muted);
+  }
+  .dots:hover{ background: var(--paper); color: var(--ink); }
+
+  /* ─────────── PILLS ─────────── */
+  .pill{
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 4px 12px; border-radius: 999px;
+    font: 500 11px 'Inter'; letter-spacing: 0.05em; text-transform: uppercase;
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+  .pill .pdot{ width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .pill.confirmed{ background: var(--sage-tint); color: var(--sage); border-color: rgba(92,117,103,.18); }
+  .pill.confirmed .pdot{ background: var(--sage); }
+  .pill.pending{ background: var(--gold-tint); color: var(--gold-dark); border-color: rgba(184,146,62,.22); }
+  .pill.pending .pdot{ background: var(--gold); }
+  .pill.cancelled{ background: var(--linen); color: var(--ink-muted); border-color: var(--rule); text-decoration: line-through; text-decoration-color: rgba(139,130,117,.55); }
+  .pill.cancelled .pdot{ background: var(--ink-muted); }
+  .pill.completed{ background: var(--linen); color: var(--ink-muted); border-color: var(--rule); }
+  .pill.completed .pdot{ background: var(--ink-muted); }
+  .pill.noshow{ background: var(--terracotta-tint); color: var(--clay); border-color: rgba(199,111,76,.22); }
+  .pill.noshow .pdot{ background: var(--clay); }
+  .pill.approved{ background: var(--sage-tint); color: var(--sage); border-color: rgba(92,117,103,.18); }
+  .pill.waiting{ background: var(--gold-tint); color: var(--gold-dark); border-color: rgba(184,146,62,.22); }
+
+  /* ─────────── ORIGIN ─────────── */
+  .origin{
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 12.5px; color: var(--ink-soft);
+    white-space: nowrap;
+  }
+  .origin .ob{
+    width: 20px; height: 20px; border-radius: 6px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font: 600 10px 'Inter'; letter-spacing: 0;
+  }
+  .origin.direct .ob{ background: var(--sage-tint); color: var(--sage); }
+  .origin.direct .ob svg{ width: 11px; height: 11px; }
+  .origin.booking .ob{ background: rgba(0,53,128,0.08); color: #003580; border: 1px solid rgba(0,53,128,0.15); }
+  .origin.airbnb .ob{ background: rgba(255,90,95,0.08); color: #E04E54; border: 1px solid rgba(255,90,95,0.18); }
+  .origin.manual .ob{ background: var(--linen); color: var(--ink-soft); border: 1px solid var(--rule);}
+  .origin.manual .ob svg{ width: 11px; height: 11px; }
+
+  /* ─────────── PAGINATION ─────────── */
+  .pagination{
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 22px 4px 0;
+    font-size: 13px; color: var(--ink-muted);
+  }
+  .pagination .num{ color: var(--ink-soft); font-weight: 500; }
+  .pagination-ctrls{ display: inline-flex; gap: 8px; }
+  .pg-btn{
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 34px; padding: 0 14px; border-radius: 10px;
+    font: 500 13px 'Inter';
+    color: var(--ink-soft);
+  }
+  .pg-btn:hover{ background: var(--linen); color: var(--ink); }
+  .pg-btn:disabled{ opacity: .35; cursor: not-allowed; }
+  .pg-btn .ic{ width: 12px; height: 12px; }
+
+  /* ─────────── DRAWER ─────────── */
+  .drawer-backdrop{
+    position: absolute; inset: 0;
+    background: rgba(31,27,22, 0.18);
+    z-index: 50;
+  }
+  .drawer{
+    position: absolute;
+    top: 0; right: 0; bottom: 0;
+    width: 480px;
+    background: var(--paper);
+    border-left: 1px solid var(--rule);
+    box-shadow: var(--shadow-drawer);
+    display: flex; flex-direction: column;
+    z-index: 60;
+  }
+  .drawer-head{
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+    padding: 18px 22px;
+    background: var(--paper);
+    border-bottom: 1px solid var(--rule);
+  }
+  .drawer-head .left{ display: inline-flex; align-items: center; gap: 12px; }
+  .drawer-head .code{ font: 500 12.5px 'JetBrains Mono', monospace; color: var(--ink-muted); letter-spacing: -0.01em; }
+  .drawer-close{
+    width: 36px; height: 36px; border-radius: 10px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--ink-soft);
+  }
+  .drawer-close:hover{ background: var(--linen); color: var(--ink); }
+
+  .drawer-body{
+    flex: 1; overflow-y: auto;
+    background: var(--paper);
+  }
+  .drawer-section{ padding: 24px; }
+  .drawer-section + .drawer-section{ border-top: 1px solid var(--rule); }
+
+  .guest-hero{
+    display: flex; flex-direction: column; gap: 4px;
+    margin-bottom: 22px;
+  }
+  .guest-hero .av{
+    width: 64px; height: 64px; border-radius: 50%;
+    background: var(--sage-tint); color: var(--sage);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 500;
+    margin-bottom: 10px;
+  }
+  .guest-hero .name{
+    font-family:'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 28px; letter-spacing: -0.02em; line-height: 1.1;
+    color: var(--ink);
+  }
+  .guest-hero .meta{
+    font-size: 13px; color: var(--ink-muted); margin-top: 4px;
+  }
+
+  .pair-list{ display: flex; flex-direction: column; gap: 16px; }
+  .pair{
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .pair-label{
+    font: 500 11px 'Inter'; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  .pair-value{
+    font: 400 14px 'Inter'; color: var(--ink);
+    display: inline-flex; align-items: center; gap: 8px;
+    flex-wrap: wrap;
+  }
+  .pair-value.bignum{
+    font-family:'Fraunces', serif; font-weight: 500; font-size: 22px;
+    font-variant-numeric: tabular-nums oldstyle-nums;
+    font-feature-settings: "onum","tnum"; letter-spacing: -0.01em;
+  }
+  .pair-value .copy{
+    width: 26px; height: 26px; border-radius: 7px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--ink-muted);
+  }
+  .pair-value .copy:hover{ background: var(--linen); color: var(--ink); }
+  .pair-value .copy svg{ width: 13px; height: 13px;}
+  .pair-value .wa{
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 12px; color: var(--sage); font-weight: 500;
+    padding: 3px 9px; border-radius: 999px;
+    background: var(--sage-tint);
+  }
+  .pair-value .wa:hover{ background: rgba(92,117,103,.18); }
+  .pair-value .wa svg{ width: 12px; height: 12px;}
+  .pair-value .mono-val{
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink);
+    letter-spacing: -0.02em;
+  }
+
+  .overline-gold{
+    display: block; margin-bottom: 14px;
+    font: 500 11px 'Inter'; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--gold-dark);
+  }
+
+  .stay-block{
+    background: var(--linen);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .stay-block .room{
+    font-family:'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 18px; color: var(--ink); margin-bottom: 8px;
+    letter-spacing: -0.015em;
+  }
+  .stay-block .dates{
+    font-family:'Fraunces', serif; font-weight: 500; font-size: 22px;
+    font-variant-numeric: oldstyle-nums; font-feature-settings: "onum";
+    color: var(--ink); letter-spacing: -0.015em;
+    display: inline-flex; align-items: center; gap: 10px;
+  }
+  .stay-block .dates .arrow{ color: var(--gold); width: 18px; height: 18px;}
+  .stay-block .nights{
+    font-size: 13px; color: var(--ink-muted); margin-top: 8px;
+  }
+
+  /* WhatsApp messages */
+  .msgs{ display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px;}
+  .msg{
+    background: var(--linen); border-radius: 12px;
+    padding: 12px 16px;
+    position: relative;
+    border: 1px solid transparent;
+  }
+  .msg.out{ background: var(--sage-tint); border-color: rgba(92,117,103,.15);}
+  .msg-meta{
+    display: flex; align-items: center; gap: 6px;
+    font: 500 11px 'Inter'; color: var(--ink-muted);
+    margin-bottom: 4px;
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .msg-meta .arr{ width: 11px; height: 11px; color: var(--ink-muted); }
+  .msg.out .msg-meta{ color: var(--sage); }
+  .msg.out .msg-meta .arr{ color: var(--sage); }
+  .msg-body{
+    font-size: 14px; line-height: 1.5; color: var(--ink);
+    margin: 0;
+  }
+  .msg-time{
+    font-size: 11px; color: var(--ink-muted); margin-top: 6px;
+    font-variant-numeric: oldstyle-nums; font-feature-settings: "onum";
+  }
+
+  /* Timeline */
+  .timeline{
+    position: relative;
+    padding-left: 22px;
+  }
+  .timeline::before{
+    content:""; position: absolute;
+    left: 5px; top: 8px; bottom: 8px;
+    width: 1px; background: var(--rule);
+  }
+  .tl-item{
+    position: relative;
+    padding-bottom: 18px;
+  }
+  .tl-item:last-child{ padding-bottom: 0; }
+  .tl-dot{
+    position: absolute;
+    left: -22px; top: 4px;
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--sage);
+    border: 2.5px solid var(--paper);
+    box-shadow: 0 0 0 1px var(--rule);
+  }
+  .tl-item.muted .tl-dot{ background: var(--ink-muted); }
+  .tl-item.future .tl-dot{ background: var(--paper); border-color: var(--sage); box-shadow: 0 0 0 1px var(--sage);}
+  .tl-title{
+    font-family:'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 14.5px; color: var(--ink); line-height: 1.25;
+    letter-spacing: -0.005em;
+  }
+  .tl-meta{
+    font-size: 12px; color: var(--ink-muted); margin-top: 3px;
+    font-variant-numeric: oldstyle-nums; font-feature-settings: "onum";
+  }
+
+  /* Drawer footer */
+  .drawer-foot{
+    flex-shrink: 0;
+    display: flex; gap: 10px;
+    padding: 16px 22px;
+    border-top: 1px solid var(--rule);
+    background: var(--paper);
+  }
+  .drawer-foot .btn{ height: 42px; flex: 1; }
+  .drawer-foot .btn.sage{ flex: 1.5; }
+
+  /* WhatsApp-section button */
+  .send-wa-btn{
+    width: 100%; height: 40px;
+    border: 1px solid var(--sage);
+    background: transparent;
+    color: var(--sage);
+    border-radius: 12px;
+    font: 500 14px 'Inter';
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .send-wa-btn:hover{ background: var(--sage-tint); }
+  .send-wa-btn svg{ width: 14px; height: 14px;}
+
+  /* ─────────── MOBILE ─────────── */
+  .topbar-mob{
+    height: 52px;
+    background: var(--cream);
+    display: grid; grid-template-columns: 44px 1fr 44px;
+    align-items: center; gap: 8px; padding: 0 12px;
+  }
+  .topbar-mob .ham{
+    width: 44px; height: 44px; border-radius: 12px;
+    color: var(--ink);
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .topbar-mob .av{
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--sage-tint); color: var(--sage);
+    display: inline-flex; align-items: center; justify-content: center;
+    font: 500 13px 'Inter';
+    margin-left: auto;
+  }
+  .topbar-mob .center{
+    font-family:'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 17px; color: var(--ink); text-align: center;
+    letter-spacing: -0.01em;
+  }
+
+  /* Editorial mobile hero */
+  .mob-hero{
+    padding: 20px 20px 18px;
+  }
+  .mob-hero .eyebrow{
+    display: block;
+    font: 500 11px 'Inter'; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--gold-dark); margin-bottom: 10px;
+  }
+  .mob-hero .title{
+    font-family:'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 38px; line-height: 1.02; margin: 0 0 12px;
+    letter-spacing: -0.025em;
+  }
+  .mob-hero .stats{
+    display: flex; gap: 16px; padding-top: 6px;
+  }
+  .mob-hero .stat{
+    flex: 1;
+  }
+  .mob-hero .stat .v{
+    font-family: 'Fraunces', serif; font-weight: 500; font-size: 26px;
+    font-variant-numeric: oldstyle-nums; font-feature-settings: "onum";
+    color: var(--ink); line-height: 1;
+    letter-spacing: -0.02em;
+    display: block; margin-bottom: 6px;
+  }
+  .mob-hero .stat .l{
+    font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-muted); font-weight: 500;
+  }
+  .mob-hero .stat + .stat{
+    padding-left: 16px; border-left: 1px solid var(--rule);
+  }
+
+  /* Search prominent + filters scroll */
+  .mob-search{
+    padding: 0 20px 12px;
+  }
+  .mob-search-input{
+    position: relative;
+    height: 44px;
+  }
+  .mob-search-input svg{
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    width: 16px; height: 16px; color: var(--ink-muted);
+  }
+  .mob-search-input input{
+    width: 100%; height: 44px;
+    background: var(--paper); border: 1px solid var(--rule);
+    border-radius: 14px;
+    padding: 0 14px 0 40px;
+    font: 400 14px 'Inter'; color: var(--ink);
+  }
+  .mob-search-input input::placeholder{ color: var(--ink-muted); }
+
+  .filters-mob{
+    display: flex; gap: 8px;
+    overflow-x: auto; padding: 4px 20px 14px;
+    -ms-overflow-style: none; scrollbar-width: none;
+  }
+  .filters-mob::-webkit-scrollbar{ display: none; }
+
+  /* Cards mobile — más editorial, avatar visible, jerarquía vertical */
+  .mob-list{
+    padding: 0 16px 110px;
+  }
+  .bk-card{
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 22px;
+    padding: 18px 18px 16px;
+    margin-bottom: 12px;
+    position: relative;
+    display: block;
+    width: 100%;
+    text-align: left;
+  }
+  .bk-card-top{
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 8px; margin-bottom: 14px;
+  }
+  .bk-card-code{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px; letter-spacing: -0.02em;
+    color: var(--ink-muted); font-weight: 500;
+  }
+  .bk-card-head{
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 14px;
+  }
+  .bk-card-head .av{
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--sage-tint); color: var(--sage);
+    display: inline-flex; align-items: center; justify-content: center;
+    font: 500 14px 'Inter'; flex-shrink: 0;
+    background-size: cover; background-position: center;
+  }
+  .bk-card-head .av.fr{
+    background-image: url('https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=120&h=120&q=80');
+    color: transparent;
+  }
+  .bk-card-head .who{ min-width: 0; flex: 1;}
+  .bk-card-name{
+    font-family:'Fraunces',serif; font-style: italic; font-weight: 500;
+    font-size: 20px; color: var(--ink); margin: 0 0 3px;
+    letter-spacing: -0.02em; line-height: 1.1;
+  }
+  .bk-card-name-sub{
+    font-size: 12px; color: var(--ink-muted); margin: 0;
+    letter-spacing: 0.02em;
+  }
+  .bk-card-meta{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    padding: 12px 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  .bk-card-meta .cell .l{
+    display: block;
+    font: 500 10px 'Inter'; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-muted); margin-bottom: 3px;
+  }
+  .bk-card-meta .cell .v{
+    font-size: 14px; color: var(--ink);
+    font-variant-numeric: oldstyle-nums; font-feature-settings: "onum";
+  }
+  .bk-card-meta .cell .v .room-num{ font-family:'Fraunces', serif; font-weight: 500; font-size: 16px; margin-right: 4px;}
+  .bk-card-foot{
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 14px;
+  }
+  .bk-card-total{
+    font-family:'Fraunces',serif; font-weight: 500; font-size: 22px;
+    font-variant-numeric: tabular-nums oldstyle-nums;
+    font-feature-settings: "onum","tnum";
+    color: var(--ink); line-height: 1;
+    letter-spacing: -0.01em;
+  }
+
+  /* Floating Action Button */
+  .fab{
+    position: absolute;
+    bottom: 30px; right: 22px;
+    height: 56px; padding: 0 22px 0 18px;
+    border-radius: 999px;
+    background: var(--terracotta);
+    color: var(--cream);
+    display: inline-flex; align-items: center; gap: 8px;
+    font: 500 14px 'Inter';
+    box-shadow:
+      0 8px 18px -6px rgba(199,111,76,.5),
+      0 18px 32px -16px rgba(31,27,22,.18);
+    z-index: 30;
+  }
+  .fab svg{ width: 16px; height: 16px;}
+
+  /* Mobile drawer / bottom sheet */
+  .mob-drawer{
+    position: absolute; left: 0; right: 0; bottom: 0;
+    background: var(--paper);
+    z-index: 70;
+    display: flex; flex-direction: column;
+    max-height: 92%;
+    border-radius: 28px 28px 0 0;
+    box-shadow: 0 -20px 40px -16px rgba(31,27,22,.2);
+  }
+  .mob-drawer .handle{
+    width: 44px; height: 5px; border-radius: 3px;
+    background: var(--rule-strong);
+    margin: 8px auto 4px;
+    flex-shrink: 0;
+  }
+
+  /* Helpers */
+  .vsep{ width: 1px; align-self: stretch; background: var(--rule); margin: 0 4px; }
+  .hsep{ height: 1px; background: var(--rule); margin: 20px 0;}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     STATE 01 · DESKTOP — LISTADO
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="preview-label">Estado 01 — Listado · Desktop 1440 <span class="mute">/dashboard/bookings</span></div>
+<div class="preview-frame desktop">
+  <div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <a class="sb-logo">Eztadia</a>
+      <button class="sb-prop">
+        <span class="ph"></span>
+        <span class="name">Casa Marina</span>
+        <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+
+      <div class="sb-section">
+        <span class="sb-section-label">Operación</span>
+        <a class="sb-item">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2v-9z"/></svg>
+          Resumen
+        </a>
+        <a class="sb-item">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M8 3v4"/><path d="M16 3v4"/></svg>
+          Calendario
+        </a>
+        <a class="sb-item active">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>
+          Reservas
+        </a>
+        <a class="sb-item">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12c0-4.4 3.6-8 8-8s8 3.6 8 8c0 1.4-.4 2.8-1 4l1 4-4-1c-1.2.6-2.6 1-4 1-4.4 0-8-3.6-8-8z"/></svg>
+          Mensajes
+          <span class="sb-badge">3</span>
+        </a>
+      </div>
+
+      <div class="sb-section">
+        <span class="sb-section-label">Propiedad</span>
+        <a class="sb-item">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18H6z"/><path d="M9 21V3"/><circle cx="13" cy="12" r="1" fill="currentColor"/></svg>
+          Habitaciones
+        </a>
+        <a class="sb-item">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10"/><path d="M15 9.5c-.5-1.2-1.7-2-3.2-2-1.8 0-3.3 1-3.3 2.5s1.5 2 3.3 2.3c1.7.4 3.2.8 3.2 2.5 0 1.5-1.5 2.5-3.3 2.5-1.6 0-2.8-.8-3.3-2.2"/></svg>
+          Precios
+        </a>
+        <a class="sb-item">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 20v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7.5" r="3.5"/><path d="M21 20v-2a4 4 0 0 0-3-3.85"/><path d="M16 4.15A4 4 0 0 1 16 11"/></svg>
+          Staff
+        </a>
+        <a class="sb-item">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 7V4a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v3H7a1 1 0 0 0-1 1v3h3a2 2 0 1 1 0 4H6v3a1 1 0 0 0 1 1h4v-3a2 2 0 1 1 4 0v3h4a1 1 0 0 0 1-1v-4h-3a2 2 0 1 1 0-4h3V8a1 1 0 0 0-1-1z"/></svg>
+          Integraciones
+        </a>
+      </div>
+
+      <div class="sb-section">
+        <span class="sb-section-label">Cuenta</span>
+        <a class="sb-item">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6c.66-.27 1.06-.91 1-1.6V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.27.66.91 1.06 1.6 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Configuración
+        </a>
+      </div>
+
+      <div class="sb-spacer"></div>
+
+      <button class="sb-user">
+        <span class="av">CS</span>
+        <span class="name">Carlos</span>
+        <svg class="chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main">
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <nav class="crumbs">
+          <span>Casa Marina</span>
+          <span class="sep">/</span>
+          <span class="cur">Reservas</span>
+        </nav>
+        <div class="search-top">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+          <input placeholder="Buscar reserva, huésped, habitación..." />
+        </div>
+        <div class="top-actions">
+          <button class="top-btn" aria-label="Notificaciones">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17h12l-1.5-2.5V11a4.5 4.5 0 0 0-9 0v3.5L6 17z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+            <span class="dot"></span>
+          </button>
+          <div class="lang">
+            <button class="on">ES</button>
+            <span class="sep">·</span>
+            <button>EN</button>
+          </div>
+          <button class="top-av">CS</button>
+        </div>
+      </header>
+
+      <!-- PROPERTY TABS -->
+      <nav class="ptabs">
+        <a class="ptab">Resumen</a>
+        <a class="ptab on">Reservas</a>
+        <a class="ptab">Calendario</a>
+        <a class="ptab">Habitaciones</a>
+        <a class="ptab">Precios</a>
+        <a class="ptab">Staff</a>
+        <a class="ptab">Integraciones</a>
+        <a class="ptab">Configuración</a>
+      </nav>
+
+      <!-- PAGE -->
+      <div class="page">
+        <header class="page-head">
+          <div>
+            <h1 class="page-title">Reservas</h1>
+            <p class="page-sub"><span class="num oldstyle">32</span> este mes · <span class="num oldstyle">14</span> confirmadas · <span class="num oldstyle">2</span> pendientes de pago</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn outline-sage">
+              <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12"/><path d="m7 11 5 5 5-5"/><path d="M5 20h14"/></svg>
+              Exportar
+            </button>
+            <button class="btn terracotta">
+              <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+              Nueva reserva manual
+            </button>
+          </div>
+        </header>
+
+        <!-- FILTERS -->
+        <div class="filters">
+          <div class="filters-search">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+            <input placeholder="Buscar por nombre, código, email..." />
+          </div>
+          <span class="filters-divider"></span>
+          <button class="chip">Todas las fechas <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></button>
+          <button class="chip">Cualquier estado <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></button>
+          <button class="chip">Cualquier habitación <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></button>
+          <button class="chip">Cualquier origen <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></button>
+        </div>
+
+        <!-- TABLE -->
+        <div class="tbl-wrap">
+          <table class="bookings">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Huésped <span class="sort"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6-6 6 6"/><path d="m6 15 6 6 6-6"/></svg></span></th>
+                <th>Habitación</th>
+                <th>Check-in <span class="sort"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6-6 6 6"/><path d="m6 15 6 6 6-6"/></svg></span></th>
+                <th>Check-out</th>
+                <th>Total <span class="sort"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6-6 6 6"/><path d="m6 15 6 6 6-6"/></svg></span></th>
+                <th>Estado</th>
+                <th>Origen</th>
+                <th class="col-actions"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="col-code">EZT-2026-00131</span></td>
+                <td><span class="col-guest"><span class="av">AM</span><span class="name">Andrea Mendoza</span></span></td>
+                <td><span class="col-room"><span class="num oldstyle">101</span><span class="type">· Suite Marina</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">15 may</span><span class="day">viernes</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">18 may</span><span class="day">lunes</span></span></td>
+                <td><span class="col-total">$1.350.000</span></td>
+                <td><span class="pill confirmed"><span class="pdot"></span>Confirmada</span></td>
+                <td><span class="origin direct"><span class="ob"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2v-9z"/></svg></span>Directo</span></td>
+                <td class="col-actions"><button class="dots" aria-label="Acciones"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button></td>
+              </tr>
+              <tr class="zebra">
+                <td><span class="col-code">EZT-2026-00130</span></td>
+                <td><span class="col-guest"><span class="av">LP</span><span class="name">Luis Pérez</span></span></td>
+                <td><span class="col-room"><span class="num oldstyle">203</span><span class="type">· Hab. Tropical</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">18 may</span><span class="day">lunes</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">21 may</span><span class="day">jueves</span></span></td>
+                <td><span class="col-total">$960.000</span></td>
+                <td><span class="pill pending"><span class="pdot"></span>Pago pendiente</span></td>
+                <td><span class="origin direct"><span class="ob"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2v-9z"/></svg></span>Directo</span></td>
+                <td class="col-actions"><button class="dots" aria-label="Acciones"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button></td>
+              </tr>
+              <tr>
+                <td><span class="col-code">EZT-2026-00129</span></td>
+                <td><span class="col-guest"><span class="av fr">FR</span><span class="name">Familia Rodríguez</span></span></td>
+                <td><span class="col-room"><span class="num oldstyle">202</span><span class="type">· Hab. Tropical</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">21 may</span><span class="day">hoy</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">24 may</span><span class="day">domingo</span></span></td>
+                <td><span class="col-total">$960.000</span></td>
+                <td><span class="pill confirmed"><span class="pdot"></span>Confirmada</span></td>
+                <td><span class="origin direct"><span class="ob"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2v-9z"/></svg></span>Directo</span></td>
+                <td class="col-actions"><button class="dots" aria-label="Acciones"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button></td>
+              </tr>
+              <tr class="zebra">
+                <td><span class="col-code">EZT-2026-00128</span></td>
+                <td><span class="col-guest"><span class="av">TB</span><span class="name">Tom Bradley</span></span></td>
+                <td><span class="col-room"><span class="num oldstyle">301</span><span class="type">· Hab. Estándar</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">23 may</span><span class="day">sábado</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">27 may</span><span class="day">miércoles</span></span></td>
+                <td><span class="col-total">$880.000</span></td>
+                <td><span class="pill confirmed"><span class="pdot"></span>Confirmada</span></td>
+                <td><span class="origin direct"><span class="ob"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2v-9z"/></svg></span>Directo</span></td>
+                <td class="col-actions"><button class="dots" aria-label="Acciones"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button></td>
+              </tr>
+              <tr>
+                <td><span class="col-code">EZT-2026-00127</span></td>
+                <td><span class="col-guest"><span class="av">LC</span><span class="name">Lucía Cárdenas</span></span></td>
+                <td><span class="col-room"><span class="num oldstyle">102</span><span class="type">· Suite Marina</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">12 may</span><span class="day">martes</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">15 may</span><span class="day">viernes</span></span></td>
+                <td><span class="col-total">$1.350.000</span></td>
+                <td><span class="pill completed"><span class="pdot"></span>Completada</span></td>
+                <td><span class="origin direct"><span class="ob"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2v-9z"/></svg></span>Directo</span></td>
+                <td class="col-actions"><button class="dots" aria-label="Acciones"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button></td>
+              </tr>
+              <tr class="zebra">
+                <td><span class="col-code">EZT-2026-00126</span></td>
+                <td><span class="col-guest"><span class="av">MG</span><span class="name">M. González</span></span></td>
+                <td><span class="col-room"><span class="num oldstyle">205</span><span class="type">· Hab. Tropical</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">23 may</span><span class="day">sábado</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">27 may</span><span class="day">miércoles</span></span></td>
+                <td><span class="col-total">$1.280.000</span></td>
+                <td><span class="pill confirmed"><span class="pdot"></span>Confirmada</span></td>
+                <td><span class="origin booking"><span class="ob">B.</span>Booking</span></td>
+                <td class="col-actions"><button class="dots" aria-label="Acciones"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button></td>
+              </tr>
+              <tr>
+                <td><span class="col-code">EZT-2026-00125</span></td>
+                <td><span class="col-guest"><span class="av">EP</span><span class="name">Erika Pacheco</span></span></td>
+                <td><span class="col-room"><span class="num oldstyle">202</span><span class="type">· Hab. Tropical</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">14 may</span><span class="day">jueves</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">16 may</span><span class="day">sábado</span></span></td>
+                <td><span class="col-total">$640.000</span></td>
+                <td><span class="pill completed"><span class="pdot"></span>Completada</span></td>
+                <td><span class="origin direct"><span class="ob"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2v-9z"/></svg></span>Directo</span></td>
+                <td class="col-actions"><button class="dots" aria-label="Acciones"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button></td>
+              </tr>
+              <tr class="zebra">
+                <td><span class="col-code">EZT-2026-00124</span></td>
+                <td><span class="col-guest"><span class="av">JS</span><span class="name">J. Smith</span></span></td>
+                <td><span class="col-room"><span class="num oldstyle">205</span><span class="type">· Hab. Tropical</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">7 may</span><span class="day">jueves</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">10 may</span><span class="day">domingo</span></span></td>
+                <td><span class="col-total">$960.000</span></td>
+                <td><span class="pill completed"><span class="pdot"></span>Completada</span></td>
+                <td><span class="origin airbnb"><span class="ob">A.</span>Airbnb</span></td>
+                <td class="col-actions"><button class="dots" aria-label="Acciones"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button></td>
+              </tr>
+              <tr>
+                <td><span class="col-code">EZT-2026-00123</span></td>
+                <td><span class="col-guest"><span class="av">CV</span><span class="name">Carla Vélez</span></span></td>
+                <td><span class="col-room"><span class="num oldstyle">101</span><span class="type">· Suite Marina</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">1 may</span><span class="day">viernes</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">4 may</span><span class="day">lunes</span></span></td>
+                <td><span class="col-total">$1.350.000</span></td>
+                <td><span class="pill completed"><span class="pdot"></span>Completada</span></td>
+                <td><span class="origin direct"><span class="ob"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2v-9z"/></svg></span>Directo</span></td>
+                <td class="col-actions"><button class="dots" aria-label="Acciones"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button></td>
+              </tr>
+              <tr class="zebra">
+                <td><span class="col-code">EZT-2026-00122</span></td>
+                <td><span class="col-guest"><span class="av">JR</span><span class="name">J. Rodríguez</span></span></td>
+                <td><span class="col-room"><span class="num oldstyle">101</span><span class="type">· Suite Marina</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">8 may</span><span class="day">viernes</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">11 may</span><span class="day">lunes</span></span></td>
+                <td><span class="col-total">$1.350.000</span></td>
+                <td><span class="pill noshow"><span class="pdot"></span>No show</span></td>
+                <td><span class="origin direct"><span class="ob"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2v-9z"/></svg></span>Directo</span></td>
+                <td class="col-actions"><button class="dots" aria-label="Acciones"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- PAGINATION -->
+        <div class="pagination">
+          <span>Mostrando <span class="num oldstyle">1–10</span> de <span class="num oldstyle">32</span> reservas</span>
+          <div class="pagination-ctrls">
+            <button class="pg-btn" disabled>
+              <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg>
+              Anterior
+            </button>
+            <button class="pg-btn">
+              Siguiente
+              <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="preview-spacer"></div>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     STATE 02 · DESKTOP — DRAWER ABIERTO
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="preview-label">Estado 02 — Drawer abierto · Desktop 1440 <span class="mute">EZT-2026-00131 · Andrea Mendoza</span></div>
+<div class="preview-frame desktop">
+  <div class="app">
+
+    <!-- SIDEBAR (mismo que arriba — compacto) -->
+    <aside class="sidebar">
+      <a class="sb-logo">Eztadia</a>
+      <button class="sb-prop">
+        <span class="ph"></span>
+        <span class="name">Casa Marina</span>
+        <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+
+      <div class="sb-section">
+        <span class="sb-section-label">Operación</span>
+        <a class="sb-item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2v-9z"/></svg>Resumen</a>
+        <a class="sb-item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M8 3v4"/><path d="M16 3v4"/></svg>Calendario</a>
+        <a class="sb-item active"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>Reservas</a>
+        <a class="sb-item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12c0-4.4 3.6-8 8-8s8 3.6 8 8c0 1.4-.4 2.8-1 4l1 4-4-1c-1.2.6-2.6 1-4 1-4.4 0-8-3.6-8-8z"/></svg>Mensajes<span class="sb-badge">3</span></a>
+      </div>
+      <div class="sb-section">
+        <span class="sb-section-label">Propiedad</span>
+        <a class="sb-item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18H6z"/><path d="M9 21V3"/><circle cx="13" cy="12" r="1" fill="currentColor"/></svg>Habitaciones</a>
+        <a class="sb-item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10"/></svg>Precios</a>
+        <a class="sb-item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9.5" cy="7.5" r="3.5"/><path d="M16 20v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/></svg>Staff</a>
+        <a class="sb-item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 7V4a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v3H7a1 1 0 0 0-1 1v3h3a2 2 0 1 1 0 4H6v3a1 1 0 0 0 1 1h4v-3a2 2 0 1 1 4 0v3h4a1 1 0 0 0 1-1v-4h-3a2 2 0 1 1 0-4h3V8a1 1 0 0 0-1-1z"/></svg>Integraciones</a>
+      </div>
+      <div class="sb-section">
+        <span class="sb-section-label">Cuenta</span>
+        <a class="sb-item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6c.66-.27 1.06-.91 1-1.6V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.27.66.91 1.06 1.6 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Configuración</a>
+      </div>
+      <div class="sb-spacer"></div>
+      <button class="sb-user"><span class="av">CS</span><span class="name">Carlos</span><svg class="chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <nav class="crumbs">
+          <span>Casa Marina</span>
+          <span class="sep">/</span>
+          <span>Reservas</span>
+          <span class="sep">/</span>
+          <span class="cur mono">EZT-2026-00131</span>
+        </nav>
+        <div class="search-top">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+          <input placeholder="Buscar reserva, huésped, habitación..." />
+        </div>
+        <div class="top-actions">
+          <button class="top-btn" aria-label="Notificaciones">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17h12l-1.5-2.5V11a4.5 4.5 0 0 0-9 0v3.5L6 17z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+            <span class="dot"></span>
+          </button>
+          <div class="lang"><button class="on">ES</button><span class="sep">·</span><button>EN</button></div>
+          <button class="top-av">CS</button>
+        </div>
+      </header>
+
+      <nav class="ptabs">
+        <a class="ptab">Resumen</a>
+        <a class="ptab on">Reservas</a>
+        <a class="ptab">Calendario</a>
+        <a class="ptab">Habitaciones</a>
+        <a class="ptab">Precios</a>
+        <a class="ptab">Staff</a>
+        <a class="ptab">Integraciones</a>
+        <a class="ptab">Configuración</a>
+      </nav>
+
+      <div class="page" style="padding-right:520px;">
+        <header class="page-head">
+          <div>
+            <h1 class="page-title">Reservas</h1>
+            <p class="page-sub"><span class="num oldstyle">32</span> este mes · <span class="num oldstyle">14</span> confirmadas · <span class="num oldstyle">2</span> pendientes de pago</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn outline-sage"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12"/><path d="m7 11 5 5 5-5"/><path d="M5 20h14"/></svg>Exportar</button>
+            <button class="btn terracotta"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Nueva reserva manual</button>
+          </div>
+        </header>
+
+        <!-- Filtros con un chip activo y "Limpiar filtros" visible -->
+        <div class="filters">
+          <div class="filters-search">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+            <input placeholder="Buscar por nombre, código, email..." />
+          </div>
+          <span class="filters-divider"></span>
+          <button class="chip">Todas las fechas <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></button>
+          <button class="chip on">Confirmada
+            <svg class="x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6l-12 12"/></svg>
+          </button>
+          <button class="chip">Cualquier habitación <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></button>
+          <button class="chip">Cualquier origen <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></button>
+          <a class="filters-clear">Limpiar filtros</a>
+        </div>
+
+        <div class="tbl-wrap">
+          <table class="bookings">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Huésped</th>
+                <th>Habitación</th>
+                <th>Check-in</th>
+                <th>Check-out</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th>Origen</th>
+                <th class="col-actions"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="selected">
+                <td><span class="col-code">EZT-2026-00131</span></td>
+                <td><span class="col-guest"><span class="av">AM</span><span class="name">Andrea Mendoza</span></span></td>
+                <td><span class="col-room"><span class="num oldstyle">101</span><span class="type">· Suite Marina</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">15 may</span><span class="day">viernes</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">18 may</span><span class="day">lunes</span></span></td>
+                <td><span class="col-total">$1.350.000</span></td>
+                <td><span class="pill confirmed"><span class="pdot"></span>Confirmada</span></td>
+                <td><span class="origin direct"><span class="ob"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2v-9z"/></svg></span>Directo</span></td>
+                <td class="col-actions"><button class="dots"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button></td>
+              </tr>
+              <tr class="zebra">
+                <td><span class="col-code">EZT-2026-00129</span></td>
+                <td><span class="col-guest"><span class="av fr">FR</span><span class="name">Familia Rodríguez</span></span></td>
+                <td><span class="col-room"><span class="num oldstyle">202</span><span class="type">· Hab. Tropical</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">21 may</span><span class="day">hoy</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">24 may</span><span class="day">domingo</span></span></td>
+                <td><span class="col-total">$960.000</span></td>
+                <td><span class="pill confirmed"><span class="pdot"></span>Confirmada</span></td>
+                <td><span class="origin direct"><span class="ob"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2v-9z"/></svg></span>Directo</span></td>
+                <td class="col-actions"><button class="dots"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button></td>
+              </tr>
+              <tr>
+                <td><span class="col-code">EZT-2026-00128</span></td>
+                <td><span class="col-guest"><span class="av">TB</span><span class="name">Tom Bradley</span></span></td>
+                <td><span class="col-room"><span class="num oldstyle">301</span><span class="type">· Hab. Estándar</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">23 may</span><span class="day">sábado</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">27 may</span><span class="day">miércoles</span></span></td>
+                <td><span class="col-total">$880.000</span></td>
+                <td><span class="pill confirmed"><span class="pdot"></span>Confirmada</span></td>
+                <td><span class="origin direct"><span class="ob"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2v-9z"/></svg></span>Directo</span></td>
+                <td class="col-actions"><button class="dots"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button></td>
+              </tr>
+              <tr class="zebra">
+                <td><span class="col-code">EZT-2026-00126</span></td>
+                <td><span class="col-guest"><span class="av">MG</span><span class="name">M. González</span></span></td>
+                <td><span class="col-room"><span class="num oldstyle">205</span><span class="type">· Hab. Tropical</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">23 may</span><span class="day">sábado</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">27 may</span><span class="day">miércoles</span></span></td>
+                <td><span class="col-total">$1.280.000</span></td>
+                <td><span class="pill confirmed"><span class="pdot"></span>Confirmada</span></td>
+                <td><span class="origin booking"><span class="ob">B.</span>Booking</span></td>
+                <td class="col-actions"><button class="dots"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- DRAWER -->
+      <div class="drawer-backdrop"></div>
+      <aside class="drawer" aria-label="Detalle de la reserva">
+        <header class="drawer-head">
+          <div class="left">
+            <span class="code">EZT-2026-00131</span>
+            <span class="pill confirmed"><span class="pdot"></span>Confirmada</span>
+          </div>
+          <button class="drawer-close" aria-label="Cerrar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6l-12 12"/></svg>
+          </button>
+        </header>
+
+        <div class="drawer-body">
+
+          <!-- Huésped -->
+          <section class="drawer-section">
+            <div class="guest-hero">
+              <span class="av">AM</span>
+              <h2 class="name">Andrea Mendoza</h2>
+              <p class="meta">Primera vez con nosotros · Colombia</p>
+            </div>
+
+            <div class="pair-list">
+              <div class="pair">
+                <span class="pair-label">Documento</span>
+                <span class="pair-value">
+                  <span class="mono-val">CC 1.024.567.890</span>
+                  <button class="copy" aria-label="Copiar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h2"/></svg></button>
+                </span>
+              </div>
+              <div class="pair">
+                <span class="pair-label">Email</span>
+                <span class="pair-value">
+                  andrea.m@gmail.com
+                  <button class="copy" aria-label="Copiar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h2"/></svg></button>
+                </span>
+              </div>
+              <div class="pair">
+                <span class="pair-label">Teléfono</span>
+                <span class="pair-value">
+                  <span class="oldstyle">+57 311 234 5678</span>
+                  <a class="wa">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.91-7.01A9.83 9.83 0 0 0 12.04 2zm5.78 14.13c-.24.67-1.41 1.28-1.95 1.36-.5.07-1.13.1-1.83-.11-.42-.13-.96-.31-1.66-.61-2.91-1.26-4.81-4.19-4.95-4.38-.15-.19-1.18-1.57-1.18-3 0-1.43.75-2.13 1.02-2.42.27-.29.58-.36.78-.36s.39 0 .56.01c.18.01.42-.07.66.5.24.58.82 2.01.89 2.16.07.15.12.32.02.51-.09.19-.14.31-.28.48-.14.17-.29.38-.41.51-.14.14-.28.29-.12.57.16.29.71 1.17 1.52 1.89 1.04.93 1.92 1.21 2.21 1.36.29.14.46.12.63-.07.17-.19.73-.85.93-1.14.19-.29.38-.24.65-.14.27.1 1.71.81 2 .96.29.15.49.22.56.34.07.13.07.74-.17 1.41z"/></svg>
+                    WhatsApp
+                  </a>
+                </span>
+              </div>
+              <div class="pair">
+                <span class="pair-label">País</span>
+                <span class="pair-value">
+                  <svg width="16" height="11" viewBox="0 0 16 11" aria-hidden="true" style="border-radius:2px;overflow:hidden;display:inline-block;border:1px solid var(--rule);">
+                    <rect width="16" height="11" fill="#FCD116"/>
+                    <rect width="16" height="5.5" y="5.5" fill="#003893"/>
+                    <rect width="16" height="2.75" y="8.25" fill="#CE1126"/>
+                  </svg>
+                  Colombia
+                </span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Estancia -->
+          <section class="drawer-section">
+            <span class="overline-gold">Estancia</span>
+            <div class="stay-block">
+              <p class="room serif italic">Suite Marina · Habitación 101</p>
+              <p class="dates">
+                <span class="oldstyle">15 may</span>
+                <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+                <span class="oldstyle">18 may</span>
+              </p>
+              <p class="nights"><span class="oldstyle">3</span> noches · <span class="oldstyle">2</span> adultos · <span class="oldstyle">0</span> niños</p>
+            </div>
+
+            <div class="pair-list">
+              <div class="pair">
+                <span class="pair-label">Check-in</span>
+                <span class="pair-value oldstyle">viernes 15 may, 15:00</span>
+              </div>
+              <div class="pair">
+                <span class="pair-label">Check-out</span>
+                <span class="pair-value oldstyle">lunes 18 may, 12:00</span>
+              </div>
+              <div class="pair">
+                <span class="pair-label">Habitación</span>
+                <span class="pair-value"><span class="oldstyle">101</span> · Piso <span class="oldstyle">1</span></span>
+              </div>
+              <div class="pair">
+                <span class="pair-label">Estancia</span>
+                <span class="pair-value"><span class="oldstyle">3</span> noches</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Pago -->
+          <section class="drawer-section">
+            <span class="overline-gold">Pago</span>
+            <div class="pair-list">
+              <div class="pair">
+                <span class="pair-label">Monto total</span>
+                <span class="pair-value bignum">$1.350.000 <span style="font:500 12px Inter;color:var(--ink-muted);letter-spacing:0.08em;text-transform:uppercase;margin-left:6px;">COP</span></span>
+              </div>
+              <div class="pair">
+                <span class="pair-label">Método</span>
+                <span class="pair-value">PSE vía Wompi</span>
+              </div>
+              <div class="pair">
+                <span class="pair-label">Estado</span>
+                <span class="pair-value"><span class="pill approved"><span class="pdot"></span>Aprobado</span></span>
+              </div>
+              <div class="pair">
+                <span class="pair-label">Ref. Wompi</span>
+                <span class="pair-value">
+                  <span class="mono-val">TXN_3KdSnJ4kfL2</span>
+                  <button class="copy" aria-label="Copiar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h2"/></svg></button>
+                </span>
+              </div>
+              <div class="pair">
+                <span class="pair-label">Pagado el</span>
+                <span class="pair-value oldstyle">5 may 2026, 18:34</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Comunicación -->
+          <section class="drawer-section">
+            <span class="overline-gold">Comunicación</span>
+            <div class="msgs">
+              <div class="msg out">
+                <div class="msg-meta">
+                  <svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m7 17 10-10"/><path d="M8 7h9v9"/></svg>
+                  Enviado · Casa Marina
+                </div>
+                <p class="msg-body">Listo Andrea, te esperamos el 15 de mayo. Aquí van los datos para el check-in…</p>
+                <p class="msg-time">hace 16 días · 5 may, 18:35</p>
+              </div>
+              <div class="msg">
+                <div class="msg-meta">
+                  <svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m17 7-10 10"/><path d="M16 17H7V8"/></svg>
+                  Recibido · Andrea
+                </div>
+                <p class="msg-body">Perfecto, llegamos sobre las 4 de la tarde. ¡Gracias!</p>
+                <p class="msg-time">hace 16 días · 5 may, 19:02</p>
+              </div>
+              <div class="msg out">
+                <div class="msg-meta">
+                  <svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m7 17 10-10"/><path d="M8 7h9v9"/></svg>
+                  Enviado · Casa Marina
+                </div>
+                <p class="msg-body">Hola Andrea, recordatorio amable de que mañana las esperamos en Casa Marina. ¿Necesitas indicaciones?</p>
+                <p class="msg-time">hace 6 días · 14 may, 09:00</p>
+              </div>
+            </div>
+            <button class="send-wa-btn">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.91-7.01A9.83 9.83 0 0 0 12.04 2zm5.78 14.13c-.24.67-1.41 1.28-1.95 1.36-.5.07-1.13.1-1.83-.11-.42-.13-.96-.31-1.66-.61-2.91-1.26-4.81-4.19-4.95-4.38-.15-.19-1.18-1.57-1.18-3 0-1.43.75-2.13 1.02-2.42.27-.29.58-.36.78-.36s.39 0 .56.01c.18.01.42-.07.66.5.24.58.82 2.01.89 2.16.07.15.12.32.02.51-.09.19-.14.31-.28.48-.14.17-.29.38-.41.51-.14.14-.28.29-.12.57.16.29.71 1.17 1.52 1.89 1.04.93 1.92 1.21 2.21 1.36.29.14.46.12.63-.07.17-.19.73-.85.93-1.14.19-.29.38-.24.65-.14.27.1 1.71.81 2 .96.29.15.49.22.56.34.07.13.07.74-.17 1.41z"/></svg>
+              Enviar mensaje por WhatsApp
+            </button>
+          </section>
+
+          <!-- Historial -->
+          <section class="drawer-section">
+            <span class="overline-gold">Historial</span>
+            <div class="timeline">
+              <div class="tl-item">
+                <span class="tl-dot"></span>
+                <p class="tl-title">Recordatorio pre check-in enviado</p>
+                <p class="tl-meta">21 may, 09:00 · WhatsApp automático</p>
+              </div>
+              <div class="tl-item">
+                <span class="tl-dot"></span>
+                <p class="tl-title">WhatsApp de confirmación enviado</p>
+                <p class="tl-meta">5 may, 18:35 · automático</p>
+              </div>
+              <div class="tl-item">
+                <span class="tl-dot"></span>
+                <p class="tl-title">Email de confirmación enviado</p>
+                <p class="tl-meta">5 may, 18:35 · automático</p>
+              </div>
+              <div class="tl-item">
+                <span class="tl-dot"></span>
+                <p class="tl-title">Pago confirmado</p>
+                <p class="tl-meta">5 may, 18:34 · Wompi webhook</p>
+              </div>
+              <div class="tl-item muted">
+                <span class="tl-dot"></span>
+                <p class="tl-title">Reserva creada</p>
+                <p class="tl-meta">5 may, 18:32 · web pública (/p/casa-marina)</p>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <footer class="drawer-foot">
+          <button class="btn ghost">Modificar</button>
+          <button class="btn ghost-danger">Cancelar reserva</button>
+          <button class="btn sage">Enviar bienvenida
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+          </button>
+        </footer>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<div class="preview-spacer"></div>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     STATE 03 · MOBILE — LISTADO
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="preview-label">Estado 03 — Listado · Mobile 390</div>
+<div class="preview-frame mobile">
+  <span class="phone-notch" aria-hidden></span>
+  <div class="phone-screen">
+
+    <!-- iOS-style status bar -->
+    <div class="phone-statusbar">
+      <span class="oldstyle">9:41</span>
+      <span class="icons" aria-hidden>
+        <!-- signal -->
+        <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect y="7" width="3" height="4" rx=".5"/><rect x="4.5" y="5" width="3" height="6" rx=".5"/><rect x="9" y="2.5" width="3" height="8.5" rx=".5"/><rect x="13.5" width="3" height="11" rx=".5"/></svg>
+        <!-- wifi -->
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 4a10 10 0 0 1 12 0"/><path d="M4.5 6.5a6.5 6.5 0 0 1 7 0"/><path d="M7 9a2.5 2.5 0 0 1 2 0"/></svg>
+        <!-- battery -->
+        <svg width="26" height="11" viewBox="0 0 26 11" fill="none" stroke="currentColor" stroke-width="1"><rect x=".5" y=".5" width="22" height="10" rx="2.5"/><rect x="2.5" y="2.5" width="14" height="6" rx="1" fill="currentColor" stroke="none"/><path d="M24 4v3" stroke-linecap="round"/></svg>
+      </span>
+    </div>
+
+    <header class="topbar-mob">
+      <button class="ham">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg>
+      </button>
+      <span class="center">Casa Marina</span>
+      <button class="av">CS</button>
+    </header>
+
+    <!-- Editorial hero -->
+    <section class="mob-hero">
+      <span class="eyebrow">Reservas · Mayo 2026</span>
+      <h1 class="title">Quién <em class="italic">llega</em>.</h1>
+      <div class="stats">
+        <div class="stat"><span class="v">32</span><span class="l">Este mes</span></div>
+        <div class="stat"><span class="v">14</span><span class="l">Confirmadas</span></div>
+        <div class="stat"><span class="v">2</span><span class="l">Pendientes</span></div>
+      </div>
+    </section>
+
+    <!-- Search prominent -->
+    <div class="mob-search">
+      <div class="mob-search-input">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+        <input placeholder="Buscar por nombre, código…" />
+      </div>
+    </div>
+
+    <!-- Filter chips horizontal scroll -->
+    <div class="filters-mob">
+      <button class="chip on">Confirmada
+        <svg class="x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6l-12 12"/></svg>
+      </button>
+      <button class="chip">Fechas <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></button>
+      <button class="chip">Habitación <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></button>
+      <button class="chip">Origen <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></button>
+    </div>
+
+    <!-- Cards mobile rediseñadas -->
+    <div class="mob-list">
+      <article class="bk-card">
+        <div class="bk-card-top">
+          <span class="bk-card-code">EZT-2026-00131</span>
+          <span class="pill confirmed"><span class="pdot"></span>Confirmada</span>
+        </div>
+        <div class="bk-card-head">
+          <span class="av">AM</span>
+          <div class="who">
+            <p class="bk-card-name">Andrea Mendoza</p>
+            <p class="bk-card-name-sub">2 adultos · Directo</p>
+          </div>
+        </div>
+        <div class="bk-card-meta">
+          <div class="cell">
+            <span class="l">Habitación</span>
+            <span class="v"><span class="room-num oldstyle">101</span>· Suite Marina</span>
+          </div>
+          <div class="cell">
+            <span class="l">Estancia</span>
+            <span class="v"><span class="oldstyle">15 → 18 may</span></span>
+          </div>
+        </div>
+        <div class="bk-card-foot">
+          <span class="bk-card-total">$1.350.000</span>
+        </div>
+      </article>
+
+      <article class="bk-card">
+        <div class="bk-card-top">
+          <span class="bk-card-code">EZT-2026-00130</span>
+          <span class="pill pending"><span class="pdot"></span>Pago pendiente</span>
+        </div>
+        <div class="bk-card-head">
+          <span class="av">LP</span>
+          <div class="who">
+            <p class="bk-card-name">Luis Pérez</p>
+            <p class="bk-card-name-sub">2 adultos · Directo</p>
+          </div>
+        </div>
+        <div class="bk-card-meta">
+          <div class="cell">
+            <span class="l">Habitación</span>
+            <span class="v"><span class="room-num oldstyle">203</span>· Tropical</span>
+          </div>
+          <div class="cell">
+            <span class="l">Estancia</span>
+            <span class="v"><span class="oldstyle">18 → 21 may</span></span>
+          </div>
+        </div>
+        <div class="bk-card-foot">
+          <span class="bk-card-total">$960.000</span>
+        </div>
+      </article>
+
+      <article class="bk-card">
+        <div class="bk-card-top">
+          <span class="bk-card-code">EZT-2026-00129</span>
+          <span class="pill confirmed"><span class="pdot"></span>Confirmada</span>
+        </div>
+        <div class="bk-card-head">
+          <span class="av fr">FR</span>
+          <div class="who">
+            <p class="bk-card-name">Familia Rodríguez</p>
+            <p class="bk-card-name-sub">3 personas · Llega hoy</p>
+          </div>
+        </div>
+        <div class="bk-card-meta">
+          <div class="cell">
+            <span class="l">Habitación</span>
+            <span class="v"><span class="room-num oldstyle">202</span>· Tropical</span>
+          </div>
+          <div class="cell">
+            <span class="l">Estancia</span>
+            <span class="v"><span class="oldstyle">21 → 24 may</span></span>
+          </div>
+        </div>
+        <div class="bk-card-foot">
+          <span class="bk-card-total">$960.000</span>
+        </div>
+      </article>
+
+      <article class="bk-card">
+        <div class="bk-card-top">
+          <span class="bk-card-code">EZT-2026-00126</span>
+          <span class="pill confirmed"><span class="pdot"></span>Confirmada</span>
+        </div>
+        <div class="bk-card-head">
+          <span class="av">MG</span>
+          <div class="who">
+            <p class="bk-card-name">M. González</p>
+            <p class="bk-card-name-sub">2 adultos · Booking.com</p>
+          </div>
+        </div>
+        <div class="bk-card-meta">
+          <div class="cell">
+            <span class="l">Habitación</span>
+            <span class="v"><span class="room-num oldstyle">205</span>· Tropical</span>
+          </div>
+          <div class="cell">
+            <span class="l">Estancia</span>
+            <span class="v"><span class="oldstyle">23 → 27 may</span></span>
+          </div>
+        </div>
+        <div class="bk-card-foot">
+          <span class="bk-card-total">$1.280.000</span>
+        </div>
+      </article>
+
+      <article class="bk-card">
+        <div class="bk-card-top">
+          <span class="bk-card-code">EZT-2026-00122</span>
+          <span class="pill noshow"><span class="pdot"></span>No show</span>
+        </div>
+        <div class="bk-card-head">
+          <span class="av">JR</span>
+          <div class="who">
+            <p class="bk-card-name">J. Rodríguez</p>
+            <p class="bk-card-name-sub">2 adultos · Directo</p>
+          </div>
+        </div>
+        <div class="bk-card-meta">
+          <div class="cell">
+            <span class="l">Habitación</span>
+            <span class="v"><span class="room-num oldstyle">101</span>· Suite Marina</span>
+          </div>
+          <div class="cell">
+            <span class="l">Estancia</span>
+            <span class="v"><span class="oldstyle">8 → 11 may</span></span>
+          </div>
+        </div>
+        <div class="bk-card-foot">
+          <span class="bk-card-total">$1.350.000</span>
+        </div>
+      </article>
+    </div>
+
+    <!-- FAB acción primaria -->
+    <button class="fab" aria-label="Nueva reserva manual">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+      Nueva reserva
+    </button>
+
+    <span class="phone-home" aria-hidden></span>
+  </div>
+</div>
+
+<div class="preview-spacer"></div>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     STATE 04 · MOBILE — DRAWER COMO SHEET DESDE ABAJO
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="preview-label">Estado 04 — Drawer como bottom-sheet · Mobile 390</div>
+<div class="preview-frame mobile">
+  <span class="phone-notch" aria-hidden></span>
+  <div class="phone-screen">
+
+    <div class="phone-statusbar">
+      <span class="oldstyle">9:41</span>
+      <span class="icons" aria-hidden>
+        <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect y="7" width="3" height="4" rx=".5"/><rect x="4.5" y="5" width="3" height="6" rx=".5"/><rect x="9" y="2.5" width="3" height="8.5" rx=".5"/><rect x="13.5" width="3" height="11" rx=".5"/></svg>
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 4a10 10 0 0 1 12 0"/><path d="M4.5 6.5a6.5 6.5 0 0 1 7 0"/><path d="M7 9a2.5 2.5 0 0 1 2 0"/></svg>
+        <svg width="26" height="11" viewBox="0 0 26 11" fill="none" stroke="currentColor" stroke-width="1"><rect x=".5" y=".5" width="22" height="10" rx="2.5"/><rect x="2.5" y="2.5" width="14" height="6" rx="1" fill="currentColor" stroke="none"/><path d="M24 4v3" stroke-linecap="round"/></svg>
+      </span>
+    </div>
+
+    <!-- Underlying page (visible solo arriba, oscurecida por backdrop) -->
+    <div style="opacity:.5;">
+      <header class="topbar-mob">
+        <button class="ham"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg></button>
+        <span class="center">Casa Marina</span>
+        <button class="av">CS</button>
+      </header>
+      <section class="mob-hero">
+        <span class="eyebrow">Reservas · Mayo 2026</span>
+        <h1 class="title">Quién <em class="italic">llega</em>.</h1>
+      </section>
+    </div>
+
+    <!-- Backdrop -->
+    <div style="position:absolute; left:0; right:0; top:0; bottom:0; background:rgba(31,27,22,0.32); z-index:60;"></div>
+
+    <!-- Bottom-sheet drawer -->
+    <div class="mob-drawer">
+      <div class="handle"></div>
+
+      <header class="drawer-head" style="padding:8px 20px 14px; border:0;">
+        <div class="left">
+          <span class="code">EZT-2026-00131</span>
+          <span class="pill confirmed"><span class="pdot"></span>Confirmada</span>
+        </div>
+        <button class="drawer-close" aria-label="Cerrar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6l-12 12"/></svg>
+        </button>
+      </header>
+
+      <div class="drawer-body" style="overflow-y:auto;">
+        <!-- Huésped -->
+        <section class="drawer-section" style="padding:8px 20px 20px;">
+          <div class="guest-hero" style="margin-bottom:16px;">
+            <span class="av" style="width:56px;height:56px;font-size:18px;">AM</span>
+            <h2 class="name" style="font-size:24px;">Andrea Mendoza</h2>
+            <p class="meta">Primera vez con nosotros · Colombia</p>
+          </div>
+
+          <div class="pair-list" style="gap:14px;">
+            <div class="pair">
+              <span class="pair-label">Documento</span>
+              <span class="pair-value">
+                <span class="mono-val">CC 1.024.567.890</span>
+                <button class="copy" aria-label="Copiar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h2"/></svg></button>
+              </span>
+            </div>
+            <div class="pair">
+              <span class="pair-label">Email</span>
+              <span class="pair-value">andrea.m@gmail.com</span>
+            </div>
+            <div class="pair">
+              <span class="pair-label">Teléfono</span>
+              <span class="pair-value">
+                <span class="oldstyle">+57 311 234 5678</span>
+                <a class="wa"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.91-7.01A9.83 9.83 0 0 0 12.04 2z"/></svg>WhatsApp</a>
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <section class="drawer-section" style="padding:20px;">
+          <span class="overline-gold">Estancia</span>
+          <div class="stay-block" style="padding:16px;">
+            <p class="room serif italic" style="font-size:16px;">Suite Marina · <span class="oldstyle">101</span></p>
+            <p class="dates" style="font-size:20px;">
+              <span class="oldstyle">15 may</span>
+              <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+              <span class="oldstyle">18 may</span>
+            </p>
+            <p class="nights"><span class="oldstyle">3</span> noches · <span class="oldstyle">2</span> adultos</p>
+          </div>
+        </section>
+
+        <section class="drawer-section" style="padding:20px;">
+          <span class="overline-gold">Pago</span>
+          <div class="pair-list" style="gap:14px;">
+            <div class="pair">
+              <span class="pair-label">Monto total</span>
+              <span class="pair-value bignum" style="font-size:20px;">$1.350.000</span>
+            </div>
+            <div class="pair">
+              <span class="pair-label">Método · Estado</span>
+              <span class="pair-value">PSE Wompi · <span class="pill approved"><span class="pdot"></span>Aprobado</span></span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <footer class="drawer-foot" style="padding:14px 20px 22px;">
+        <button class="btn ghost" style="height:46px;flex:1;">Modificar</button>
+        <button class="btn sage" style="height:46px;flex:1.4;">Enviar bienvenida →</button>
+      </footer>
+    </div>
+
+    <span class="phone-home" aria-hidden></span>
+  </div>
+</div>
+
+<div class="preview-spacer"></div>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     STATE 05 · VARIANTE — DRAWER PAGO PENDIENTE MANUAL (Luis Pérez)
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="preview-label">Variante — Drawer con pago manual pendiente <span class="mute">EZT-2026-00130 · Luis Pérez</span></div>
+<div class="preview-frame desktop" style="min-height:760px;">
+  <div class="app">
+
+    <aside class="sidebar">
+      <a class="sb-logo">Eztadia</a>
+      <button class="sb-prop"><span class="ph"></span><span class="name">Casa Marina</span><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+      <div class="sb-section">
+        <span class="sb-section-label">Operación</span>
+        <a class="sb-item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2v-9z"/></svg>Resumen</a>
+        <a class="sb-item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg>Calendario</a>
+        <a class="sb-item active"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2z"/></svg>Reservas</a>
+      </div>
+      <div class="sb-spacer"></div>
+      <button class="sb-user"><span class="av">CS</span><span class="name">Carlos</span></button>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <nav class="crumbs"><span>Casa Marina</span><span class="sep">/</span><span>Reservas</span><span class="sep">/</span><span class="cur mono">EZT-2026-00130</span></nav>
+        <div class="search-top"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input placeholder="Buscar..." /></div>
+        <div class="top-actions"><div class="lang"><button class="on">ES</button><span class="sep">·</span><button>EN</button></div><button class="top-av">CS</button></div>
+      </header>
+      <nav class="ptabs"><a class="ptab">Resumen</a><a class="ptab on">Reservas</a><a class="ptab">Calendario</a></nav>
+
+      <div class="page" style="padding-right:520px;">
+        <header class="page-head">
+          <div>
+            <h1 class="page-title">Reservas</h1>
+            <p class="page-sub"><span class="num oldstyle">32</span> este mes · <span class="num oldstyle">14</span> confirmadas · <span class="num oldstyle">2</span> pendientes de pago</p>
+          </div>
+        </header>
+        <div class="tbl-wrap" style="opacity:.5;pointer-events:none;">
+          <table class="bookings">
+            <thead><tr><th>Código</th><th>Huésped</th><th>Habitación</th><th>Check-in</th><th>Check-out</th><th>Total</th><th>Estado</th><th>Origen</th></tr></thead>
+            <tbody>
+              <tr class="selected">
+                <td><span class="col-code">EZT-2026-00130</span></td>
+                <td><span class="col-guest"><span class="av">LP</span><span class="name">Luis Pérez</span></span></td>
+                <td><span class="col-room"><span class="num oldstyle">203</span><span class="type">· Hab. Tropical</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">18 may</span><span class="day">lunes</span></span></td>
+                <td><span class="col-date"><span class="d oldstyle">21 may</span><span class="day">jueves</span></span></td>
+                <td><span class="col-total">$960.000</span></td>
+                <td><span class="pill pending"><span class="pdot"></span>Pago pendiente</span></td>
+                <td><span class="origin direct"><span class="ob"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2v-9z"/></svg></span>Directo</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="drawer-backdrop"></div>
+      <aside class="drawer">
+        <header class="drawer-head">
+          <div class="left">
+            <span class="code">EZT-2026-00130</span>
+            <span class="pill pending"><span class="pdot"></span>Pago pendiente</span>
+          </div>
+          <button class="drawer-close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6l-12 12"/></svg></button>
+        </header>
+        <div class="drawer-body">
+          <section class="drawer-section">
+            <div class="guest-hero">
+              <span class="av">LP</span>
+              <h2 class="name">Luis Pérez</h2>
+              <p class="meta">Reserva directa · Colombia</p>
+            </div>
+            <div class="pair-list">
+              <div class="pair"><span class="pair-label">Documento</span><span class="pair-value"><span class="mono-val">CC 80.123.456</span></span></div>
+              <div class="pair"><span class="pair-label">Email</span><span class="pair-value">luis.perez@gmail.com</span></div>
+              <div class="pair"><span class="pair-label">Teléfono</span><span class="pair-value"><span class="oldstyle">+57 318 555 1212</span><a class="wa"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.91-7.01A9.83 9.83 0 0 0 12.04 2z"/></svg>WhatsApp</a></span></div>
+            </div>
+          </section>
+
+          <section class="drawer-section">
+            <span class="overline-gold">Estancia</span>
+            <div class="stay-block">
+              <p class="room serif italic">Hab. Tropical · Habitación 203</p>
+              <p class="dates">
+                <span class="oldstyle">18 may</span>
+                <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+                <span class="oldstyle">21 may</span>
+              </p>
+              <p class="nights"><span class="oldstyle">3</span> noches · <span class="oldstyle">2</span> adultos</p>
+            </div>
+          </section>
+
+          <section class="drawer-section">
+            <span class="overline-gold">Pago</span>
+            <div class="pair-list">
+              <div class="pair"><span class="pair-label">Monto total</span><span class="pair-value bignum">$960.000 <span style="font:500 12px Inter;color:var(--ink-muted);letter-spacing:0.08em;text-transform:uppercase;margin-left:6px;">COP</span></span></div>
+              <div class="pair"><span class="pair-label">Método</span><span class="pair-value">Transferencia bancaria</span></div>
+              <div class="pair"><span class="pair-label">Estado</span><span class="pair-value"><span class="pill waiting"><span class="pdot"></span>Esperando comprobante</span></span></div>
+              <div class="pair">
+                <span class="pair-label">Comprobante recibido</span>
+                <span class="pair-value" style="margin-top:6px;">
+                  <a style="display:block; width:120px; height:84px; border-radius:10px; border:1px solid var(--rule); background:linear-gradient(135deg, #F5E3D9 0%, #FBF8F2 100%); position:relative;">
+                    <span style="position:absolute; bottom:6px; left:8px; right:8px; font:500 10px Inter; color:var(--ink-muted); letter-spacing:0.06em; text-transform:uppercase;">comprobante.pdf</span>
+                    <svg style="position:absolute; top:50%; left:50%; transform:translate(-50%,-65%); color:var(--clay);" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg>
+                  </a>
+                </span>
+              </div>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:18px;">
+              <button class="btn terracotta" style="flex:1.5;">Confirmar pago</button>
+              <button class="btn ghost-danger" style="flex:1;">Rechazar pago</button>
+            </div>
+          </section>
+
+          <section class="drawer-section">
+            <span class="overline-gold">Historial</span>
+            <div class="timeline">
+              <div class="tl-item future">
+                <span class="tl-dot"></span>
+                <p class="tl-title">Esperando confirmación de comprobante</p>
+                <p class="tl-meta">hace 4 horas · acción pendiente</p>
+              </div>
+              <div class="tl-item">
+                <span class="tl-dot"></span>
+                <p class="tl-title">Comprobante recibido por WhatsApp</p>
+                <p class="tl-meta">21 may, 10:20 · adjunto PDF</p>
+              </div>
+              <div class="tl-item">
+                <span class="tl-dot"></span>
+                <p class="tl-title">Datos bancarios enviados al huésped</p>
+                <p class="tl-meta">19 may, 14:00 · WhatsApp manual</p>
+              </div>
+              <div class="tl-item muted">
+                <span class="tl-dot"></span>
+                <p class="tl-title">Reserva creada</p>
+                <p class="tl-meta">19 may, 13:48 · web pública</p>
+              </div>
+            </div>
+          </section>
+        </div>
+        <footer class="drawer-foot">
+          <button class="btn ghost">Modificar</button>
+          <button class="btn ghost-danger">Cancelar reserva</button>
+          <button class="btn sage">Enviar recordatorio →</button>
+        </footer>
+      </aside>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

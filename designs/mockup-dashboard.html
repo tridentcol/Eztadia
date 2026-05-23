@@ -1,0 +1,1132 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Resumen · Casa Marina — Eztadia</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..700,0..100;1,9..144,400..700,0..100&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --cream:#FBF8F2; --paper:#FFFFFF; --linen:#F2EDE2;
+    --ink:#1F1B16; --ink-soft:#5A5147; --ink-muted:#8B8275;
+    --sage:#5C7567; --sage-soft:#9CB39E; --sage-tint:#E5EDE5;
+    --terracotta:#C76F4C; --clay:#A85A3B; --gold:#B8923E;
+    --gold-tint: rgba(184, 146, 62, 0.14);
+    --rule:#E5DFD3; --rule-strong:#D4CCB9;
+    --shadow-soft: 0 1px 2px rgba(31,27,22,.04), 0 8px 24px -12px rgba(31,27,22,.08);
+    --shadow-pop:  0 4px 8px -3px rgba(31,27,22,.08), 0 20px 40px -16px rgba(31,27,22,.16);
+    --ease: cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  html{ -webkit-text-size-adjust:100%; }
+  body{
+    background: var(--cream); color: var(--ink);
+    font-family:'Inter', system-ui, sans-serif;
+    font-size:16px; line-height:1.55;
+    font-feature-settings:"ss01","cv11";
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  }
+  img{ display:block; max-width:100%; height:auto; }
+  a{ color:inherit; text-decoration:none; }
+  button{ font:inherit; color:inherit; cursor:pointer; border:0; background:transparent; padding:0; }
+  :focus-visible{ outline:2px solid var(--sage); outline-offset:3px; border-radius:4px; }
+
+  .serif{
+    font-family:'Fraunces', Georgia, serif;
+    font-variation-settings:"SOFT" 50, "opsz" 144;
+    letter-spacing:-0.01em;
+  }
+  .oldstyle{ font-variant-numeric:oldstyle-nums; font-feature-settings:"onum"; }
+  .tnum{ font-variant-numeric:tabular-nums; font-feature-settings:"tnum"; }
+
+  /* ─────────── APP SHELL ─────────── */
+  .app{
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+  }
+  @media (max-width: 1023px){
+    .app{ grid-template-columns: 1fr; }
+  }
+
+  /* ─────────── SIDEBAR ─────────── */
+  .sidebar{
+    position: sticky; top: 0;
+    height: 100vh;
+    background: var(--cream);
+    border-right: 1px solid var(--rule);
+    padding: 24px 16px;
+    display: flex; flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  .sidebar-logo{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'Fraunces', serif; font-style:italic; font-weight:500;
+    font-size:22px; color:var(--ink); letter-spacing:-0.01em;
+    padding: 6px 8px;
+    margin-bottom: 20px;
+  }
+  .sidebar-logo::after{
+    content:""; width:5px; height:5px; border-radius:50%;
+    background: var(--gold); margin-top: -10px;
+  }
+  .prop-switcher-wrap{ position: relative; margin-bottom: 28px; }
+  .prop-switcher{
+    display:flex; align-items:center; gap:10px;
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 12px;
+    transition: background-color 200ms var(--ease);
+    text-align: left;
+  }
+  .prop-switcher:hover{ background: var(--linen); }
+  .prop-switcher .ph{
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background-size: cover; background-position: center;
+    background-image: url('https://images.unsplash.com/photo-1545158535-c3f7168c28b6?auto=format&fit=crop&w=160&q=80');
+    flex-shrink: 0;
+    border: 1px solid var(--rule);
+  }
+  .prop-switcher .name{
+    font-family:'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 15px;
+    color: var(--ink);
+    flex: 1; min-width: 0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .prop-switcher svg{ color: var(--ink-muted); flex-shrink: 0; }
+
+  .prop-menu{
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    box-shadow: var(--shadow-pop);
+    padding: 8px;
+    z-index: 30;
+    display: none;
+  }
+  .prop-menu.open{ display: block; }
+  .prop-menu-item{
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px; border-radius: 8px;
+    width: 100%; text-align: left;
+    transition: background-color 150ms var(--ease);
+  }
+  .prop-menu-item:hover{ background: var(--linen); }
+  .prop-menu-item .ph{ width: 28px; height: 28px; border-radius: 6px; }
+  .prop-menu-item .label{
+    font-size: 13px; font-weight: 500; color: var(--ink);
+  }
+  .prop-menu-divider{ height: 1px; background: var(--rule); margin: 6px 4px; }
+  .prop-menu-item.is-new{
+    color: var(--sage);
+  }
+  .prop-menu-item.is-new .label{ color: var(--sage); }
+
+  .nav-section{ margin-bottom: 20px; }
+  .nav-section .label{
+    display:block;
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-muted);
+    padding: 4px 14px 8px;
+  }
+
+  .nav-item{
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    color: var(--ink-soft);
+    font-size: 14px;
+    transition: background-color 200ms var(--ease), color 200ms var(--ease);
+    position: relative;
+    margin-bottom: 2px;
+  }
+  .nav-item svg{ flex-shrink: 0; color: var(--ink-soft); transition: color 200ms var(--ease); }
+  .nav-item:hover{ background: var(--linen); color: var(--ink); }
+  .nav-item:hover svg{ color: var(--ink); }
+  .nav-item.active{
+    background: var(--sage-tint);
+    color: var(--sage);
+    font-weight: 500;
+  }
+  .nav-item.active svg{ color: var(--sage); }
+  .nav-item.active::before{
+    content: "";
+    position: absolute;
+    left: 4px; top: 50%;
+    transform: translateY(-50%);
+    width: 3px; height: 16px;
+    border-radius: 2px;
+    background: var(--sage);
+  }
+  .nav-item .badge{
+    margin-left: auto;
+    background: var(--sage);
+    color: var(--cream);
+    font-size: 11px; font-weight: 500;
+    padding: 1px 7px;
+    border-radius: 999px;
+    line-height: 1.4;
+  }
+
+  .sidebar-spacer{ flex: 1; }
+
+  .user-trigger-wrap{ position: relative; margin-top: 12px; }
+  .user-trigger{
+    display:flex; align-items:center; gap:10px;
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 12px;
+    transition: background-color 200ms var(--ease);
+    text-align: left;
+  }
+  .user-trigger:hover{ background: var(--linen); }
+  .user-avatar{
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--sage-tint);
+    color: var(--sage);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 500;
+    flex-shrink: 0;
+  }
+  .user-trigger .name{
+    flex: 1; min-width: 0;
+    font-size: 13px; font-weight: 500; color: var(--ink);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .user-menu{
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 0; right: 0;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    box-shadow: var(--shadow-pop);
+    padding: 8px;
+    display: none;
+  }
+  .user-menu.open{ display: block; }
+  .user-menu a, .user-menu button{
+    display: flex; align-items: center; gap: 10px;
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 13px; color: var(--ink);
+    text-align: left;
+    transition: background-color 150ms var(--ease);
+  }
+  .user-menu a:hover, .user-menu button:hover{ background: var(--linen); }
+  .user-menu .divider{ height: 1px; background: var(--rule); margin: 6px 4px; }
+  .user-menu .logout{ color: var(--terracotta); }
+
+  /* ─────────── TOPBAR ─────────── */
+  .topbar{
+    position: sticky; top: 0; z-index: 20;
+    height: 64px;
+    background: var(--cream);
+    border-bottom: 1px solid var(--rule);
+    padding: 0 32px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 24px;
+  }
+  @media (max-width: 768px){
+    .topbar{ padding: 0 16px; grid-template-columns: auto 1fr auto; gap: 12px; }
+  }
+
+  .breadcrumb{
+    font-size: 13px;
+    color: var(--ink-muted);
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .breadcrumb a{ color: var(--ink-muted); transition: color 200ms var(--ease); }
+  .breadcrumb a:hover{ color: var(--ink); }
+  .breadcrumb .sep{ opacity: 0.5; }
+  .breadcrumb .current{ color: var(--ink); font-weight: 500; }
+
+  .search{
+    position: relative;
+    width: 100%;
+    max-width: 360px;
+    justify-self: center;
+  }
+  .search input{
+    width: 100%; height: 38px;
+    padding: 0 14px 0 38px;
+    background: var(--linen);
+    border: 1px solid transparent;
+    border-radius: 12px;
+    font: inherit; font-size: 14px; color: var(--ink);
+    transition: background-color 200ms var(--ease), border-color 200ms var(--ease);
+  }
+  .search input::placeholder{ color: var(--ink-muted); }
+  .search input:focus{
+    outline: none;
+    background: var(--paper);
+    border-color: var(--rule-strong);
+  }
+  .search svg{
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    color: var(--ink-muted);
+  }
+
+  .topbar-right{
+    display: inline-flex; align-items: center; gap: 14px;
+    justify-self: end;
+  }
+  .icon-btn{
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--ink-soft);
+    transition: background-color 200ms var(--ease), color 200ms var(--ease);
+    position: relative;
+  }
+  .icon-btn:hover{ background: var(--linen); color: var(--ink); }
+  .icon-btn .dot{
+    position: absolute;
+    top: 8px; right: 9px;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--sage);
+    border: 2px solid var(--cream);
+  }
+  .lang-mini{
+    font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-muted); font-weight: 500;
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .lang-mini button{ color: var(--ink-muted); padding: 4px 2px; transition: color 200ms var(--ease); }
+  .lang-mini button.active{ color: var(--ink); }
+  .lang-mini button:hover{ color: var(--ink); }
+  .lang-mini .sep{ opacity: 0.4; }
+  .topbar .user-avatar{ width: 34px; height: 34px; cursor: pointer; }
+
+  .hamburger{
+    display: none;
+    width: 38px; height: 38px; border-radius: 10px;
+    color: var(--ink); align-items: center; justify-content: center;
+  }
+  @media (max-width: 1023px){
+    .hamburger{ display: inline-flex; }
+    .breadcrumb{ display: none; }
+    .lang-mini{ display: none; }
+  }
+
+  /* ─────────── CONTENT ─────────── */
+  .content{
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 48px 56px 80px;
+  }
+  @media (max-width: 768px){
+    .content{ padding: 32px 20px 96px; }
+  }
+
+  /* ─── Greeting ─── */
+  .greeting{
+    margin-bottom: 56px;
+  }
+  .greeting h1{
+    font-family:'Fraunces', serif;
+    font-variation-settings:"SOFT" 50, "opsz" 144;
+    font-weight: 500;
+    font-size: clamp(28px, 4vw, 44px);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin: 0 0 10px;
+  }
+  .greeting h1 em{ font-style: italic; font-weight: 500; }
+  .greeting p{
+    font-size: 16px;
+    color: var(--ink-muted);
+    margin: 0;
+    max-width: 70ch;
+  }
+  .greeting p strong{ color: var(--ink-soft); font-weight: 500; }
+
+  /* ─── Two-column block ─── */
+  .pulse-grid{
+    display: grid;
+    grid-template-columns: 8fr 4fr;
+    gap: 56px;
+    margin-bottom: 80px;
+  }
+  @media (max-width: 1023px){
+    .pulse-grid{ grid-template-columns: 1fr; gap: 56px; }
+  }
+
+  .col-head{ margin-bottom: 20px; }
+  .col-head .overline{
+    display: block;
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .col-head h3{
+    font-family:'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 22px;
+    color: var(--ink);
+    margin: 0;
+    letter-spacing: -0.015em;
+  }
+
+  /* ─── Attention items ─── */
+  .attn-list{ display: flex; flex-direction: column; gap: 14px; }
+  .attn{
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 16px;
+    padding: 18px 22px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 16px;
+    align-items: center;
+    transition: transform 250ms var(--ease), box-shadow 250ms var(--ease), border-color 250ms var(--ease);
+  }
+  .attn:hover{
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-soft);
+    border-color: var(--rule-strong);
+  }
+  .attn-avatar{
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--sage-tint);
+    color: var(--sage);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 500;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .attn-avatar img{ width: 100%; height: 100%; object-fit: cover; }
+  .attn-body{ min-width: 0; }
+  .attn-name{
+    font-size: 14px; font-weight: 500; color: var(--ink);
+    margin: 0 0 3px;
+  }
+  .attn-meta{
+    font-size: 13px; color: var(--ink-soft);
+    margin: 0 0 8px;
+  }
+  .attn-quote{
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin: 0 0 8px;
+    line-height: 1.45;
+  }
+  .pill{
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px; font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .pill-gold{ background: var(--gold-tint); color: var(--gold); border: 1px solid rgba(184,146,62,.18); }
+  .pill-sage{ background: var(--sage-tint); color: var(--sage); border: 1px solid rgba(92,117,103,.18); }
+  .pill-linen{ background: var(--linen); color: var(--ink-soft); border: 1px solid var(--rule); }
+  .pill-terra{ background: rgba(199, 111, 76, .12); color: var(--clay); border: 1px solid rgba(199, 111, 76, .22); }
+  .pill .dot{ width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+  .attn-action{
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 6px;
+    height: 38px;
+    padding: 0 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background-color 200ms var(--ease), color 200ms var(--ease), border-color 200ms var(--ease);
+  }
+  .attn-action.ghost{
+    color: var(--ink-soft);
+    border: 1px solid var(--rule);
+    background: var(--cream);
+  }
+  .attn-action.ghost:hover{ background: var(--linen); color: var(--ink); border-color: var(--rule-strong); }
+  .attn-action.primary-sage{
+    color: var(--cream);
+    background: var(--sage);
+  }
+  .attn-action.primary-sage:hover{ background: #4F6759; }
+
+  @media (max-width: 640px){
+    .attn{ grid-template-columns: auto 1fr; }
+    .attn-action{ grid-column: 1 / -1; width: 100%; }
+  }
+
+  /* Empty state */
+  .attn-empty{
+    text-align: center;
+    padding: 56px 24px;
+    border: 1px dashed var(--rule);
+    border-radius: 20px;
+    background: var(--cream);
+  }
+  .attn-empty .orn{
+    color: var(--gold);
+    opacity: 0.5;
+    margin-bottom: 16px;
+  }
+  .attn-empty h4{
+    font-family:'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 22px; margin: 0 0 8px; color: var(--ink);
+  }
+  .attn-empty p{ color: var(--ink-muted); font-size: 14px; margin: 0; max-width: 36ch; margin-left:auto; margin-right:auto; }
+
+  /* ─── Week pulse ─── */
+  .metric{
+    padding: 22px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .metric:first-of-type{ padding-top: 4px; }
+  .metric:last-of-type{ border-bottom: 0; }
+  .metric-label{
+    font-size: 13px;
+    color: var(--ink-muted);
+    margin: 0 0 8px;
+  }
+  .metric-row{
+    display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+  }
+  .metric-value{
+    font-family:'Fraunces', serif;
+    font-weight: 500;
+    font-size: 44px;
+    line-height: 1;
+    color: var(--ink);
+    font-variant-numeric: oldstyle-nums;
+    font-feature-settings: "onum";
+    letter-spacing: -0.02em;
+  }
+  .metric-sub{
+    font-size: 11px;
+    color: var(--ink-muted);
+    margin-top: 6px;
+    display: block;
+    letter-spacing: 0.04em;
+  }
+  .metric-bar{
+    margin-top: 12px;
+    height: 4px;
+    background: var(--linen);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .metric-bar > span{
+    display: block;
+    height: 100%;
+    background: var(--sage);
+    border-radius: 999px;
+    transition: width 600ms var(--ease);
+  }
+  .week-foot{
+    margin-top: 24px;
+  }
+  .week-foot a{
+    display: inline-flex; gap: 6px; align-items: center;
+    font-size: 13px; color: var(--sage);
+    border-bottom: 1px solid transparent;
+    transition: border-color 200ms var(--ease);
+    padding-bottom: 1px;
+  }
+  .week-foot a:hover{ border-bottom-color: var(--sage); }
+
+  /* ─── Upcoming check-ins ─── */
+  .checkins{ margin-top: 24px; }
+  .checkins-table{
+    width: 100%;
+    border-collapse: collapse;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  .checkins-table th{
+    text-align: left;
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    color: var(--ink-muted);
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--rule);
+    background: var(--cream);
+  }
+  .checkins-table td{
+    padding: 16px;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: middle;
+  }
+  .checkins-table tr:last-child td{ border-bottom: 0; }
+  .checkins-table tr{
+    cursor: pointer;
+    transition: background-color 150ms var(--ease);
+  }
+  .checkins-table tbody tr:nth-child(even) td{ background: var(--paper); }
+  .checkins-table tbody tr:hover td{ background: var(--linen); }
+
+  .cin-guest{
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 15px;
+    color: var(--ink);
+  }
+  .cin-guest.muted{ color: var(--ink-muted); font-style: italic; font-weight: 400; }
+  .cin-room{
+    font-size: 14px; color: var(--ink-soft);
+  }
+  .cin-room strong{ color: var(--ink); font-weight: 500; }
+  .cin-date{
+    font-size: 14px; color: var(--ink);
+    font-variant-numeric: oldstyle-nums;
+    font-feature-settings: "onum";
+  }
+  .cin-date small{ color: var(--ink-muted); font-size: 12px; display: block; margin-top: 2px; font-feature-settings: normal; font-variant-numeric: normal; }
+
+  .checkins-foot{ margin-top: 20px; }
+  .checkins-foot a{
+    display: inline-flex; gap: 6px; align-items: center;
+    font-size: 14px; color: var(--sage); font-weight: 500;
+    border-bottom: 1px solid transparent;
+    transition: border-color 200ms var(--ease);
+    padding-bottom: 1px;
+  }
+  .checkins-foot a:hover{ border-bottom-color: var(--sage); }
+
+  /* Mobile cards version */
+  .checkins-cards{ display: none; flex-direction: column; gap: 12px; }
+  @media (max-width: 760px){
+    .checkins-table{ display: none; }
+    .checkins-cards{ display: flex; }
+  }
+  .cin-card{
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 14px;
+    padding: 16px;
+  }
+  .cin-card .head{
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+    margin-bottom: 10px;
+  }
+  .cin-card .head .name{
+    font-family: 'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 16px; color: var(--ink);
+  }
+  .cin-card .meta{
+    font-size: 13px; color: var(--ink-soft); display: flex; gap: 8px; flex-wrap: wrap;
+  }
+  .cin-card .meta .room strong{ color: var(--ink); }
+  .cin-card .dates{
+    display: flex; justify-content: space-between; gap: 8px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--rule);
+    font-size: 13px;
+    color: var(--ink); font-variant-numeric: oldstyle-nums; font-feature-settings: "onum";
+  }
+  .cin-card .dates .lbl{ display:block; color: var(--ink-muted); font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; font-feature-settings: normal; font-variant-numeric: normal; margin-bottom: 2px; }
+
+  /* ─── Mobile drawer ─── */
+  .drawer-backdrop{
+    position: fixed; inset: 0;
+    background: rgba(31,27,22,0.4);
+    z-index: 90;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 250ms var(--ease);
+  }
+  .drawer-backdrop.open{ opacity: 1; pointer-events: auto; }
+  @media (min-width: 1024px){
+    .drawer-backdrop{ display: none; }
+  }
+
+  @media (max-width: 1023px){
+    .sidebar{
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      width: 280px;
+      z-index: 100;
+      transform: translateX(-100%);
+      transition: transform 300ms var(--ease);
+      border-right: 1px solid var(--rule);
+    }
+    .sidebar.open{ transform: translateX(0); }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{ animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ───────── SIDEBAR ───────── -->
+  <aside class="sidebar" id="sidebar" aria-label="Navegación principal">
+    <a href="/" class="sidebar-logo">Eztadia</a>
+
+    <div class="prop-switcher-wrap">
+      <button type="button" class="prop-switcher" id="prop-switcher" aria-expanded="false" aria-haspopup="menu" aria-controls="prop-menu">
+        <span class="ph" aria-hidden="true"></span>
+        <span class="name">Casa Marina</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <div class="prop-menu" id="prop-menu" role="menu" aria-label="Tus propiedades">
+        <a class="prop-menu-item" href="#" role="menuitem">
+          <span class="ph" style="background-image:url('https://images.unsplash.com/photo-1545158535-c3f7168c28b6?auto=format&fit=crop&w=120&q=80')"></span>
+          <span class="label">Casa Marina <span style="color:var(--ink-muted);font-weight:400;"> · Cartagena</span></span>
+        </a>
+        <div class="prop-menu-divider" aria-hidden="true"></div>
+        <button class="prop-menu-item is-new" role="menuitem" type="button">
+          <span class="ph" style="background:var(--sage-tint); display:inline-flex; align-items:center; justify-content:center;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="color:var(--sage);"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+          </span>
+          <span class="label">Crear nueva propiedad</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <span class="label">Operación</span>
+      <a class="nav-item active" href="/dashboard" aria-current="page">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2v-9z"/></svg>
+        Resumen
+      </a>
+      <a class="nav-item" href="/dashboard/calendar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M8 3v4"/><path d="M16 3v4"/></svg>
+        Calendario
+      </a>
+      <a class="nav-item" href="/dashboard/bookings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>
+        Reservas
+      </a>
+      <a class="nav-item" href="/dashboard/messages">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12c0-4.4 3.6-8 8-8s8 3.6 8 8c0 1.4-.4 2.8-1 4l1 4-4-1c-1.2.6-2.6 1-4 1-4.4 0-8-3.6-8-8z"/></svg>
+        Mensajes
+        <span class="badge">3</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <span class="label">Propiedad</span>
+      <a class="nav-item" href="/dashboard/rooms">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18H6z"/><path d="M9 21V3"/><circle cx="13" cy="12" r="1" fill="currentColor"/></svg>
+        Habitaciones
+      </a>
+      <a class="nav-item" href="/dashboard/pricing">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v10"/><path d="M15 9.5c-.5-1.2-1.7-2-3.2-2-1.8 0-3.3 1-3.3 2.5s1.5 2 3.3 2.3c1.7.4 3.2.8 3.2 2.5 0 1.5-1.5 2.5-3.3 2.5-1.6 0-2.8-.8-3.3-2.2"/></svg>
+        Precios
+      </a>
+      <a class="nav-item" href="/dashboard/staff">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 20v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7.5" r="3.5"/><path d="M21 20v-2a4 4 0 0 0-3-3.85"/><path d="M16 4.15A4 4 0 0 1 16 11"/></svg>
+        Staff
+      </a>
+      <a class="nav-item" href="/dashboard/integrations">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 7V4a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v3H7a1 1 0 0 0-1 1v3h3a2 2 0 1 1 0 4H6v3a1 1 0 0 0 1 1h4v-3a2 2 0 1 1 4 0v3h4a1 1 0 0 0 1-1v-4h-3a2 2 0 1 1 0-4h3V8a1 1 0 0 0-1-1z"/></svg>
+        Integraciones
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <span class="label">Cuenta</span>
+      <a class="nav-item" href="/dashboard/settings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33 1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/><circle cx="12" cy="12" r="3"/></svg>
+        Configuración
+      </a>
+    </div>
+
+    <div class="sidebar-spacer"></div>
+
+    <div class="user-trigger-wrap">
+      <button type="button" class="user-trigger" id="user-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="user-menu">
+        <span class="user-avatar" aria-hidden="true">CS</span>
+        <span class="name">Carlos</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ink-muted)" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <div class="user-menu" id="user-menu" role="menu">
+        <a href="#" role="menuitem">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          Mi perfil
+        </a>
+        <a href="#" role="menuitem">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg>
+          Ayuda
+        </a>
+        <div class="divider" aria-hidden="true"></div>
+        <button class="logout" role="menuitem" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/><path d="M12 19H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6"/></svg>
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Mobile drawer backdrop -->
+  <div class="drawer-backdrop" id="drawer-backdrop"></div>
+
+  <!-- ───────── MAIN ───────── -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="breadcrumb">
+        <a href="/dashboard">Casa Marina</a>
+        <span class="sep" aria-hidden="true">/</span>
+        <span class="current">Resumen</span>
+      </div>
+
+      <button class="hamburger" id="open-drawer" aria-label="Abrir menú">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg>
+      </button>
+
+      <div class="search" role="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>
+        </svg>
+        <input type="search" placeholder="Buscar reserva, huésped, habitación..." aria-label="Buscar" />
+      </div>
+
+      <div class="topbar-right">
+        <button class="icon-btn" type="button" aria-label="Notificaciones">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 17h12l-1.5-2.5V11a4.5 4.5 0 0 0-9 0v3.5L6 17z"/>
+            <path d="M10 20a2 2 0 0 0 4 0"/>
+          </svg>
+          <span class="dot" aria-hidden="true"></span>
+        </button>
+        <div class="lang-mini" role="group" aria-label="Idioma">
+          <button class="active" type="button" aria-pressed="true">ES</button>
+          <span class="sep" aria-hidden="true">·</span>
+          <button type="button" aria-pressed="false">EN</button>
+        </div>
+        <button class="user-avatar" aria-label="Tu cuenta" title="Carlos San Juan">CS</button>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <main class="content" id="content">
+
+      <!-- Greeting -->
+      <section class="greeting" aria-labelledby="greet-title">
+        <h1 id="greet-title">Buenas tardes, <em>Carlos</em>.</h1>
+        <p>Hoy es viernes <span class="oldstyle">21 de mayo</span>. Tienes <strong>2 cosas pendientes</strong> y un check-in en <strong>2 horas</strong>.</p>
+      </section>
+
+      <!-- Two columns -->
+      <section class="pulse-grid">
+
+        <!-- LEFT: Attention -->
+        <div>
+          <div class="col-head">
+            <span class="overline">Necesita tu atención</span>
+            <h3>Antes de pasar a otra cosa…</h3>
+          </div>
+
+          <div class="attn-list">
+            <!-- Item 1 — pago manual pendiente -->
+            <article class="attn">
+              <span class="attn-avatar" aria-hidden="true">AM</span>
+              <div class="attn-body">
+                <p class="attn-name">Andrea Mendoza</p>
+                <p class="attn-meta">Suite Marina · <span class="oldstyle">15–18 may</span> · COP <span class="oldstyle">$1.350.000</span></p>
+                <span class="pill pill-gold">Esperando comprobante · hace 2 h</span>
+              </div>
+              <a class="attn-action ghost" href="#">
+                Ver comprobante
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+              </a>
+            </article>
+
+            <!-- Item 2 — check-in hoy -->
+            <article class="attn">
+              <span class="attn-avatar" aria-hidden="true">
+                <img src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=120&h=120&q=80" alt="" />
+              </span>
+              <div class="attn-body">
+                <p class="attn-name">Familia Rodríguez</p>
+                <p class="attn-meta">Habitación Tropical · 3 personas · Llegan hoy</p>
+                <span class="pill pill-sage">Check-in en 2 horas · <span class="oldstyle">17:00</span></span>
+              </div>
+              <a class="attn-action primary-sage" href="#">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.91-7.01A9.83 9.83 0 0 0 12.04 2zm5.78 14.13c-.24.67-1.41 1.28-1.95 1.36-.5.07-1.13.1-1.83-.11-.42-.13-.96-.31-1.66-.61-2.91-1.26-4.81-4.19-4.95-4.38-.15-.19-1.18-1.57-1.18-3 0-1.43.75-2.13 1.02-2.42.27-.29.58-.36.78-.36s.39 0 .56.01c.18.01.42-.07.66.5.24.58.82 2.01.89 2.16.07.15.12.32.02.51-.09.19-.14.31-.28.48-.14.17-.29.38-.41.51-.14.14-.28.29-.12.57.16.29.71 1.17 1.52 1.89 1.04.93 1.92 1.21 2.21 1.36.29.14.46.12.63-.07.17-.19.73-.85.93-1.14.19-.29.38-.24.65-.14.27.1 1.71.81 2 .96.29.15.49.22.56.34.07.13.07.74-.17 1.41z"/>
+                </svg>
+                Enviar bienvenida
+              </a>
+            </article>
+
+            <!-- Item 3 — WhatsApp pendiente -->
+            <article class="attn">
+              <span class="attn-avatar" aria-hidden="true">MS</span>
+              <div class="attn-body">
+                <p class="attn-name">María Salazar <span style="color:var(--ink-muted);font-weight:400;">— huésped potencial</span></p>
+                <p class="attn-quote">“¿Tienen disponibilidad para 2 personas del <span class="oldstyle">28 al 30 de mayo</span>?”</p>
+                <span class="pill pill-linen">vía WhatsApp · hace 18 min</span>
+              </div>
+              <a class="attn-action ghost" href="#">
+                Responder
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+              </a>
+            </article>
+          </div>
+        </div>
+
+        <!-- RIGHT: Week pulse -->
+        <aside aria-label="Métricas de la semana">
+          <div class="col-head">
+            <span class="overline">Esta semana</span>
+            <h3>El pulso.</h3>
+          </div>
+
+          <div class="metric">
+            <p class="metric-label">Ocupación</p>
+            <div class="metric-row">
+              <span class="metric-value">67%</span>
+              <span class="pill pill-sage">↑ 8% vs sem. pasada</span>
+            </div>
+            <div class="metric-bar" aria-hidden="true"><span style="width: 67%"></span></div>
+          </div>
+
+          <div class="metric">
+            <p class="metric-label">Reservas confirmadas</p>
+            <div class="metric-row">
+              <span class="metric-value">14</span>
+              <span class="pill pill-linen">12 directas · 2 de Booking</span>
+            </div>
+          </div>
+
+          <div class="metric">
+            <p class="metric-label">Ingresos confirmados</p>
+            <div class="metric-row">
+              <span class="metric-value">$5.480.000</span>
+            </div>
+            <span class="metric-sub">COP · solo pagos confirmados</span>
+          </div>
+
+          <div class="metric">
+            <p class="metric-label">Tiempo de respuesta promedio</p>
+            <div class="metric-row">
+              <span class="metric-value">23 min</span>
+              <span class="pill pill-sage">↓ excelente</span>
+            </div>
+          </div>
+
+          <div class="week-foot">
+            <a href="/dashboard/reports">
+              Ver reporte completo
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+            </a>
+          </div>
+        </aside>
+
+      </section>
+
+      <!-- Upcoming check-ins -->
+      <section class="checkins" aria-labelledby="checkins-title">
+        <div class="col-head">
+          <span class="overline">Próximos 7 días</span>
+          <h3 id="checkins-title">Quién llega.</h3>
+        </div>
+
+        <table class="checkins-table" role="table">
+          <thead>
+            <tr>
+              <th scope="col">Huésped</th>
+              <th scope="col">Habitación</th>
+              <th scope="col">Llega</th>
+              <th scope="col">Se va</th>
+              <th scope="col">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr onclick="window.location.href='/dashboard/bookings/1'">
+              <td><span class="cin-guest">Familia Rodríguez</span></td>
+              <td><span class="cin-room">Hab. Tropical <strong>202</strong></span></td>
+              <td><span class="cin-date"><strong>Hoy</strong>, <span class="oldstyle">17:00</span><small>21 may</small></span></td>
+              <td><span class="cin-date">Lun <span class="oldstyle">24 may</span></span></td>
+              <td><span class="pill pill-sage">Confirmada</span></td>
+            </tr>
+            <tr onclick="window.location.href='/dashboard/bookings/2'">
+              <td><span class="cin-guest">Andrea Mendoza</span></td>
+              <td><span class="cin-room">Suite Marina <strong>101</strong></span></td>
+              <td><span class="cin-date">Mañana<small>22 may</small></span></td>
+              <td><span class="cin-date">Dom <span class="oldstyle">25 may</span></span></td>
+              <td><span class="pill pill-gold">Pago pendiente</span></td>
+            </tr>
+            <tr onclick="window.location.href='/dashboard/bookings/3'">
+              <td><span class="cin-guest">Tom Bradley</span></td>
+              <td><span class="cin-room">Hab. Estándar <strong>301</strong></span></td>
+              <td><span class="cin-date">Dom <span class="oldstyle">23 may</span></span></td>
+              <td><span class="cin-date">Mié <span class="oldstyle">27 may</span></span></td>
+              <td><span class="pill pill-sage">Confirmada</span></td>
+            </tr>
+            <tr onclick="window.location.href='/dashboard/bookings/4'">
+              <td><span class="cin-guest">Lucía Cárdenas</span></td>
+              <td><span class="cin-room">Suite Marina <strong>102</strong></span></td>
+              <td><span class="cin-date">Lun <span class="oldstyle">24 may</span></span></td>
+              <td><span class="cin-date">Sáb <span class="oldstyle">30 may</span></span></td>
+              <td><span class="pill pill-sage">Confirmada</span></td>
+            </tr>
+            <tr>
+              <td><span class="cin-guest muted">— sin huésped —</span></td>
+              <td><span class="cin-room">Hab. Tropical <strong>203</strong></span></td>
+              <td><span class="cin-date">Mar <span class="oldstyle">25 may</span></span></td>
+              <td><span class="cin-date">Vie <span class="oldstyle">28 may</span></span></td>
+              <td><span class="pill pill-linen">Bloqueada (Booking.com)</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Mobile cards -->
+        <div class="checkins-cards">
+          <a class="cin-card" href="#">
+            <div class="head">
+              <span class="name">Familia Rodríguez</span>
+              <span class="pill pill-sage">Confirmada</span>
+            </div>
+            <div class="meta"><span class="room">Hab. Tropical <strong>202</strong></span></div>
+            <div class="dates">
+              <span><span class="lbl">Llega</span><strong>Hoy</strong>, <span class="oldstyle">17:00</span></span>
+              <span><span class="lbl">Se va</span>Lun <span class="oldstyle">24 may</span></span>
+            </div>
+          </a>
+          <a class="cin-card" href="#">
+            <div class="head">
+              <span class="name">Andrea Mendoza</span>
+              <span class="pill pill-gold">Pago pendiente</span>
+            </div>
+            <div class="meta"><span class="room">Suite Marina <strong>101</strong></span></div>
+            <div class="dates">
+              <span><span class="lbl">Llega</span>Mañana <span class="oldstyle">22 may</span></span>
+              <span><span class="lbl">Se va</span>Dom <span class="oldstyle">25 may</span></span>
+            </div>
+          </a>
+          <a class="cin-card" href="#">
+            <div class="head">
+              <span class="name">Tom Bradley</span>
+              <span class="pill pill-sage">Confirmada</span>
+            </div>
+            <div class="meta"><span class="room">Hab. Estándar <strong>301</strong></span></div>
+            <div class="dates">
+              <span><span class="lbl">Llega</span>Dom <span class="oldstyle">23 may</span></span>
+              <span><span class="lbl">Se va</span>Mié <span class="oldstyle">27 may</span></span>
+            </div>
+          </a>
+          <a class="cin-card" href="#">
+            <div class="head">
+              <span class="name">Lucía Cárdenas</span>
+              <span class="pill pill-sage">Confirmada</span>
+            </div>
+            <div class="meta"><span class="room">Suite Marina <strong>102</strong></span></div>
+            <div class="dates">
+              <span><span class="lbl">Llega</span>Lun <span class="oldstyle">24 may</span></span>
+              <span><span class="lbl">Se va</span>Sáb <span class="oldstyle">30 may</span></span>
+            </div>
+          </a>
+          <div class="cin-card" style="opacity:.85;">
+            <div class="head">
+              <span class="name" style="font-style:italic;font-weight:400;color:var(--ink-muted);">— sin huésped —</span>
+              <span class="pill pill-linen">Bloqueada (Booking.com)</span>
+            </div>
+            <div class="meta"><span class="room">Hab. Tropical <strong>203</strong></span></div>
+            <div class="dates">
+              <span><span class="lbl">Llega</span>Mar <span class="oldstyle">25 may</span></span>
+              <span><span class="lbl">Se va</span>Vie <span class="oldstyle">28 may</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="checkins-foot">
+          <a href="/dashboard/bookings">
+            Ver todas las reservas
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+          </a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script>
+  // Property switcher dropdown
+  const ps = document.getElementById('prop-switcher');
+  const pm = document.getElementById('prop-menu');
+  ps.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const open = pm.classList.toggle('open');
+    ps.setAttribute('aria-expanded', String(open));
+  });
+  pm.addEventListener('click', (e) => e.stopPropagation());
+
+  // User menu
+  const ut = document.getElementById('user-trigger');
+  const um = document.getElementById('user-menu');
+  ut.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const open = um.classList.toggle('open');
+    ut.setAttribute('aria-expanded', String(open));
+  });
+  um.addEventListener('click', (e) => e.stopPropagation());
+
+  // Close on outside click
+  document.addEventListener('click', () => {
+    pm.classList.remove('open');
+    ps.setAttribute('aria-expanded', 'false');
+    um.classList.remove('open');
+    ut.setAttribute('aria-expanded', 'false');
+  });
+
+  // Lang switcher
+  document.querySelectorAll('.lang-mini').forEach(group => {
+    group.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        group.querySelectorAll('button').forEach(b => {
+          b.classList.remove('active');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        btn.classList.add('active');
+        btn.setAttribute('aria-pressed', 'true');
+      });
+    });
+  });
+
+  // Mobile drawer
+  const sidebar = document.getElementById('sidebar');
+  const backdrop = document.getElementById('drawer-backdrop');
+  document.getElementById('open-drawer')?.addEventListener('click', () => {
+    sidebar.classList.add('open');
+    backdrop.classList.add('open');
+  });
+  backdrop.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    backdrop.classList.remove('open');
+  });
+</script>
+
+</body>
+</html>

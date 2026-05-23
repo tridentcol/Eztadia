@@ -1,0 +1,1409 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Estados secundarios · Catálogo · Eztadia</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..700,0..100;1,9..144,400..700,0..100&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --cream:#FBF8F2; --paper:#FFFFFF; --linen:#F2EDE2;
+    --ink:#1F1B16; --ink-soft:#5A5147; --ink-muted:#8B8275;
+    --sage:#5C7567; --sage-soft:#9CB39E; --sage-tint:#E5EDE5;
+    --terracotta:#C76F4C; --clay:#A85A3B;
+    --gold:#B8923E; --gold-dark:#8A6E2E;
+    --gold-tint: rgba(184, 146, 62, 0.14);
+    --terracotta-tint: rgba(199, 111, 76, 0.12);
+    --rule:#E5DFD3; --rule-strong:#D4CCB9;
+    --warning:#C49A3C; --warning-tint: rgba(196, 154, 60, 0.14);
+    --danger:#A8483C; --danger-tint: rgba(168, 72, 60, 0.12);
+    --info:#5B7B96; --info-tint: rgba(91, 123, 150, 0.14);
+    --success:#5E8A5F;
+    --shadow-soft: 0 1px 2px rgba(31,27,22,.04), 0 8px 24px -12px rgba(31,27,22,.08);
+    --shadow-pop:  0 4px 8px -3px rgba(31,27,22,.08), 0 20px 40px -16px rgba(31,27,22,.16);
+    --shadow-modal: 0 20px 60px -20px rgba(31,27,22,0.28), 0 8px 24px -12px rgba(31,27,22,0.14);
+    --ease: cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--cream);
+    color: var(--ink);
+    font-family:'Inter', system-ui, sans-serif;
+    font-size:16px; line-height:1.55;
+    font-feature-settings:"ss01","cv11";
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    padding: 64px 24px 96px;
+  }
+  img{ display:block; max-width:100%; height:auto; }
+  a{ color:inherit; text-decoration:none; }
+  button{ font:inherit; color:inherit; cursor:pointer; border:0; background:transparent; padding:0; }
+  input,select,textarea{ font:inherit; color: inherit;}
+  :focus-visible{ outline:2px solid var(--sage); outline-offset:3px; border-radius:4px; }
+
+  .serif{ font-family:'Fraunces', Georgia, serif; font-variation-settings:"SOFT" 50, "opsz" 144; letter-spacing:-0.01em;}
+  .italic{ font-style: italic; }
+  .oldstyle{ font-variant-numeric:oldstyle-nums; font-feature-settings:"onum"; }
+  .mono{ font-family:'JetBrains Mono', monospace; }
+
+  /* CATALOG LAYOUT */
+  .catalog{ max-width: 1280px; margin: 0 auto; }
+  .catalog-head{ margin-bottom: 56px; text-align: center;}
+  .catalog-head .eyebrow{
+    display: block;
+    font: 500 11px 'Inter'; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--gold-dark); margin-bottom: 14px;
+  }
+  .catalog-head h1{
+    font-family:'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 44px; margin: 0 0 14px;
+    letter-spacing: -0.025em;
+  }
+  .catalog-head p{ font-size: 16px; color: var(--ink-soft); margin: 0; max-width: 56ch; margin-left: auto; margin-right: auto; line-height: 1.55;}
+
+  .cat-section{ margin-bottom: 80px;}
+  .cat-section-head{ margin-bottom: 32px; display: flex; align-items: baseline; gap: 16px;}
+  .cat-section-head .letter{
+    font-family:'Fraunces', serif; font-weight: 500; font-size: 56px;
+    color: var(--gold); opacity: .8; line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .cat-section-head .info .label{
+    display: block;
+    font: 500 11px 'Inter'; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--gold-dark); margin-bottom: 6px;
+  }
+  .cat-section-head .info h2{
+    font-family:'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 32px; margin: 0 0 4px;
+    letter-spacing: -0.02em;
+  }
+  .cat-section-head .info p{ font-size: 14px; color: var(--ink-muted); margin: 0; max-width: 56ch;}
+
+  .variant-grid{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+  .variant-grid.one{ grid-template-columns: 1fr; }
+  .variant-grid.three{ grid-template-columns: repeat(3, 1fr);}
+  @media (max-width: 900px){
+    .variant-grid, .variant-grid.three{ grid-template-columns: 1fr; }
+  }
+
+  .variant{
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 18px;
+    overflow: hidden;
+    position: relative;
+  }
+  .variant-meta{
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--rule);
+    background: var(--cream);
+    display: flex; justify-content: space-between; align-items: center; gap: 14px;
+    flex-wrap: wrap;
+  }
+  .variant-meta .num{
+    font: 500 11px 'Inter'; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--gold-dark);
+  }
+  .variant-meta .name{
+    font-family:'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 15px; color: var(--ink-soft);
+    letter-spacing: -0.005em;
+  }
+  .variant-body{
+    background: var(--cream);
+    min-height: 360px;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+    position: relative;
+  }
+
+  /* EMPTY STATE BASE */
+  .empty{
+    max-width: 480px;
+    text-align: center;
+    padding: 56px 16px;
+  }
+  .empty .orn{
+    display: block;
+    margin: 0 auto 24px;
+    color: var(--gold);
+    opacity: 0.65;
+  }
+  .empty .orn.sage{ color: var(--sage); opacity: 0.45;}
+  .empty .orn.terra{ color: var(--clay); opacity: 0.55;}
+  .empty h3{
+    font-family:'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 28px; color: var(--ink); margin: 0 0 12px;
+    letter-spacing: -0.02em; line-height: 1.1;
+  }
+  .empty h3.small{ font-size: 22px;}
+  .empty p{
+    font-size: 15px; color: var(--ink-soft); line-height: 1.55;
+    margin: 0 0 24px; max-width: 44ch; margin-left: auto; margin-right: auto;
+  }
+  .empty p.small{ font-size: 14px;}
+  .empty .ctas{ display: inline-flex; gap: 8px; flex-wrap: wrap; justify-content: center;}
+
+  /* BUTTONS */
+  .btn{
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    height: 40px; padding: 0 18px; border-radius: 12px;
+    font: 500 14px 'Inter'; letter-spacing: -0.005em;
+    border: 1px solid transparent;
+    transition: background-color 200ms var(--ease), color 200ms var(--ease), border-color 200ms var(--ease);
+  }
+  .btn.outline-sage{ background: transparent; color: var(--sage); border-color: var(--sage);}
+  .btn.outline-sage:hover{ background: var(--sage-tint);}
+  .btn.sage{ background: var(--sage); color: var(--cream);}
+  .btn.sage:hover{ background: #4F6759;}
+  .btn.terracotta{ background: var(--terracotta); color: var(--cream);}
+  .btn.terracotta:hover{ background: var(--clay);}
+  .btn.ghost{ background: var(--cream); color: var(--ink-soft); border-color: var(--rule);}
+  .btn.ghost:hover{ background: var(--linen); color: var(--ink); border-color: var(--rule-strong);}
+  .btn.destructive{ background: var(--danger); color: var(--cream);}
+  .btn.destructive:hover{ background: #8E3C32;}
+  .btn.destructive:disabled{ opacity: .4; cursor: not-allowed;}
+  .btn.ghost-sage{ background: transparent; color: var(--sage); border: 0; padding: 0 12px; height: 36px;}
+  .btn.ghost-sage:hover{ background: var(--sage-tint);}
+  .btn.sm{ height: 34px; padding: 0 14px; font-size: 13px;}
+
+  /* SKELETON ANIMATION */
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .sk{
+    display: block;
+    background: var(--linen);
+    background-image: linear-gradient(90deg, var(--linen) 0%, rgba(251,248,242,0.55) 50%, var(--linen) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s linear infinite;
+    border-radius: 6px;
+  }
+  @media (prefers-reduced-motion: reduce){
+    .sk{ animation: none;}
+  }
+  .sk.circle{ border-radius: 50%;}
+  .sk.tall{ border-radius: 10px;}
+  .sk.huge{ border-radius: 20px;}
+  .sk.pill{ border-radius: 999px;}
+
+  /* SKELETON LAYOUTS */
+  .sk-frame{
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 14px;
+    padding: 24px;
+  }
+  .sk-row{
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .sk-row:last-child{ border-bottom: 0;}
+
+  .sk-tbl-head{
+    display: grid;
+    grid-template-columns: 100px 1fr 90px 90px 90px 60px;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .sk-tbl-row{
+    display: grid;
+    grid-template-columns: 100px 1fr 90px 90px 90px 60px;
+    gap: 14px; align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .sk-tbl-row:last-child{ border-bottom: 0;}
+
+  .sk-cal-grid{
+    display: grid;
+    grid-template-columns: 100px repeat(7, 1fr);
+    gap: 6px;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 14px;
+    padding: 12px;
+  }
+  .sk-cal-grid .room{ padding: 4px 6px; display: flex; align-items: center; min-height: 32px;}
+  .sk-cal-cell{ min-height: 32px; background: var(--linen); border-radius: 4px; position: relative;}
+  .sk-cal-cell.booking{
+    background: var(--linen);
+    background-image: linear-gradient(90deg, var(--linen) 0%, rgba(251,248,242,0.5) 50%, var(--linen) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s linear infinite;
+    border-radius: 4px;
+  }
+  .sk-cal-cell.booking.span2{ grid-column: span 2;}
+  .sk-cal-cell.booking.span3{ grid-column: span 3;}
+
+  /* DOT LOADER (3 dots) */
+  .dots-loader{
+    display: inline-flex; align-items: center; gap: 4px;
+    height: 14px;
+  }
+  .dots-loader span{
+    width: 5px; height: 5px; border-radius: 50%;
+    background: currentColor;
+    opacity: 0.3;
+    animation: dotpulse 1.2s ease-in-out infinite;
+  }
+  .dots-loader span:nth-child(1){ animation-delay: 0s;}
+  .dots-loader span:nth-child(2){ animation-delay: 0.15s;}
+  .dots-loader span:nth-child(3){ animation-delay: 0.3s;}
+  @keyframes dotpulse {
+    0%, 60%, 100% { opacity: 0.3; transform: scale(1);}
+    30% { opacity: 1; transform: scale(1.2);}
+  }
+
+  /* INLINE BUTTON LOADING ROW */
+  .btn-row-demo{
+    display: flex; gap: 14px; flex-wrap: wrap; padding: 28px;
+    align-items: center; justify-content: center;
+  }
+
+  /* ERROR PAGE */
+  .err-state{
+    max-width: 480px; text-align: center;
+    padding: 80px 24px;
+    margin: 0 auto;
+  }
+  .err-404-orn{
+    position: relative;
+    margin-bottom: 24px;
+  }
+  .err-404-orn .digits{
+    font-family:'Fraunces', serif; font-weight: 300;
+    font-size: 120px; line-height: 1;
+    color: var(--rule-strong);
+    letter-spacing: -0.04em;
+    font-variant-numeric: oldstyle-nums;
+    font-feature-settings: "onum";
+    -webkit-text-stroke: 1px var(--rule-strong);
+    color: transparent;
+  }
+  .err-404-orn .dot{
+    position: absolute;
+    top: 12px; left: 50%; transform: translateX(-50%);
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--gold);
+  }
+  .err-state h3{
+    font-family:'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 32px; color: var(--ink); margin: 0 0 14px;
+    letter-spacing: -0.025em; line-height: 1.1;
+  }
+  .err-state p{
+    font-size: 16px; color: var(--ink-soft); line-height: 1.55;
+    margin: 0 0 28px; max-width: 44ch; margin-left: auto; margin-right: auto;
+  }
+  .err-state .err-code{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 12px; color: var(--ink-muted);
+    margin-top: 28px; padding-top: 18px;
+    border-top: 1px solid var(--rule);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .err-state .err-code .copy-btn{
+    width: 24px; height: 24px; border-radius: 6px;
+    color: var(--ink-muted);
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .err-state .err-code .copy-btn:hover{ background: var(--linen); color: var(--ink);}
+  .err-state .ctas{ display: inline-flex; gap: 8px; flex-wrap: wrap; justify-content: center;}
+
+  /* OFFLINE BANNER */
+  .offline-banner{
+    background: var(--warning-tint);
+    border-bottom: 1px solid rgba(196,154,60,.4);
+    padding: 12px 24px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .offline-banner .ic{ width: 20px; height: 20px; color: var(--warning); flex-shrink: 0;}
+  .offline-banner .text{ flex: 1; font: 400 14px 'Inter'; color: var(--ink);}
+  .offline-banner .btn-retry{
+    font: 500 13px 'Inter'; color: var(--ink-soft);
+    padding: 6px 12px; border-radius: 8px;
+    background: var(--paper); border: 1px solid var(--rule);
+  }
+  .offline-banner .btn-retry:hover{ background: var(--linen); color: var(--ink);}
+
+  /* INLINE FORM ERROR */
+  .form-demo{ max-width: 380px; margin: 0 auto; padding: 32px;}
+  .form-demo .field-label{
+    display: block; font: 500 11px 'Inter'; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-muted); margin-bottom: 8px;
+  }
+  .form-demo .input{
+    width: 100%; height: 44px;
+    background: var(--paper); border: 1px solid var(--rule-strong);
+    border-radius: 10px;
+    padding: 0 14px;
+    font: 400 15px 'Inter'; color: var(--ink); outline: 0;
+  }
+  .form-demo .input.error{
+    border-color: var(--danger);
+    box-shadow: 0 0 0 3px rgba(168,72,60,0.12);
+  }
+  .form-demo .err-line{
+    display: flex; gap: 6px; align-items: flex-start;
+    margin-top: 8px;
+    font: 400 12px 'Inter'; color: var(--ink); line-height: 1.45;
+  }
+  .form-demo .err-line .ic{ width: 13px; height: 13px; color: var(--danger); flex-shrink: 0; margin-top: 2px;}
+  .form-demo .err-line a{ color: var(--sage); text-decoration: underline; text-underline-offset: 3px;}
+
+  /* ERROR TOAST */
+  .toast-container{
+    padding: 32px;
+    min-height: 280px;
+    background: var(--cream);
+    position: relative;
+  }
+  .toast-stage{
+    position: absolute; bottom: 24px; right: 24px;
+    width: 360px;
+    background: var(--paper);
+    border-left: 3px solid var(--danger);
+    border-radius: 14px;
+    padding: 16px 20px;
+    display: flex; align-items: flex-start; gap: 12px;
+    box-shadow: var(--shadow-pop);
+  }
+  .toast-stage .body{ flex: 1;}
+  .toast-stage .title{
+    font-family:'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 15px; color: var(--ink); margin: 0 0 4px;
+    letter-spacing: -0.005em;
+  }
+  .toast-stage .desc{ font: 400 13px 'Inter'; color: var(--ink-soft); margin: 0 0 10px; line-height: 1.45;}
+  .toast-stage .actions{ display: inline-flex; gap: 6px;}
+  .toast-stage .actions .btn{ height: 30px; padding: 0 10px; font-size: 12px;}
+  .toast-stage .close{
+    width: 26px; height: 26px; border-radius: 7px;
+    color: var(--ink-muted);
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-top: -2px;
+  }
+  .toast-stage .close:hover{ background: var(--linen); color: var(--ink);}
+
+  /* CONFIRM DIALOG MODAL */
+  .modal-stage{
+    background: rgba(31,27,22,0.18);
+    padding: 40px;
+    min-height: 480px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .modal{
+    width: 100%; max-width: 460px;
+    background: var(--paper);
+    border-radius: 28px;
+    padding: 36px;
+    box-shadow: var(--shadow-modal);
+  }
+  .modal-orn{
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--warning-tint);
+    color: var(--warning);
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-bottom: 22px;
+  }
+  .modal-orn.terra{ background: var(--terracotta-tint); color: var(--clay);}
+  .modal-orn svg{ width: 28px; height: 28px;}
+  .modal h3{
+    font-family:'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 24px; color: var(--ink); margin: 0 0 10px;
+    letter-spacing: -0.02em; line-height: 1.15;
+  }
+  .modal p{
+    font: 400 14px 'Inter'; color: var(--ink-soft); line-height: 1.55;
+    margin: 0 0 20px;
+  }
+  .modal-input{
+    width: 100%; min-height: 80px;
+    background: var(--paper); border: 1px solid var(--rule-strong);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font: 400 14px 'Inter'; color: var(--ink); outline: 0;
+    resize: vertical; margin-bottom: 22px; line-height: 1.5;
+  }
+  .modal-input::placeholder{ color: var(--ink-muted);}
+  .modal-text-input{
+    width: 100%; height: 44px;
+    background: var(--paper); border: 1px solid var(--rule-strong);
+    border-radius: 10px;
+    padding: 0 14px;
+    font: 500 14px 'JetBrains Mono', monospace;
+    color: var(--ink); outline: 0;
+    letter-spacing: 0.08em;
+    margin-bottom: 22px;
+  }
+  .modal-helper{
+    font: 400 12px 'Inter'; color: var(--ink-muted);
+    margin: -16px 0 22px;
+  }
+  .modal-cta-row{
+    display: flex; justify-content: flex-end; gap: 10px;
+  }
+
+  /* DRAWER SKELETON */
+  .sk-drawer{
+    background: var(--paper); border: 1px solid var(--rule);
+    border-radius: 14px; padding: 28px;
+  }
+
+  /* PROPERTY PAGE SKELETON */
+  .sk-property{
+    background: var(--paper); border: 1px solid var(--rule);
+    border-radius: 14px; padding: 24px; overflow: hidden;
+  }
+  .sk-property .hero{ height: 160px; border-radius: 20px; margin-bottom: 20px;}
+  .sk-property .room-card{
+    display: grid; grid-template-columns: 80px 1fr 80px;
+    gap: 14px; align-items: center; padding: 14px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .sk-property .room-card:last-child{ border-bottom: 0;}
+
+  /* OVERVIEW SKELETON */
+  .sk-overview .greeting{ height: 28px; width: 60%; margin-bottom: 8px;}
+  .sk-overview .sub{ height: 14px; width: 80%; margin-bottom: 24px;}
+  .sk-overview .grid{
+    display: grid; grid-template-columns: 2fr 1fr; gap: 20px;
+  }
+</style>
+</head>
+<body>
+
+<div class="catalog">
+
+  <header class="catalog-head">
+    <span class="eyebrow">Sistema · catálogo</span>
+    <h1>Estados <em class="italic">secundarios</em>.</h1>
+    <p>Empty states, loading skeletons, errores y diálogos de confirmación. La regla: copy editorial humano + ornamento orgánico minimal. Nunca ilustración isométrica de stock. Nunca spinner genérico.</p>
+  </header>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION A · EMPTY STATES
+       ════════════════════════════════════════════════════════════════════ -->
+  <section class="cat-section">
+    <header class="cat-section-head">
+      <span class="letter">A</span>
+      <div class="info">
+        <span class="label">Empty states</span>
+        <h2>Cuando no hay nada.</h2>
+        <p>Lo que ve el usuario cuando una lista, búsqueda o sección está vacía. Ornamento + título Fraunces + body Inter + CTA opcional. Centrado vertical, max-width 480.</p>
+      </div>
+    </header>
+
+    <div class="variant-grid">
+
+      <!-- E1 · SIN RESERVAS -->
+      <article class="variant">
+        <div class="variant-meta">
+          <span class="num">E·01</span>
+          <span class="name">Sin reservas</span>
+        </div>
+        <div class="variant-body">
+          <div class="empty">
+            <svg class="orn" width="120" height="60" viewBox="0 0 120 60" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden>
+              <path d="M 8 36 C 30 12, 56 52, 78 28"/>
+              <circle cx="86" cy="28" r="2.5" fill="currentColor" stroke="none"/>
+              <circle cx="96" cy="28" r="2.5" fill="currentColor" stroke="none"/>
+              <circle cx="106" cy="28" r="2.5" fill="currentColor" stroke="none"/>
+            </svg>
+            <h3>Aún no hay reservas.</h3>
+            <p>Cuando lleguen, aparecerán aquí organizadas por fecha. Mientras, asegúrate de tener tu página pública lista y compártela.</p>
+            <div class="ctas">
+              <button class="btn outline-sage">Ver mi página pública →</button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- E2 · SIN PROPIEDADES -->
+      <article class="variant">
+        <div class="variant-meta">
+          <span class="num">E·02</span>
+          <span class="name">Sin propiedades</span>
+        </div>
+        <div class="variant-body">
+          <div class="empty">
+            <svg class="orn sage" width="120" height="84" viewBox="0 0 120 84" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden>
+              <path d="M 18 70 C 18 52, 28 30, 60 14 C 92 30, 102 52, 102 70 Z" fill="currentColor" fill-opacity="0.2"/>
+              <path d="M 18 70 C 18 52, 28 30, 60 14 C 92 30, 102 52, 102 70"/>
+              <path d="M 18 70 L 102 70"/>
+              <path d="M 48 70 L 48 52 L 60 44 L 72 52 L 72 70"/>
+            </svg>
+            <h3>Aún no tienes propiedades.</h3>
+            <p>Crea tu primera propiedad — toma <span class="oldstyle">5</span> minutos y queda lista para recibir reservas.</p>
+            <div class="ctas">
+              <button class="btn terracotta">Crear mi primera propiedad →</button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- E3 · SIN STAFF -->
+      <article class="variant">
+        <div class="variant-meta">
+          <span class="num">E·03</span>
+          <span class="name">Solo el owner</span>
+        </div>
+        <div class="variant-body">
+          <div class="empty">
+            <svg class="orn sage" width="120" height="60" viewBox="0 0 120 60" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden>
+              <circle cx="50" cy="30" r="20"/>
+              <circle cx="72" cy="30" r="20"/>
+            </svg>
+            <h3>Solo tú por ahora.</h3>
+            <p>Invita a alguien cuando quieras compartir el trabajo. Cada miembro tiene su rol y solo ve lo que necesita ver.</p>
+            <div class="ctas">
+              <button class="btn outline-sage">+ Invitar a alguien</button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- E4 · SIN MENSAJES -->
+      <article class="variant">
+        <div class="variant-meta">
+          <span class="num">E·04</span>
+          <span class="name">Sin mensajes WhatsApp</span>
+        </div>
+        <div class="variant-body">
+          <div class="empty">
+            <svg class="orn" width="120" height="80" viewBox="0 0 120 80" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden>
+              <path d="M 20 24 C 22 14, 32 10, 60 10 C 90 10, 102 18, 102 36 C 102 52, 92 60, 60 60 C 56 60, 52 60, 48 59 L 32 70 L 36 56 C 26 50, 20 42, 20 24 Z"/>
+              <circle cx="46" cy="34" r="2.5" fill="currentColor"/>
+              <circle cx="60" cy="34" r="2.5" fill="currentColor"/>
+              <circle cx="74" cy="34" r="2.5" fill="currentColor"/>
+            </svg>
+            <h3>Nada en la bandeja.</h3>
+            <p>Cuando un huésped escriba por WhatsApp, verás la conversación aquí y podrás responder sin salir del dashboard.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- E5 · CALENDARIO VACÍO -->
+      <article class="variant">
+        <div class="variant-meta">
+          <span class="num">E·05</span>
+          <span class="name">Calendario limpio</span>
+        </div>
+        <div class="variant-body">
+          <div class="empty">
+            <svg class="orn" width="140" height="80" viewBox="0 0 140 80" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" aria-hidden>
+              <rect x="10" y="8" width="120" height="64" rx="6"/>
+              <path d="M 10 22 L 130 22"/>
+              <g stroke-opacity="0.5">
+                <path d="M 30 22 L 30 72 M 50 22 L 50 72 M 70 22 L 70 72 M 90 22 L 90 72 M 110 22 L 110 72"/>
+                <path d="M 10 38 L 130 38 M 10 54 L 130 54"/>
+              </g>
+              <rect x="72" y="42" width="16" height="10" fill="#B8923E" fill-opacity="0.6" stroke="none" rx="2"/>
+            </svg>
+            <h3>Tu calendario está limpio.</h3>
+            <p>Sin reservas todavía. Cuando lleguen, las verás distribuidas por habitación y fecha.</p>
+            <div class="ctas">
+              <button class="btn outline-sage">Configurar precios →</button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- E6 · BÚSQUEDA SIN RESULTADOS -->
+      <article class="variant">
+        <div class="variant-meta">
+          <span class="num">E·06</span>
+          <span class="name">Búsqueda sin resultados</span>
+        </div>
+        <div class="variant-body">
+          <div class="empty">
+            <svg class="orn" width="100" height="80" viewBox="0 0 100 80" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden>
+              <circle cx="40" cy="36" r="22"/>
+              <path d="M 58 54 L 80 70"/>
+            </svg>
+            <h3>Nada coincide con tu búsqueda.</h3>
+            <p>Prueba con otras palabras o quita algunos filtros.</p>
+            <div class="ctas">
+              <button class="btn ghost-sage">Limpiar filtros</button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- E7 · SIN INTEGRACIONES -->
+      <article class="variant">
+        <div class="variant-meta">
+          <span class="num">E·07</span>
+          <span class="name">Sin integraciones</span>
+        </div>
+        <div class="variant-body">
+          <div class="empty">
+            <svg class="orn" width="120" height="80" viewBox="0 0 120 80" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden>
+              <path d="M 16 18 L 50 18 L 50 36 C 50 40, 54 42, 58 42 C 62 42, 66 40, 66 36 L 66 18 L 100 18 L 100 50 L 82 50 C 78 50, 76 54, 76 58 C 76 62, 78 66, 82 66 L 100 66 L 100 74 L 16 74 Z"/>
+              <path d="M 16 18 L 16 38" stroke-dasharray="2 3"/>
+              <path d="M 100 50 L 100 66" stroke-dasharray="2 3"/>
+            </svg>
+            <h3>Conecta tus herramientas.</h3>
+            <p>Eztadia funciona mejor cuando se habla con Wompi (pagos), WhatsApp y tus calendarios de Booking/Airbnb.</p>
+            <div class="ctas">
+              <button class="btn ghost-sage sm">Conectar Wompi →</button>
+              <button class="btn ghost-sage sm">Conectar WhatsApp →</button>
+              <button class="btn ghost-sage sm">Conectar iCal →</button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- E8 · GALERÍA VACÍA -->
+      <article class="variant">
+        <div class="variant-meta">
+          <span class="num">E·08</span>
+          <span class="name">Galería vacía</span>
+        </div>
+        <div class="variant-body">
+          <div class="empty">
+            <svg class="orn" width="120" height="80" viewBox="0 0 120 80" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden>
+              <rect x="14" y="10" width="92" height="60" rx="3"/>
+              <rect x="22" y="18" width="76" height="44" rx="2" stroke-dasharray="3 4" stroke-opacity="0.6"/>
+              <circle cx="40" cy="34" r="3"/>
+              <path d="M 32 56 L 50 40 L 64 52 L 78 38 L 92 52"/>
+            </svg>
+            <h3>Esta galería está vacía.</h3>
+            <p>Las fotos buenas hacen reservas. Sube al menos <span class="oldstyle">5</span> para que tu página pública se vea bien.</p>
+            <div class="ctas">
+              <button class="btn outline-sage">+ Subir fotos</button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- E9 · NADA URGENTE (dashboard) -->
+      <article class="variant">
+        <div class="variant-meta">
+          <span class="num">E·09</span>
+          <span class="name">Nada urgente · dashboard</span>
+        </div>
+        <div class="variant-body" style="min-height: 280px;">
+          <div class="empty" style="padding: 32px 16px;">
+            <svg class="orn" width="100" height="40" viewBox="0 0 100 40" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden>
+              <path d="M 8 28 C 24 14, 40 30, 50 22 S 76 14, 92 22"/>
+              <circle cx="28" cy="24" r="2" fill="currentColor"/>
+              <circle cx="50" cy="22" r="2" fill="currentColor"/>
+              <circle cx="72" cy="20" r="2" fill="currentColor"/>
+            </svg>
+            <h3 class="small">Nada urgente.</h3>
+            <p class="small">Buen momento para revisar tu calendario o agregar fotos a la propiedad.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- E10 · AUDIT LOGS VACÍOS -->
+      <article class="variant">
+        <div class="variant-meta">
+          <span class="num">E·10</span>
+          <span class="name">Sin eventos en rango</span>
+        </div>
+        <div class="variant-body">
+          <div class="empty">
+            <svg class="orn" width="140" height="40" viewBox="0 0 140 40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden>
+              <path d="M 8 20 L 132 20"/>
+              <circle cx="20" cy="20" r="3.5" fill="currentColor"/>
+              <circle cx="50" cy="20" r="3.5" fill="currentColor" fill-opacity="0.5"/>
+              <circle cx="80" cy="20" r="3.5" fill="currentColor" fill-opacity="0.3"/>
+              <circle cx="110" cy="20" r="3.5" fill="currentColor" fill-opacity="0.5"/>
+            </svg>
+            <h3>Sin eventos en este rango.</h3>
+            <p>Cambia el rango de fechas o los filtros para ver más actividad.</p>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION B · LOADING SKELETONS
+       ════════════════════════════════════════════════════════════════════ -->
+  <section class="cat-section">
+    <header class="cat-section-head">
+      <span class="letter">B</span>
+      <div class="info">
+        <span class="label">Loading skeletons</span>
+        <h2>Mientras carga.</h2>
+        <p>Skeletons respetan el layout final. Shimmer hairline 1.5s linear loop. Cero spinners genéricos.</p>
+      </div>
+    </header>
+
+    <div class="variant-grid">
+
+      <!-- SK1 · BOOKINGS TABLE -->
+      <article class="variant">
+        <div class="variant-meta">
+          <span class="num">SK·01</span>
+          <span class="name">Tabla de reservas</span>
+        </div>
+        <div class="variant-body" style="align-items: stretch;">
+          <div class="sk-frame" style="width: 100%;">
+            <div class="sk-tbl-head">
+              <span class="sk" style="height:10px; width:80%;"></span>
+              <span class="sk" style="height:10px; width:60%;"></span>
+              <span class="sk" style="height:10px; width:70%;"></span>
+              <span class="sk" style="height:10px; width:70%;"></span>
+              <span class="sk" style="height:10px; width:60%;"></span>
+              <span class="sk" style="height:10px; width:50%;"></span>
+            </div>
+            <div class="sk-tbl-row">
+              <span class="sk" style="height:12px; width:90%;"></span>
+              <div style="display:flex;align-items:center;gap:10px;"><span class="sk circle" style="width:24px;height:24px;"></span><span class="sk" style="height:13px; flex:1;"></span></div>
+              <span class="sk" style="height:12px;"></span>
+              <span class="sk" style="height:12px;"></span>
+              <span class="sk pill" style="height:18px; width:80%;"></span>
+              <span class="sk" style="height:12px; width:50%;"></span>
+            </div>
+            <div class="sk-tbl-row">
+              <span class="sk" style="height:12px; width:90%;"></span>
+              <div style="display:flex;align-items:center;gap:10px;"><span class="sk circle" style="width:24px;height:24px;"></span><span class="sk" style="height:13px; flex:1;"></span></div>
+              <span class="sk" style="height:12px;"></span>
+              <span class="sk" style="height:12px;"></span>
+              <span class="sk pill" style="height:18px; width:80%;"></span>
+              <span class="sk" style="height:12px; width:50%;"></span>
+            </div>
+            <div class="sk-tbl-row">
+              <span class="sk" style="height:12px; width:90%;"></span>
+              <div style="display:flex;align-items:center;gap:10px;"><span class="sk circle" style="width:24px;height:24px;"></span><span class="sk" style="height:13px; flex:1;"></span></div>
+              <span class="sk" style="height:12px;"></span>
+              <span class="sk" style="height:12px;"></span>
+              <span class="sk pill" style="height:18px; width:80%;"></span>
+              <span class="sk" style="height:12px; width:50%;"></span>
+            </div>
+            <div class="sk-tbl-row">
+              <span class="sk" style="height:12px; width:90%;"></span>
+              <div style="display:flex;align-items:center;gap:10px;"><span class="sk circle" style="width:24px;height:24px;"></span><span class="sk" style="height:13px; flex:1;"></span></div>
+              <span class="sk" style="height:12px;"></span>
+              <span class="sk" style="height:12px;"></span>
+              <span class="sk pill" style="height:18px; width:80%;"></span>
+              <span class="sk" style="height:12px; width:50%;"></span>
+            </div>
+            <div class="sk-tbl-row">
+              <span class="sk" style="height:12px; width:90%;"></span>
+              <div style="display:flex;align-items:center;gap:10px;"><span class="sk circle" style="width:24px;height:24px;"></span><span class="sk" style="height:13px; flex:1;"></span></div>
+              <span class="sk" style="height:12px;"></span>
+              <span class="sk" style="height:12px;"></span>
+              <span class="sk pill" style="height:18px; width:80%;"></span>
+              <span class="sk" style="height:12px; width:50%;"></span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- SK2 · CALENDAR -->
+      <article class="variant">
+        <div class="variant-meta">
+          <span class="num">SK·02</span>
+          <span class="name">Calendario timeline</span>
+        </div>
+        <div class="variant-body" style="align-items: stretch;">
+          <div class="sk-cal-grid" style="width: 100%;">
+            <div class="room"><span class="sk" style="height:14px; width:80%;"></span></div>
+            <div class="sk-cal-cell booking span2" style="grid-column: 2 / span 3;"></div>
+            <div class="sk-cal-cell"></div>
+            <div class="sk-cal-cell booking span2" style="grid-column: 6 / span 2;"></div>
+
+            <div class="room"><span class="sk" style="height:14px; width:60%;"></span></div>
+            <div class="sk-cal-cell"></div>
+            <div class="sk-cal-cell booking span3" style="grid-column: 3 / span 3;"></div>
+            <div class="sk-cal-cell"></div>
+            <div class="sk-cal-cell"></div>
+
+            <div class="room"><span class="sk" style="height:14px; width:75%;"></span></div>
+            <div class="sk-cal-cell booking" style="grid-column: 2 / span 1;"></div>
+            <div class="sk-cal-cell"></div>
+            <div class="sk-cal-cell"></div>
+            <div class="sk-cal-cell booking span2" style="grid-column: 5 / span 2;"></div>
+            <div class="sk-cal-cell"></div>
+
+            <div class="room"><span class="sk" style="height:14px; width:70%;"></span></div>
+            <div class="sk-cal-cell"></div>
+            <div class="sk-cal-cell booking span2" style="grid-column: 3 / span 2;"></div>
+            <div class="sk-cal-cell"></div>
+            <div class="sk-cal-cell"></div>
+            <div class="sk-cal-cell booking" style="grid-column: 7 / span 1;"></div>
+
+            <div class="room"><span class="sk" style="height:14px; width:65%;"></span></div>
+            <div class="sk-cal-cell"></div>
+            <div class="sk-cal-cell"></div>
+            <div class="sk-cal-cell"></div>
+            <div class="sk-cal-cell booking span3" style="grid-column: 5 / span 3;"></div>
+
+            <div class="room"><span class="sk" style="height:14px; width:80%;"></span></div>
+            <div class="sk-cal-cell booking span2" style="grid-column: 2 / span 2;"></div>
+            <div class="sk-cal-cell"></div>
+            <div class="sk-cal-cell"></div>
+            <div class="sk-cal-cell"></div>
+            <div class="sk-cal-cell booking" style="grid-column: 7 / span 1;"></div>
+          </div>
+        </div>
+      </article>
+
+      <!-- SK3 · PROPERTY PUBLIC PAGE -->
+      <article class="variant">
+        <div class="variant-meta">
+          <span class="num">SK·03</span>
+          <span class="name">Página pública de propiedad</span>
+        </div>
+        <div class="variant-body" style="align-items: stretch;">
+          <div class="sk-property" style="width: 100%;">
+            <span class="sk huge hero" style="display:block; height: 160px;"></span>
+            <div style="display:flex; flex-direction: column; gap: 8px; margin-bottom: 18px;">
+              <span class="sk" style="height:18px; width:60%;"></span>
+              <span class="sk" style="height:12px; width:80%;"></span>
+              <span class="sk" style="height:12px; width:45%;"></span>
+            </div>
+            <div class="room-card">
+              <span class="sk huge" style="height:60px;"></span>
+              <div style="display:flex; flex-direction: column; gap: 6px;">
+                <span class="sk" style="height:16px; width:60%;"></span>
+                <span class="sk" style="height:11px; width:80%;"></span>
+                <span class="sk" style="height:11px; width:50%;"></span>
+              </div>
+              <span class="sk pill" style="height: 32px; width: 80px;"></span>
+            </div>
+            <div class="room-card">
+              <span class="sk huge" style="height:60px;"></span>
+              <div style="display:flex; flex-direction: column; gap: 6px;">
+                <span class="sk" style="height:16px; width:50%;"></span>
+                <span class="sk" style="height:11px; width:75%;"></span>
+                <span class="sk" style="height:11px; width:45%;"></span>
+              </div>
+              <span class="sk pill" style="height: 32px; width: 80px;"></span>
+            </div>
+            <div class="room-card">
+              <span class="sk huge" style="height:60px;"></span>
+              <div style="display:flex; flex-direction: column; gap: 6px;">
+                <span class="sk" style="height:16px; width:65%;"></span>
+                <span class="sk" style="height:11px; width:72%;"></span>
+                <span class="sk" style="height:11px; width:50%;"></span>
+              </div>
+              <span class="sk pill" style="height: 32px; width: 80px;"></span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- SK4 · DASHBOARD OVERVIEW -->
+      <article class="variant">
+        <div class="variant-meta">
+          <span class="num">SK·04</span>
+          <span class="name">Dashboard overview</span>
+        </div>
+        <div class="variant-body" style="align-items: stretch;">
+          <div class="sk-frame sk-overview" style="width: 100%;">
+            <span class="sk greeting"></span>
+            <span class="sk sub"></span>
+            <div class="grid">
+              <div style="display:flex; flex-direction: column; gap: 12px;">
+                <span class="sk" style="height: 16px; width: 40%;"></span>
+                <div style="display:flex; gap: 12px; padding: 12px; border: 1px solid var(--rule); border-radius: 12px;">
+                  <span class="sk circle" style="width: 44px; height: 44px;"></span>
+                  <div style="flex:1; display:flex; flex-direction: column; gap: 6px;">
+                    <span class="sk" style="height: 12px; width: 50%;"></span>
+                    <span class="sk" style="height: 10px; width: 70%;"></span>
+                    <span class="sk pill" style="height: 16px; width: 100px;"></span>
+                  </div>
+                  <span class="sk pill" style="height: 30px; width: 100px;"></span>
+                </div>
+                <div style="display:flex; gap: 12px; padding: 12px; border: 1px solid var(--rule); border-radius: 12px;">
+                  <span class="sk circle" style="width: 44px; height: 44px;"></span>
+                  <div style="flex:1; display:flex; flex-direction: column; gap: 6px;">
+                    <span class="sk" style="height: 12px; width: 60%;"></span>
+                    <span class="sk" style="height: 10px; width: 75%;"></span>
+                    <span class="sk pill" style="height: 16px; width: 120px;"></span>
+                  </div>
+                  <span class="sk pill" style="height: 30px; width: 100px;"></span>
+                </div>
+              </div>
+              <div style="display:flex; flex-direction: column; gap: 12px;">
+                <span class="sk" style="height: 16px; width: 50%;"></span>
+                <div style="padding: 12px; border-bottom: 1px solid var(--rule);">
+                  <span class="sk" style="height: 10px; width: 50%; margin-bottom: 6px;"></span>
+                  <span class="sk" style="height: 22px; width: 60%;"></span>
+                </div>
+                <div style="padding: 12px; border-bottom: 1px solid var(--rule);">
+                  <span class="sk" style="height: 10px; width: 60%; margin-bottom: 6px;"></span>
+                  <span class="sk" style="height: 22px; width: 50%;"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- SK5 · DRAWER DETAIL -->
+      <article class="variant">
+        <div class="variant-meta">
+          <span class="num">SK·05</span>
+          <span class="name">Drawer detail</span>
+        </div>
+        <div class="variant-body" style="align-items: stretch;">
+          <div class="sk-drawer" style="width: 100%;">
+            <div style="display:flex; align-items:center; justify-content: space-between; padding-bottom: 16px; border-bottom: 1px solid var(--rule);">
+              <span class="sk mono" style="height: 12px; width: 120px;"></span>
+              <span class="sk pill" style="height: 22px; width: 90px;"></span>
+            </div>
+            <div style="margin-top: 18px;">
+              <span class="sk circle" style="width: 64px; height: 64px; margin-bottom: 12px;"></span>
+              <span class="sk" style="display:block; height: 26px; width: 60%; margin-bottom: 6px;"></span>
+              <span class="sk" style="display:block; height: 12px; width: 80%; margin-bottom: 18px;"></span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <div><span class="sk" style="height: 10px; width: 80px; margin-bottom: 6px;"></span><span class="sk" style="height: 14px; width: 70%;"></span></div>
+              <div><span class="sk" style="height: 10px; width: 80px; margin-bottom: 6px;"></span><span class="sk" style="height: 14px; width: 80%;"></span></div>
+              <div><span class="sk" style="height: 10px; width: 80px; margin-bottom: 6px;"></span><span class="sk" style="height: 14px; width: 60%;"></span></div>
+              <div><span class="sk" style="height: 10px; width: 80px; margin-bottom: 6px;"></span><span class="sk" style="height: 14px; width: 70%;"></span></div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- SK6 · INLINE BUTTON LOADING -->
+      <article class="variant">
+        <div class="variant-meta">
+          <span class="num">SK·06</span>
+          <span class="name">Botones cargando</span>
+        </div>
+        <div class="variant-body">
+          <div class="btn-row-demo">
+            <button class="btn sage" disabled style="opacity:.85;">
+              <span class="dots-loader" style="color: var(--cream);"><span></span><span></span><span></span></span>
+              Guardando…
+            </button>
+            <button class="btn terracotta" disabled style="opacity:.85;">
+              <span class="dots-loader" style="color: var(--cream);"><span></span><span></span><span></span></span>
+              Confirmando…
+            </button>
+            <button class="btn destructive" disabled style="opacity:.85;">
+              <span class="dots-loader" style="color: var(--cream);"><span></span><span></span><span></span></span>
+              Eliminando…
+            </button>
+            <button class="btn sage" style="background: var(--success);">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+              Guardado
+            </button>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION C · ERROR STATES
+       ════════════════════════════════════════════════════════════════════ -->
+  <section class="cat-section">
+    <header class="cat-section-head">
+      <span class="letter">C</span>
+      <div class="info">
+        <span class="label">Error states</span>
+        <h2>Cuando algo falla.</h2>
+        <p>Copy humano, sin "Oops!", sin culpar al usuario. Errores que dan opciones, no pánico.</p>
+      </div>
+    </header>
+
+    <div class="variant-grid">
+
+      <!-- C1 · 404 -->
+      <article class="variant">
+        <div class="variant-meta">
+          <span class="num">C·01</span>
+          <span class="name">404 · Página no existe</span>
+        </div>
+        <div class="variant-body" style="min-height: 540px;">
+          <div class="err-state">
+            <div class="err-404-orn">
+              <span class="dot"></span>
+              <span class="digits">404</span>
+            </div>
+            <h3>Esa página se mudó (o nunca existió).</h3>
+            <p>Lo más probable: un link viejo o una propiedad desactivada. Vuelve al inicio y prueba de nuevo.</p>
+            <div class="ctas">
+              <button class="btn outline-sage">← Volver al inicio</button>
+              <button class="btn ghost">Escribir a soporte</button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- C2 · 500 -->
+      <article class="variant">
+        <div class="variant-meta">
+          <span class="num">C·02</span>
+          <span class="name">500 · Error del servidor</span>
+        </div>
+        <div class="variant-body" style="min-height: 540px;">
+          <div class="err-state">
+            <svg width="140" height="80" viewBox="0 0 140 80" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--clay); opacity: 0.6; margin: 0 auto 24px; display: block;" aria-hidden>
+              <path d="M 8 50 C 30 28, 50 56, 64 42 L 70 36"/>
+              <path d="M 78 28 L 88 38 C 100 50, 120 32, 132 50" stroke-dasharray="2 3"/>
+              <path d="M 72 30 L 76 26"/>
+              <path d="M 72 40 L 76 44"/>
+            </svg>
+            <h3>Algo se nos rompió.</h3>
+            <p>No es tu culpa. Ya recibimos el aviso y estamos revisando. Intenta de nuevo en un momento.</p>
+            <div class="ctas">
+              <button class="btn sage">Reintentar</button>
+              <button class="btn ghost">Reportar el problema</button>
+            </div>
+            <div class="err-code">
+              <span>Código: <span class="mono">ERR_7K9-12</span> · Hora: <span class="oldstyle">21 may 2026 14:32</span></span>
+              <button class="copy-btn" aria-label="Copiar código">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h2"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- C3 · 403 -->
+      <article class="variant">
+        <div class="variant-meta">
+          <span class="num">C·03</span>
+          <span class="name">403 · Sin permisos</span>
+        </div>
+        <div class="variant-body" style="min-height: 460px;">
+          <div class="err-state">
+            <svg width="100" height="80" viewBox="0 0 100 80" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--gold); opacity: 0.65; margin: 0 auto 24px; display: block;" aria-hidden>
+              <circle cx="30" cy="40" r="14"/>
+              <circle cx="30" cy="40" r="4"/>
+              <path d="M 44 40 L 84 40"/>
+              <path d="M 70 40 L 70 50"/>
+              <path d="M 80 40 L 80 48"/>
+            </svg>
+            <h3>Esta puerta no es tuya.</h3>
+            <p>No tienes permisos para ver esta página. Si crees que debería tenerlos, pídele al owner de la propiedad que te invite.</p>
+            <div class="ctas">
+              <button class="btn outline-sage">← Volver a mi dashboard</button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- C4 · OFFLINE BANNER -->
+      <article class="variant">
+        <div class="variant-meta">
+          <span class="num">C·04</span>
+          <span class="name">Offline banner sticky</span>
+        </div>
+        <div class="variant-body" style="align-items: stretch; padding: 0;">
+          <div style="width: 100%; display: flex; flex-direction: column;">
+            <div class="offline-banner">
+              <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M 3 16 C 3 12, 6 9, 10 9 C 11 6, 14 4, 17 5 C 20 5, 22 8, 22 11 C 22 14, 20 16, 17 16 L 8 16"/>
+                <path d="m 3 3 18 18"/>
+              </svg>
+              <span class="text">Sin conexión. Algunas acciones no funcionarán hasta que vuelvas.</span>
+              <button class="btn-retry">Reintentar</button>
+            </div>
+            <div style="flex: 1; padding: 40px; opacity: 0.5;">
+              <div style="background: var(--paper); border: 1px solid var(--rule); border-radius: 14px; padding: 20px;">
+                <span class="sk" style="height: 16px; width: 60%; margin-bottom: 12px;"></span>
+                <span class="sk" style="height: 12px; width: 80%; margin-bottom: 8px;"></span>
+                <span class="sk" style="height: 12px; width: 75%;"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- C5 · INLINE FORM ERROR -->
+      <article class="variant">
+        <div class="variant-meta">
+          <span class="num">C·05</span>
+          <span class="name">Error inline en formulario</span>
+        </div>
+        <div class="variant-body" style="min-height: 280px;">
+          <div class="form-demo">
+            <label class="field-label">Email</label>
+            <input class="input error" type="email" value="andrea@gmail.com" />
+            <div class="err-line">
+              <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+              <span>Este email ya está en uso. ¿Quizás quieres <a>iniciar sesión</a>?</span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- C6 · ERROR TOAST -->
+      <article class="variant">
+        <div class="variant-meta">
+          <span class="num">C·06</span>
+          <span class="name">Toast de error grave</span>
+        </div>
+        <div class="variant-body" style="padding: 0; align-items: stretch; min-height: 320px;">
+          <div class="toast-container" style="width: 100%; min-height: 320px;">
+            <div style="opacity: 0.5;">
+              <span class="sk" style="height: 16px; width: 50%; margin-bottom: 12px;"></span>
+              <span class="sk" style="height: 12px; width: 75%; margin-bottom: 8px;"></span>
+              <span class="sk" style="height: 12px; width: 65%;"></span>
+            </div>
+            <div class="toast-stage">
+              <div class="body">
+                <p class="title">No pudimos guardar.</p>
+                <p class="desc">Intenta de nuevo o revisa tu conexión.</p>
+                <div class="actions">
+                  <button class="btn ghost">Reintentar</button>
+                </div>
+              </div>
+              <button class="close" aria-label="Cerrar">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6l-12 12"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION D · CONFIRM DIALOGS
+       ════════════════════════════════════════════════════════════════════ -->
+  <section class="cat-section">
+    <header class="cat-section-head">
+      <span class="letter">D</span>
+      <div class="info">
+        <span class="label">Confirm dialogs</span>
+        <h2>Antes de algo destructivo.</h2>
+        <p>Una sola confirmación, contextual. Sin doble "are you really sure". El destructivo se nombra explícitamente.</p>
+      </div>
+    </header>
+
+    <div class="variant-grid">
+
+      <!-- D1 · CANCELAR RESERVA -->
+      <article class="variant">
+        <div class="variant-meta">
+          <span class="num">D·01</span>
+          <span class="name">Cancelar reserva</span>
+        </div>
+        <div class="variant-body" style="padding: 0;">
+          <div class="modal-stage">
+            <div class="modal">
+              <span class="modal-orn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 7v6c0 4.5 3 8 8 9 5-1 8-4.5 8-9V7z"/><path d="M12 8v4"/><path d="M12 15h.01"/></svg>
+              </span>
+              <h3>Cancelar la reserva de <em class="italic">Andrea Mendoza</em></h3>
+              <p>El huésped recibirá un email y WhatsApp avisándole. Según tu política de cancelación, esta reserva tiene reembolso completo.</p>
+              <textarea class="modal-input" placeholder="Motivo (opcional, visible al huésped)"></textarea>
+              <div class="modal-cta-row">
+                <button class="btn ghost">Volver</button>
+                <button class="btn destructive">Sí, cancelar reserva</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- D2 · ELIMINAR PROPIEDAD -->
+      <article class="variant">
+        <div class="variant-meta">
+          <span class="num">D·02</span>
+          <span class="name">Eliminar propiedad</span>
+        </div>
+        <div class="variant-body" style="padding: 0;">
+          <div class="modal-stage">
+            <div class="modal">
+              <span class="modal-orn terra">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M6 7v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+              </span>
+              <h3>¿Eliminar <em class="italic">Casa Marina</em>?</h3>
+              <p>Esta acción es permanente. Se eliminarán todas las reservas, fotos, configuración y staff asociado. Tus huéspedes ya confirmados recibirán un email con tus datos de contacto.</p>
+              <input class="modal-text-input" placeholder="ELIMINAR" />
+              <p class="modal-helper">Escribe <strong style="color: var(--ink);">ELIMINAR</strong> exactamente para confirmar.</p>
+              <div class="modal-cta-row">
+                <button class="btn ghost">Cancelar</button>
+                <button class="btn destructive" disabled>Eliminar permanentemente</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       ORNAMENTS REFERENCE
+       ════════════════════════════════════════════════════════════════════ -->
+  <section class="cat-section">
+    <header class="cat-section-head">
+      <span class="letter">★</span>
+      <div class="info">
+        <span class="label">Ornamentos reutilizables</span>
+        <h2>El set completo.</h2>
+        <p>Doce SVGs disponibles como componentes en <code style="font-size:13px;background:var(--linen);padding:1px 6px;border-radius:4px;">@/components/shared/Ornaments</code>. Stroke 1.5, color via currentColor.</p>
+      </div>
+    </header>
+
+    <div class="variant-grid three">
+
+      <article class="variant">
+        <div class="variant-meta"><span class="num">★·01</span><span class="name">CalendarEmpty</span></div>
+        <div class="variant-body" style="min-height: 180px;">
+          <svg width="120" height="60" viewBox="0 0 120 60" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color: var(--gold); opacity: 0.65;">
+            <path d="M 8 36 C 30 12, 56 52, 78 28"/>
+            <circle cx="86" cy="28" r="2.5" fill="currentColor" stroke="none"/>
+            <circle cx="96" cy="28" r="2.5" fill="currentColor" stroke="none"/>
+            <circle cx="106" cy="28" r="2.5" fill="currentColor" stroke="none"/>
+          </svg>
+        </div>
+      </article>
+
+      <article class="variant">
+        <div class="variant-meta"><span class="num">★·02</span><span class="name">HouseOrganic</span></div>
+        <div class="variant-body" style="min-height: 180px;">
+          <svg width="120" height="84" viewBox="0 0 120 84" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--sage); opacity: 0.55;">
+            <path d="M 18 70 C 18 52, 28 30, 60 14 C 92 30, 102 52, 102 70 Z" fill="currentColor" fill-opacity="0.2"/>
+            <path d="M 18 70 C 18 52, 28 30, 60 14 C 92 30, 102 52, 102 70"/>
+            <path d="M 18 70 L 102 70"/>
+            <path d="M 48 70 L 48 52 L 60 44 L 72 52 L 72 70"/>
+          </svg>
+        </div>
+      </article>
+
+      <article class="variant">
+        <div class="variant-meta"><span class="num">★·03</span><span class="name">ChainLinks</span></div>
+        <div class="variant-body" style="min-height: 180px;">
+          <svg width="120" height="60" viewBox="0 0 120 60" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--sage); opacity: 0.55;">
+            <circle cx="50" cy="30" r="20"/>
+            <circle cx="72" cy="30" r="20"/>
+          </svg>
+        </div>
+      </article>
+
+      <article class="variant">
+        <div class="variant-meta"><span class="num">★·04</span><span class="name">SpeechBubble</span></div>
+        <div class="variant-body" style="min-height: 180px;">
+          <svg width="120" height="80" viewBox="0 0 120 80" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--gold); opacity: 0.65;">
+            <path d="M 20 24 C 22 14, 32 10, 60 10 C 90 10, 102 18, 102 36 C 102 52, 92 60, 60 60 C 56 60, 52 60, 48 59 L 32 70 L 36 56 C 26 50, 20 42, 20 24 Z"/>
+            <circle cx="46" cy="34" r="2.5" fill="currentColor"/>
+            <circle cx="60" cy="34" r="2.5" fill="currentColor"/>
+            <circle cx="74" cy="34" r="2.5" fill="currentColor"/>
+          </svg>
+        </div>
+      </article>
+
+      <article class="variant">
+        <div class="variant-meta"><span class="num">★·05</span><span class="name">GridCalendar</span></div>
+        <div class="variant-body" style="min-height: 180px;">
+          <svg width="140" height="80" viewBox="0 0 140 80" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" style="color: var(--gold); opacity: 0.65;">
+            <rect x="10" y="8" width="120" height="64" rx="6"/>
+            <path d="M 10 22 L 130 22"/>
+            <g stroke-opacity="0.5"><path d="M 30 22 L 30 72 M 50 22 L 50 72 M 70 22 L 70 72 M 90 22 L 90 72 M 110 22 L 110 72"/><path d="M 10 38 L 130 38 M 10 54 L 130 54"/></g>
+            <rect x="72" y="42" width="16" height="10" fill="#B8923E" fill-opacity="0.6" stroke="none" rx="2"/>
+          </svg>
+        </div>
+      </article>
+
+      <article class="variant">
+        <div class="variant-meta"><span class="num">★·06</span><span class="name">SearchEmpty</span></div>
+        <div class="variant-body" style="min-height: 180px;">
+          <svg width="100" height="80" viewBox="0 0 100 80" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color: var(--gold); opacity: 0.65;">
+            <circle cx="40" cy="36" r="22"/>
+            <path d="M 58 54 L 80 70"/>
+          </svg>
+        </div>
+      </article>
+
+      <article class="variant">
+        <div class="variant-meta"><span class="num">★·07</span><span class="name">PuzzlePieces</span></div>
+        <div class="variant-body" style="min-height: 180px;">
+          <svg width="120" height="80" viewBox="0 0 120 80" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--gold); opacity: 0.65;">
+            <path d="M 16 18 L 50 18 L 50 36 C 50 40, 54 42, 58 42 C 62 42, 66 40, 66 36 L 66 18 L 100 18 L 100 50 L 82 50 C 78 50, 76 54, 76 58 C 76 62, 78 66, 82 66 L 100 66 L 100 74 L 16 74 Z"/>
+            <path d="M 16 18 L 16 38" stroke-dasharray="2 3"/>
+            <path d="M 100 50 L 100 66" stroke-dasharray="2 3"/>
+          </svg>
+        </div>
+      </article>
+
+      <article class="variant">
+        <div class="variant-meta"><span class="num">★·08</span><span class="name">FrameEmpty</span></div>
+        <div class="variant-body" style="min-height: 180px;">
+          <svg width="120" height="80" viewBox="0 0 120 80" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--gold); opacity: 0.65;">
+            <rect x="14" y="10" width="92" height="60" rx="3"/>
+            <rect x="22" y="18" width="76" height="44" rx="2" stroke-dasharray="3 4" stroke-opacity="0.6"/>
+            <circle cx="40" cy="34" r="3"/>
+            <path d="M 32 56 L 50 40 L 64 52 L 78 38 L 92 52"/>
+          </svg>
+        </div>
+      </article>
+
+      <article class="variant">
+        <div class="variant-meta"><span class="num">★·09</span><span class="name">TimelineDots</span></div>
+        <div class="variant-body" style="min-height: 180px;">
+          <svg width="140" height="40" viewBox="0 0 140 40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color: var(--gold); opacity: 0.65;">
+            <path d="M 8 20 L 132 20"/>
+            <circle cx="20" cy="20" r="3.5" fill="currentColor"/>
+            <circle cx="50" cy="20" r="3.5" fill="currentColor" fill-opacity="0.5"/>
+            <circle cx="80" cy="20" r="3.5" fill="currentColor" fill-opacity="0.3"/>
+            <circle cx="110" cy="20" r="3.5" fill="currentColor" fill-opacity="0.5"/>
+          </svg>
+        </div>
+      </article>
+
+      <article class="variant">
+        <div class="variant-meta"><span class="num">★·10</span><span class="name">KeyOrganic</span></div>
+        <div class="variant-body" style="min-height: 180px;">
+          <svg width="100" height="80" viewBox="0 0 100 80" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--gold); opacity: 0.65;">
+            <circle cx="30" cy="40" r="14"/>
+            <circle cx="30" cy="40" r="4"/>
+            <path d="M 44 40 L 84 40"/>
+            <path d="M 70 40 L 70 50"/>
+            <path d="M 80 40 L 80 48"/>
+          </svg>
+        </div>
+      </article>
+
+      <article class="variant">
+        <div class="variant-meta"><span class="num">★·11</span><span class="name">CurveBroken</span></div>
+        <div class="variant-body" style="min-height: 180px;">
+          <svg width="140" height="60" viewBox="0 0 140 60" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--clay); opacity: 0.6;">
+            <path d="M 8 40 C 30 18, 50 46, 64 32 L 70 26"/>
+            <path d="M 78 18 L 88 28 C 100 40, 120 22, 132 40" stroke-dasharray="2 3"/>
+            <path d="M 72 20 L 76 16"/>
+            <path d="M 72 30 L 76 34"/>
+          </svg>
+        </div>
+      </article>
+
+      <article class="variant">
+        <div class="variant-meta"><span class="num">★·12</span><span class="name">DotsArc</span></div>
+        <div class="variant-body" style="min-height: 180px;">
+          <svg width="100" height="40" viewBox="0 0 100 40" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="color: var(--gold); opacity: 0.65;">
+            <path d="M 8 28 C 24 14, 40 30, 50 22 S 76 14, 92 22"/>
+            <circle cx="28" cy="24" r="2" fill="currentColor"/>
+            <circle cx="50" cy="22" r="2" fill="currentColor"/>
+            <circle cx="72" cy="20" r="2" fill="currentColor"/>
+          </svg>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+</div>
+
+</body>
+</html>

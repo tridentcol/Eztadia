@@ -1,0 +1,1327 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Calendario · Casa Marina — Eztadia</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..700,0..100;1,9..144,400..700,0..100&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --cream:#FBF8F2; --paper:#FFFFFF; --linen:#F2EDE2;
+    --ink:#1F1B16; --ink-soft:#5A5147; --ink-muted:#8B8275;
+    --sage:#5C7567; --sage-soft:#9CB39E; --sage-tint:#E5EDE5;
+    --terracotta:#C76F4C; --clay:#A85A3B; --gold:#B8923E;
+    --gold-tint: rgba(184, 146, 62, 0.14);
+    --rule:#E5DFD3; --rule-strong:#D4CCB9;
+    --shadow-soft: 0 1px 2px rgba(31,27,22,.04), 0 8px 24px -12px rgba(31,27,22,.08);
+    --shadow-pop:  0 4px 8px -3px rgba(31,27,22,.08), 0 20px 40px -16px rgba(31,27,22,.16);
+    --ease: cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; background: var(--cream); color: var(--ink); }
+  body{
+    font-family:'Inter', system-ui, sans-serif;
+    font-size:16px; line-height:1.55;
+    font-feature-settings:"ss01","cv11";
+    -webkit-font-smoothing:antialiased;
+  }
+  a{ color:inherit; text-decoration:none; }
+  button{ font:inherit; color:inherit; cursor:pointer; border:0; background:transparent; padding:0; }
+  :focus-visible{ outline:2px solid var(--sage); outline-offset:3px; border-radius:4px; }
+  .serif{ font-family:'Fraunces', Georgia, serif; font-variation-settings:"SOFT" 50, "opsz" 144; }
+  .oldstyle{ font-variant-numeric:oldstyle-nums; font-feature-settings:"onum"; }
+  .mono{ font-family:'JetBrains Mono', ui-monospace, monospace; }
+
+  /* ─────────── APP SHELL (simulated) ─────────── */
+  .app{ display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+  @media (max-width: 1023px){ .app{ grid-template-columns: 1fr; } }
+
+  .sidebar{
+    position: sticky; top: 0; height: 100vh;
+    background: var(--cream);
+    border-right: 1px solid var(--rule);
+    padding: 24px 16px;
+    display: flex; flex-direction: column;
+  }
+  @media (max-width: 1023px){ .sidebar{ display: none; } }
+  .sidebar-logo{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'Fraunces', serif; font-style:italic; font-weight:500;
+    font-size:22px; color:var(--ink); padding: 6px 8px; margin-bottom: 20px;
+  }
+  .sidebar-logo::after{
+    content:""; width:5px; height:5px; border-radius:50%;
+    background: var(--gold); margin-top: -10px;
+  }
+  .prop-switcher{
+    display:flex; align-items:center; gap:10px; width: 100%;
+    padding: 8px 10px; margin-bottom: 28px; border-radius: 12px;
+    background: var(--linen);
+  }
+  .prop-switcher .ph{
+    width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+    border: 1px solid var(--rule);
+    background-size: cover; background-position: center;
+    background-image: url('https://images.unsplash.com/photo-1545158535-c3f7168c28b6?auto=format&fit=crop&w=160&q=80');
+  }
+  .prop-switcher .name{
+    font-family:'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 15px; color: var(--ink); flex: 1;
+  }
+  .nav-section{ margin-bottom: 20px; }
+  .nav-section .label{
+    display:block; font-size: 11px; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-muted); padding: 4px 14px 8px;
+  }
+  .nav-item{
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; border-radius: 10px;
+    color: var(--ink-soft); font-size: 14px;
+    margin-bottom: 2px; position: relative;
+    transition: background-color 200ms var(--ease), color 200ms var(--ease);
+  }
+  .nav-item:hover{ background: var(--linen); color: var(--ink); }
+  .nav-item.active{
+    background: var(--sage-tint); color: var(--sage); font-weight: 500;
+  }
+  .nav-item.active::before{
+    content:""; position:absolute; left:4px; top:50%; transform:translateY(-50%);
+    width:3px; height:16px; border-radius:2px; background: var(--sage);
+  }
+  .nav-item svg{ flex-shrink: 0; color: currentColor; }
+
+  /* Topbar */
+  .topbar{
+    position: sticky; top: 0; z-index: 20;
+    height: 64px; background: var(--cream); border-bottom: 1px solid var(--rule);
+    padding: 0 32px;
+    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 24px;
+  }
+  .breadcrumb{ font-size: 13px; color: var(--ink-muted); display:inline-flex; gap: 6px; }
+  .breadcrumb a{ transition: color 200ms var(--ease); }
+  .breadcrumb a:hover{ color: var(--ink); }
+  .breadcrumb .current{ color: var(--ink); font-weight: 500; }
+  .breadcrumb .sep{ opacity: 0.5; }
+  .search{ position: relative; width: 100%; max-width: 360px; justify-self: center; }
+  .search input{
+    width: 100%; height: 38px; padding: 0 14px 0 38px;
+    background: var(--linen); border: 1px solid transparent;
+    border-radius: 12px; font: inherit; font-size: 14px; color: var(--ink);
+  }
+  .search input::placeholder{ color: var(--ink-muted); }
+  .search svg{ position:absolute; left:12px; top:50%; transform:translateY(-50%); color: var(--ink-muted); }
+  .topbar-right{ display:inline-flex; align-items:center; gap:14px; justify-self:end; }
+  .topbar-avatar{
+    width:34px; height:34px; border-radius:50%; background: var(--sage-tint); color: var(--sage);
+    display:inline-flex; align-items:center; justify-content:center; font-size:13px; font-weight:500;
+  }
+  .icon-btn{
+    width: 38px; height: 38px; border-radius: 10px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--ink-soft); position: relative;
+    transition: background-color 200ms var(--ease), color 200ms var(--ease);
+  }
+  .icon-btn:hover{ background: var(--linen); color: var(--ink); }
+  .icon-btn .dot{
+    position:absolute; top: 8px; right: 9px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--sage); border: 2px solid var(--cream);
+  }
+
+  /* ─────────── PROPERTY TABS ─────────── */
+  .tabs{
+    border-bottom: 1px solid var(--rule);
+    padding: 0 32px;
+    display: flex; gap: 28px;
+    overflow-x: auto;
+  }
+  .tab{
+    display: inline-block;
+    font-size: 14px; font-weight: 500;
+    color: var(--ink-soft);
+    padding: 16px 0 12px;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 200ms var(--ease), border-color 200ms var(--ease);
+    white-space: nowrap;
+  }
+  .tab:hover{ color: var(--ink); }
+  .tab.active{
+    color: var(--ink);
+    border-bottom-color: var(--sage);
+    font-weight: 500;
+  }
+  @media (max-width: 768px){ .tabs{ padding: 0 16px; gap: 18px; } }
+
+  /* ─────────── CALENDAR PAGE WRAPPER ─────────── */
+  .cal-page{ padding: 32px 32px 96px; }
+  @media (max-width: 768px){ .cal-page{ padding: 16px 16px 96px; } }
+
+  /* ─────────── CALENDAR HEADER ─────────── */
+  .cal-header{
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 24px; flex-wrap: wrap;
+    margin-bottom: 32px;
+  }
+  .cal-title{
+    font-family:'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 32px; color: var(--ink); margin: 0;
+    letter-spacing: -0.02em;
+  }
+  .cal-subtitle{
+    font-size: 14px; color: var(--ink-muted);
+    margin: 6px 0 0;
+  }
+  .cal-toolbar{
+    display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  /* View switcher pills */
+  .view-switcher{
+    display: inline-flex;
+    background: var(--linen);
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .view-switcher button{
+    padding: 6px 14px;
+    font-size: 13px; font-weight: 500;
+    color: var(--ink-soft);
+    border-radius: 999px;
+    transition: background-color 200ms var(--ease), color 200ms var(--ease), box-shadow 200ms var(--ease);
+  }
+  .view-switcher button:hover{ color: var(--ink); }
+  .view-switcher button.active{
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow: inset 0 0 0 1px var(--rule), 0 1px 2px rgba(31,27,22,.04);
+  }
+  .ghost-icon-btn{
+    width: 34px; height: 34px; border-radius: 10px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--ink-soft);
+    transition: background-color 200ms var(--ease), color 200ms var(--ease);
+    border: 1px solid transparent;
+  }
+  .ghost-icon-btn:hover{ background: var(--linen); color: var(--ink); border-color: var(--rule); }
+  .ghost-btn{
+    height: 34px; padding: 0 14px; border-radius: 10px;
+    font-size: 13px; font-weight: 500; color: var(--ink-soft);
+    transition: background-color 200ms var(--ease), color 200ms var(--ease), border-color 200ms var(--ease);
+    border: 1px solid transparent;
+  }
+  .ghost-btn:hover{ background: var(--linen); color: var(--ink); border-color: var(--rule); }
+  .toolbar-sep{
+    width: 1px; height: 24px; background: var(--rule); margin: 0 4px;
+  }
+  .chip-filter{
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 34px; padding: 0 14px;
+    background: var(--cream);
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    font-size: 13px; font-weight: 500; color: var(--ink-soft);
+    transition: background-color 200ms var(--ease), color 200ms var(--ease), border-color 200ms var(--ease);
+  }
+  .chip-filter:hover{ background: var(--linen); color: var(--ink); border-color: var(--rule-strong); }
+  .chip-filter svg{ color: var(--ink-muted); }
+  .sage-outline-btn{
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 34px; padding: 0 16px;
+    background: transparent;
+    border: 1px solid var(--sage);
+    border-radius: 10px;
+    font-size: 13px; font-weight: 500; color: var(--sage);
+    transition: background-color 200ms var(--ease);
+  }
+  .sage-outline-btn:hover{ background: var(--sage-tint); }
+
+  /* ─────────── CALENDAR GRID ─────────── */
+  .cal-wrap{
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .cal-scroll{
+    position: relative;
+    overflow-x: auto;
+    overflow-y: visible;
+    max-height: calc(100vh - 280px);
+    -webkit-overflow-scrolling: touch;
+  }
+  .cal-grid{
+    display: grid;
+    grid-template-columns: 200px repeat(31, minmax(38px, 1fr));
+    grid-auto-rows: 64px;
+    background: var(--paper);
+    min-width: 1380px;
+    position: relative;
+  }
+
+  /* Top-left corner cell */
+  .cal-corner{
+    grid-row: 1; grid-column: 1;
+    position: sticky; left: 0; top: 0;
+    background: var(--paper);
+    border-right: 1px solid var(--rule-strong);
+    border-bottom: 1px solid var(--rule);
+    z-index: 6;
+    height: 56px;
+  }
+
+  /* Day header cells */
+  .cal-day-h{
+    grid-row: 1;
+    position: sticky; top: 0;
+    background: var(--paper);
+    border-bottom: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+    z-index: 4;
+    height: 56px;
+    padding: 8px 0 6px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2px;
+  }
+  .cal-day-h .num{
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 22px;
+    line-height: 1;
+    color: var(--ink);
+    font-variant-numeric: oldstyle-nums; font-feature-settings:"onum";
+  }
+  .cal-day-h .dow{
+    font-size: 10px; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  .cal-day-h.sunday .num{ color: var(--terracotta); }
+  .cal-day-h.sunday .dow{ color: var(--clay); }
+  .cal-day-h.today{
+    background: var(--sage-tint);
+  }
+  .cal-day-h.today .num{ color: var(--sage); }
+  .cal-day-h.today .dow{ color: var(--sage); }
+
+  /* Group label row */
+  .cal-group{
+    grid-column: 1 / -1;
+    background: var(--cream);
+    border-top: 2px solid var(--rule-strong);
+    border-bottom: 1px solid var(--rule);
+    padding: 0 16px;
+    display: flex; align-items: center;
+    height: 36px;
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--gold);
+    position: sticky; left: 0;
+    z-index: 3;
+  }
+  /* First group label needs to not double-border with header */
+  .cal-group.first{ border-top: 1px solid var(--rule); }
+
+  /* Room label cell */
+  .cal-room-label{
+    grid-column: 1;
+    position: sticky; left: 0;
+    background: var(--paper);
+    border-right: 1px solid var(--rule-strong);
+    border-bottom: 1px solid var(--rule);
+    padding: 10px 16px;
+    display: flex; flex-direction: column; justify-content: center;
+    gap: 1px;
+    z-index: 2;
+  }
+  .cal-room-label .num{
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 18px;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+    font-variant-numeric: oldstyle-nums; font-feature-settings:"onum";
+  }
+  .cal-room-label .type{
+    font-size: 11px; color: var(--ink-muted);
+  }
+
+  /* Day cell (empty slot background) */
+  .cal-cell{
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    background: var(--paper);
+    height: 64px;
+  }
+  .cal-cell.weekend{ background: rgba(242, 237, 226, 0.35); }
+  .cal-cell.today-col{ background: rgba(229, 237, 229, 0.25); }
+
+  /* Today line */
+  .today-line{
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 1.5px;
+    background: var(--gold);
+    opacity: 0.6;
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  /* ─────────── BOOKING BLOCKS ─────────── */
+  .cal-booking{
+    align-self: center;
+    justify-self: stretch;
+    margin: 8px 4px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 12px; font-weight: 500;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
+    display: inline-flex; align-items: center; gap: 6px;
+    cursor: pointer;
+    transition: transform 200ms var(--ease), box-shadow 200ms var(--ease);
+    z-index: 1;
+    position: relative;
+  }
+  .cal-booking:hover{
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-soft);
+    z-index: 2;
+  }
+  .cal-booking svg{ flex-shrink: 0; }
+  .cal-booking.past{ opacity: 0.55; }
+  .cal-booking.today-checkin{
+    box-shadow: 0 0 0 2px var(--gold), 0 0 0 4px rgba(184,146,62,0.18);
+  }
+
+  /* States */
+  .cal-booking.confirmed{
+    background: var(--sage);
+    color: var(--cream);
+  }
+  .cal-booking.confirmed .name{ flex: 1; overflow: hidden; text-overflow: ellipsis; }
+
+  .cal-booking.pending{
+    background: var(--paper);
+    color: var(--sage);
+    border: 2px solid var(--sage);
+    padding: 4px 8px;
+  }
+
+  .cal-booking.pending.urgent{
+    animation: pulse 3s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  .cal-booking.hold{
+    background: var(--linen);
+    color: var(--ink-soft);
+    border: 1.5px dashed var(--ink-muted);
+    font-style: italic;
+    padding: 4px 8px;
+  }
+
+  .cal-booking.external{
+    background: repeating-linear-gradient(
+      45deg,
+      var(--paper),
+      var(--paper) 4px,
+      rgba(199, 111, 76, 0.18) 4px,
+      rgba(199, 111, 76, 0.18) 6px
+    );
+    color: var(--ink);
+    border: 1px solid rgba(199, 111, 76, 0.32);
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+
+  .cal-booking.manual-block{
+    background: rgba(139, 130, 117, 0.15);
+    color: var(--ink-muted);
+    font-size: 11px;
+    font-weight: 500;
+    border: 1px solid rgba(139, 130, 117, 0.25);
+  }
+
+  /* ─────────── BOOKING POPOVER ─────────── */
+  .booking-popover{
+    position: fixed;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 16px;
+    box-shadow: var(--shadow-pop);
+    padding: 20px;
+    max-width: 320px;
+    width: 320px;
+    z-index: 50;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-4px);
+    transition: opacity 180ms var(--ease), transform 180ms var(--ease);
+  }
+  .booking-popover.open{
+    opacity: 1; pointer-events: auto; transform: translateY(0);
+  }
+  .pop-head{
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 12px; margin-bottom: 14px;
+  }
+  .pop-head .who{
+    display: flex; align-items: center; gap: 10px;
+  }
+  .pop-avatar{
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--sage-tint); color: var(--sage);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 500;
+  }
+  .pop-name{
+    font-family: 'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 16px; color: var(--ink); letter-spacing: -0.01em;
+  }
+  .pop-pill{
+    display: inline-flex; align-items: center;
+    padding: 3px 10px; border-radius: 999px;
+    font-size: 10px; font-weight: 500;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    border: 1px solid currentColor;
+  }
+  .pop-pill.confirmed{ background: var(--sage-tint); color: var(--sage); border-color: rgba(92,117,103,.18); }
+  .pop-pill.pending{ background: var(--gold-tint); color: var(--gold); border-color: rgba(184,146,62,.18); }
+  .pop-pill.hold{ background: var(--linen); color: var(--ink-soft); border-color: var(--rule); }
+  .pop-pill.external{ background: rgba(199,111,76,.12); color: var(--clay); border-color: rgba(199,111,76,.22); }
+  .pop-pill.manual-block{ background: rgba(139,130,117,.15); color: var(--ink-soft); border-color: rgba(139,130,117,.25); }
+
+  .pop-data{
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--rule);
+    margin-bottom: 16px;
+  }
+  .pop-data dt{
+    font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-muted); font-weight: 500;
+  }
+  .pop-data dd{
+    font-size: 13px; color: var(--ink); margin: 0;
+    font-variant-numeric: oldstyle-nums; font-feature-settings:"onum";
+  }
+  .pop-data dd.mono{ font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; }
+
+  .pop-actions{
+    display: flex; gap: 8px; flex-wrap: wrap;
+  }
+  .pop-actions button{
+    flex: 1;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 8px;
+    font-size: 12px; font-weight: 500;
+    transition: background-color 200ms var(--ease), color 200ms var(--ease), border-color 200ms var(--ease);
+    white-space: nowrap;
+  }
+  .pop-actions .primary{ background: var(--sage); color: var(--cream); }
+  .pop-actions .primary:hover{ background: #4F6759; }
+  .pop-actions .ghost{ background: var(--cream); color: var(--ink-soft); border: 1px solid var(--rule); }
+  .pop-actions .ghost:hover{ background: var(--linen); color: var(--ink); border-color: var(--rule-strong); }
+  .pop-actions .danger{ background: transparent; color: var(--clay); border: 1px solid rgba(199,111,76,.22); }
+  .pop-actions .danger:hover{ background: rgba(199,111,76,.08); }
+
+  /* ─────────── LEGEND ─────────── */
+  .legend{
+    margin-top: 20px;
+    padding: 16px 4px 0;
+    display: flex; gap: 24px; flex-wrap: wrap;
+    font-size: 12px; color: var(--ink-soft);
+  }
+  .legend-item{ display: inline-flex; align-items: center; gap: 8px; }
+  .legend-swatch{
+    width: 22px; height: 14px; border-radius: 4px; flex-shrink: 0;
+  }
+  .legend-swatch.confirmed{ background: var(--sage); }
+  .legend-swatch.pending{ background: var(--paper); border: 1.5px solid var(--sage); }
+  .legend-swatch.external{
+    background: repeating-linear-gradient(
+      45deg,
+      var(--paper), var(--paper) 3px,
+      rgba(199, 111, 76, 0.4) 3px, rgba(199, 111, 76, 0.4) 5px
+    );
+    border: 1px solid rgba(199,111,76,.3);
+  }
+  .legend-swatch.hold{ background: var(--linen); border: 1.5px dashed var(--ink-muted); }
+  .legend-swatch.block{ background: rgba(139,130,117,.2); border: 1px solid rgba(139,130,117,.3); }
+
+  /* ─────────── MONTH SUMMARY PANEL ─────────── */
+  .month-panel{
+    position: fixed; top: 0; right: 0; bottom: 0;
+    width: 320px;
+    background: var(--paper);
+    border-left: 1px solid var(--rule);
+    box-shadow: var(--shadow-pop);
+    transform: translateX(100%);
+    transition: transform 300ms var(--ease);
+    z-index: 60;
+    padding: 28px 24px;
+    overflow-y: auto;
+  }
+  .month-panel.open{ transform: translateX(0); }
+  .panel-head{
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .panel-head h3{
+    font-family: 'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 20px; margin: 0; color: var(--ink);
+  }
+  .panel-close{
+    width: 32px; height: 32px; border-radius: 8px;
+    color: var(--ink-soft);
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: background-color 200ms var(--ease), color 200ms var(--ease);
+  }
+  .panel-close:hover{ background: var(--linen); color: var(--ink); }
+  .panel-stat{
+    padding: 16px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .panel-stat:last-of-type{ border-bottom: 0; }
+  .panel-stat .lbl{
+    font-size: 12px; color: var(--ink-muted); margin: 0 0 6px;
+  }
+  .panel-stat .val{
+    font-family: 'Fraunces', serif; font-weight: 500;
+    font-size: 32px; line-height: 1; color: var(--ink);
+    font-variant-numeric: oldstyle-nums; font-feature-settings: "onum";
+    letter-spacing: -0.01em;
+  }
+  .panel-bars{
+    display: flex; align-items: end; gap: 3px;
+    height: 60px;
+    margin-top: 16px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .panel-bars .bar{
+    flex: 1;
+    background: var(--sage);
+    border-radius: 2px 2px 0 0;
+    min-height: 2px;
+    transition: background-color 200ms var(--ease);
+  }
+  .panel-bars .bar.today{ background: var(--gold); }
+  .panel-top3{
+    margin-top: 20px;
+  }
+  .panel-top3 .ovl{
+    font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--gold); font-weight: 500;
+    margin-bottom: 10px;
+  }
+  .panel-top3-row{
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--rule);
+    font-size: 13px;
+  }
+  .panel-top3-row:last-child{ border-bottom: 0; }
+  .panel-top3-row .day{
+    font-family: 'Fraunces', serif; font-style: italic; color: var(--ink);
+  }
+  .panel-top3-row .pct{
+    font-variant-numeric: oldstyle-nums; font-feature-settings: "onum";
+    color: var(--sage); font-weight: 500;
+  }
+
+  /* ─────────── MOBILE LIST VIEW ─────────── */
+  .mobile-cal{ display: none; }
+  @media (max-width: 768px){
+    .cal-wrap, .legend{ display: none; }
+    .mobile-cal{ display: block; }
+  }
+
+  .day-pills{
+    display: flex; gap: 8px;
+    overflow-x: auto;
+    padding: 8px 4px 16px;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    margin: 0 -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .day-pill{
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 14px;
+    padding: 10px 12px;
+    min-width: 56px;
+    text-align: center;
+    display: flex; flex-direction: column; gap: 2px;
+    transition: background-color 200ms var(--ease), border-color 200ms var(--ease);
+  }
+  .day-pill .dow{
+    font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-muted); font-weight: 500;
+  }
+  .day-pill .num{
+    font-family: 'Fraunces', serif; font-weight: 500; font-size: 22px;
+    color: var(--ink); line-height: 1;
+    font-variant-numeric: oldstyle-nums; font-feature-settings:"onum";
+  }
+  .day-pill.today{ background: var(--sage-tint); border-color: rgba(92,117,103,.18); }
+  .day-pill.today .num, .day-pill.today .dow{ color: var(--sage); }
+  .day-pill.selected{ background: var(--ink); border-color: var(--ink); }
+  .day-pill.selected .num, .day-pill.selected .dow{ color: var(--cream); }
+
+  .mobile-day-header{
+    margin: 8px 0 16px;
+  }
+  .mobile-day-header h2{
+    font-family: 'Fraunces', serif; font-weight: 500;
+    font-size: 32px; line-height: 1.1;
+    font-variant-numeric: oldstyle-nums; font-feature-settings:"onum";
+    margin: 0; color: var(--ink);
+  }
+  .mobile-day-header h2 em{ font-style: italic; }
+  .mobile-day-header p{
+    margin: 4px 0 0;
+    font-size: 13px; color: var(--ink-muted);
+  }
+
+  .mobile-events{ display: flex; flex-direction: column; gap: 12px; }
+  .mobile-event{
+    background: var(--paper); border: 1px solid var(--rule);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: grid; grid-template-columns: auto 1fr auto; gap: 12px;
+    align-items: center;
+  }
+  .mobile-event .strip{
+    width: 4px; height: 40px; border-radius: 2px;
+  }
+  .mobile-event.confirmed .strip{ background: var(--sage); }
+  .mobile-event.pending .strip{ background: var(--paper); border: 1.5px solid var(--sage); }
+  .mobile-event.external .strip{
+    background: repeating-linear-gradient(
+      45deg,
+      var(--paper), var(--paper) 2px,
+      rgba(199, 111, 76, 0.4) 2px, rgba(199, 111, 76, 0.4) 4px
+    );
+  }
+  .mobile-event.hold .strip{ background: var(--linen); border: 1.5px dashed var(--ink-muted); }
+  .mobile-event.block .strip{ background: rgba(139,130,117,.3); }
+
+  .mobile-event .body .name{
+    font-family: 'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 15px; color: var(--ink); margin: 0 0 3px;
+  }
+  .mobile-event .body .meta{
+    font-size: 12px; color: var(--ink-muted); margin: 0;
+  }
+  .mobile-event .body .meta strong{ color: var(--ink); font-weight: 500; }
+  .mobile-event .arrow{
+    color: var(--ink-muted); display: inline-flex;
+  }
+
+  /* Floating + Reserva */
+  .fab{
+    display: none;
+  }
+  @media (max-width: 768px){
+    .fab{
+      display: inline-flex; align-items: center; gap: 6px;
+      position: fixed; bottom: 20px; right: 16px;
+      height: 52px; padding: 0 22px;
+      background: var(--terracotta); color: var(--cream);
+      border-radius: 999px; font-size: 14px; font-weight: 500;
+      box-shadow: var(--shadow-pop);
+      z-index: 30;
+    }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{ animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ───────── SIDEBAR (simulated, condensed) ───────── -->
+  <aside class="sidebar" aria-label="Navegación">
+    <a href="/" class="sidebar-logo">Eztadia</a>
+    <div class="prop-switcher">
+      <span class="ph" aria-hidden="true"></span>
+      <span class="name">Casa Marina</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ink-muted)"><path d="m6 9 6 6 6-6"/></svg>
+    </div>
+    <div class="nav-section">
+      <span class="label">Operación</span>
+      <a class="nav-item" href="/dashboard"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2v-9z"/></svg>Resumen</a>
+      <a class="nav-item active" href="/dashboard/calendar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M8 3v4"/><path d="M16 3v4"/></svg>Calendario</a>
+      <a class="nav-item" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>Reservas</a>
+      <a class="nav-item" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12c0-4.4 3.6-8 8-8s8 3.6 8 8c0 1.4-.4 2.8-1 4l1 4-4-1c-1.2.6-2.6 1-4 1-4.4 0-8-3.6-8-8z"/></svg>Mensajes</a>
+    </div>
+    <div class="nav-section">
+      <span class="label">Propiedad</span>
+      <a class="nav-item" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18H6z"/><path d="M9 21V3"/></svg>Habitaciones</a>
+      <a class="nav-item" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10"/></svg>Precios</a>
+    </div>
+  </aside>
+
+  <div class="main">
+
+    <!-- ───────── TOPBAR ───────── -->
+    <header class="topbar">
+      <div class="breadcrumb">
+        <a href="/dashboard">Casa Marina</a>
+        <span class="sep">/</span>
+        <span class="current">Calendario</span>
+      </div>
+      <div class="search" role="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+        <input type="search" placeholder="Buscar reserva, huésped, habitación..." aria-label="Buscar" />
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn" aria-label="Notificaciones">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17h12l-1.5-2.5V11a4.5 4.5 0 0 0-9 0v3.5L6 17z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+          <span class="dot"></span>
+        </button>
+        <span class="topbar-avatar" title="Carlos San Juan">CS</span>
+      </div>
+    </header>
+
+    <!-- ───────── PROPERTY TABS ───────── -->
+    <nav class="tabs" aria-label="Navegación de la propiedad">
+      <a class="tab" href="/dashboard">Resumen</a>
+      <a class="tab" href="#">Reservas</a>
+      <a class="tab active" href="#" aria-current="page">Calendario</a>
+      <a class="tab" href="#">Habitaciones</a>
+      <a class="tab" href="#">Precios</a>
+      <a class="tab" href="#">Staff</a>
+      <a class="tab" href="#">Integraciones</a>
+      <a class="tab" href="#">Configuración</a>
+    </nav>
+
+    <!-- ───────── CALENDAR PAGE ───────── -->
+    <div class="cal-page">
+
+      <!-- HEADER -->
+      <header class="cal-header">
+        <div>
+          <h1 class="cal-title">Mayo <span class="oldstyle">2026</span></h1>
+          <p class="cal-subtitle">Viendo <span class="oldstyle">12</span> habitaciones · <span class="oldstyle">67%</span> ocupado</p>
+        </div>
+        <div class="cal-toolbar">
+          <div class="view-switcher" role="group" aria-label="Tipo de vista">
+            <button type="button">Día</button>
+            <button type="button">Semana</button>
+            <button type="button" class="active" aria-pressed="true">Mes</button>
+          </div>
+          <button class="ghost-icon-btn" aria-label="Mes anterior">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg>
+          </button>
+          <button class="ghost-btn">Hoy</button>
+          <button class="ghost-icon-btn" aria-label="Mes siguiente">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+          </button>
+          <span class="toolbar-sep" aria-hidden="true"></span>
+          <button class="chip-filter">
+            Todas las habitaciones
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <button class="chip-filter">
+            Estado
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <button class="ghost-btn" id="open-panel">Resumen del mes</button>
+          <button class="sage-outline-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            Reserva manual
+          </button>
+        </div>
+      </header>
+
+      <!-- CALENDAR GRID -->
+      <div class="cal-wrap">
+        <div class="cal-scroll" id="cal-scroll">
+          <div class="cal-grid" id="cal-grid">
+            <!-- Top-left corner -->
+            <div class="cal-corner" aria-hidden="true"></div>
+            <!-- Day headers + cells + rooms + bookings are generated by JS for compactness -->
+          </div>
+        </div>
+      </div>
+
+      <!-- LEGEND -->
+      <footer class="legend" aria-label="Leyenda">
+        <span class="legend-item"><span class="legend-swatch confirmed"></span>Confirmada</span>
+        <span class="legend-item"><span class="legend-swatch pending"></span>Pago pendiente</span>
+        <span class="legend-item"><span class="legend-swatch external"></span>Booking.com / Airbnb</span>
+        <span class="legend-item"><span class="legend-swatch hold"></span>Hold</span>
+        <span class="legend-item"><span class="legend-swatch block"></span>Bloqueada</span>
+      </footer>
+
+      <!-- ─────── MOBILE LIST VIEW ─────── -->
+      <div class="mobile-cal">
+        <div class="day-pills" id="day-pills">
+          <!-- generated -->
+        </div>
+        <div class="mobile-day-header">
+          <h2 id="m-day-title"><em>Viernes</em>, <span class="oldstyle">21 mayo</span></h2>
+          <p id="m-day-sub">3 eventos · 1 check-in · 2 en curso</p>
+        </div>
+        <div class="mobile-events" id="mobile-events">
+          <!-- generated -->
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<button class="fab" type="button">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+  Reserva
+</button>
+
+<!-- Booking popover (single instance, repositioned) -->
+<div class="booking-popover" id="popover" role="dialog" aria-label="Detalle de reserva"></div>
+
+<!-- Month summary panel -->
+<aside class="month-panel" id="month-panel" aria-label="Resumen del mes">
+  <div class="panel-head">
+    <h3>Mayo en cifras</h3>
+    <button class="panel-close" id="close-panel" aria-label="Cerrar panel">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6l-12 12"/></svg>
+    </button>
+  </div>
+  <div class="panel-stat">
+    <p class="lbl">Ocupación promedio</p>
+    <p class="val">67%</p>
+  </div>
+  <div class="panel-stat">
+    <p class="lbl">Reservas confirmadas</p>
+    <p class="val">22</p>
+  </div>
+  <div class="panel-stat">
+    <p class="lbl">Ingresos confirmados</p>
+    <p class="val">$18.4M</p>
+    <p style="font-size:11px;color:var(--ink-muted);letter-spacing:0.04em;margin:6px 0 0;">COP · solo pagos confirmados</p>
+  </div>
+  <div class="panel-stat">
+    <p class="lbl">ADR (tarifa promedio)</p>
+    <p class="val">$298k</p>
+  </div>
+  <div style="margin-top: 24px;">
+    <p class="lbl" style="font-size:11px;color:var(--ink-muted);letter-spacing:0.08em;text-transform:uppercase;margin:0 0 4px;">Ocupación día a día</p>
+    <div class="panel-bars" id="panel-bars" aria-hidden="true">
+      <!-- generated -->
+    </div>
+  </div>
+  <div class="panel-top3">
+    <p class="ovl">Mejores 3 días</p>
+    <div class="panel-top3-row"><span class="day">Sábado <span class="oldstyle">23 may</span></span><span class="pct">100%</span></div>
+    <div class="panel-top3-row"><span class="day">Viernes <span class="oldstyle">29 may</span></span><span class="pct">92%</span></div>
+    <div class="panel-top3-row"><span class="day">Sábado <span class="oldstyle">30 may</span></span><span class="pct">92%</span></div>
+  </div>
+</aside>
+
+<script>
+  // ═══════════════════════════════════════════════════════════════
+  // DATA
+  // ═══════════════════════════════════════════════════════════════
+  const TODAY = 21;
+  const DAYS_IN_MONTH = 31;
+  // May 2026 — using brief's stated "viernes 21 de mayo" → May 1 = Sábado
+  const DOW = ['SÁB','DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM','LUN'];
+  const DOW_FULL = {SÁB:'Sábado',DOM:'Domingo',LUN:'Lunes',MAR:'Martes',MIÉ:'Miércoles',JUE:'Jueves',VIE:'Viernes'};
+
+  const GROUPS = [
+    { key: 'suites', label: 'SUITES', rooms: [
+      { number: '101', type: 'Suite Marina' },
+      { number: '102', type: 'Suite Marina' },
+      { number: '103', type: 'Suite Marina' },
+    ]},
+    { key: 'tropicales', label: 'TROPICALES', rooms: [
+      { number: '201', type: 'Hab. Tropical' },
+      { number: '202', type: 'Hab. Tropical' },
+      { number: '203', type: 'Hab. Tropical' },
+      { number: '204', type: 'Hab. Tropical' },
+      { number: '205', type: 'Hab. Tropical' },
+    ]},
+    { key: 'estandar', label: 'ESTÁNDAR', rooms: [
+      { number: '301', type: 'Hab. Estándar' },
+      { number: '302', type: 'Hab. Estándar' },
+      { number: '303', type: 'Hab. Estándar' },
+      { number: '304', type: 'Hab. Estándar' },
+    ]},
+  ];
+
+  // Bookings — start (incl) to end (excl). End=N means checkout day N, so room occupied through day N-1.
+  const BOOKINGS = [
+    // 101
+    { room: '101', start: 1,  end: 4,  status: 'confirmed', surname: 'Vélez',    name: 'Carla Vélez',    guests: 2, total: 1350000, pay: 'PSE',           code: 'EZT-A2B7' },
+    { room: '101', start: 8,  end: 11, status: 'confirmed', surname: 'Rodriguez',name: 'J. Rodriguez',   guests: 2, total: 1350000, pay: 'Transferencia', code: 'EZT-C9F1' },
+    { room: '101', start: 15, end: 18, status: 'pending',   surname: 'Mendoza',  name: 'Andrea Mendoza', guests: 2, total: 1350000, pay: 'Transferencia', code: 'EZT-D3E2', urgent: true },
+    { room: '101', start: 22, end: 26, status: 'confirmed', surname: 'Bradley',  name: 'Tom Bradley',    guests: 2, total: 1800000, pay: 'PSE',           code: 'EZT-G7H4' },
+    // 102
+    { room: '102', start: 5,  end: 7,  status: 'external',  source: 'Booking.com' },
+    { room: '102', start: 12, end: 15, status: 'confirmed', surname: 'Cárdenas', name: 'Lucía Cárdenas', guests: 2, total: 1350000, pay: 'PSE',           code: 'EZT-J1K9' },
+    { room: '102', start: 24, end: 30, status: 'confirmed', surname: 'Cárdenas', name: 'Lucía Cárdenas (regreso)', guests: 2, total: 2700000, pay: 'PSE', code: 'EZT-L4M8' },
+    // 103
+    { room: '103', start: 18, end: 21, status: 'manual-block', label: 'Mantenimiento de tina' },
+    { room: '103', start: 27, end: 31, status: 'pending',   surname: 'Salazar',  name: 'María Salazar',  guests: 2, total: 1800000, pay: 'PSE',           code: 'EZT-N6P3' },
+    // 201
+    { room: '201', start: 10, end: 15, status: 'external',  source: 'Airbnb' },
+    { room: '201', start: 21, end: 24, status: 'confirmed', surname: 'Rodríguez',name: 'Familia Rodríguez', guests: 3, total: 960000, pay: 'PSE', code: 'EZT-Q2R5', todayCheckin: true },
+    // 202
+    { room: '202', start: 14, end: 16, status: 'confirmed', surname: 'Pacheco',  name: 'Erika Pacheco',  guests: 2, total: 640000, pay: 'Transferencia', code: 'EZT-S8T0' },
+    { room: '202', start: 25, end: 28, status: 'external',  source: 'Booking.com' },
+    // 203
+    { room: '203', start: 19, end: 22, status: 'hold',      surname: 'Pérez',    name: 'Luis Pérez',     guests: 2 },
+    { room: '203', start: 28, end: 30, status: 'confirmed', surname: 'Mendoza',  name: 'Andrea Mendoza (segunda visita)', guests: 2, total: 640000, pay: 'PSE', code: 'EZT-U3V6' },
+    // 204 — libre
+    // 205
+    { room: '205', start: 7,  end: 10, status: 'confirmed', surname: 'Smith',    name: 'J. Smith',       guests: 2, total: 960000, pay: 'PSE',           code: 'EZT-W7X1' },
+    { room: '205', start: 23, end: 27, status: 'confirmed', surname: 'González', name: 'M. González',    guests: 2, total: 1280000, pay: 'Transferencia', code: 'EZT-Y4Z8' },
+    // 301
+    { room: '301', start: 8,  end: 11, status: 'confirmed', surname: 'Páez',     name: 'Diego Páez',     guests: 2, total: 660000, pay: 'PSE',           code: 'EZT-AA12' },
+    { room: '301', start: 22, end: 25, status: 'confirmed', surname: 'Rojas',    name: 'Sofía Rojas',    guests: 2, total: 660000, pay: 'PSE',           code: 'EZT-AB34' },
+    // 302
+    { room: '302', start: 15, end: 19, status: 'pending',   surname: 'Ortiz',    name: 'Camila Ortiz',   guests: 2, total: 880000, pay: 'Transferencia', code: 'EZT-AC56' },
+    { room: '302', start: 26, end: 29, status: 'confirmed', surname: 'López',    name: 'J. López',       guests: 2, total: 660000, pay: 'PSE',           code: 'EZT-AD78' },
+    // 303 — libre
+    // 304
+    { room: '304', start: 12, end: 14, status: 'confirmed', surname: 'Cano',     name: 'Luis Cano',      guests: 2, total: 440000, pay: 'PSE',           code: 'EZT-AE90' },
+    { room: '304', start: 20, end: 24, status: 'external',  source: 'Airbnb' },
+  ];
+
+  // ═══════════════════════════════════════════════════════════════
+  // RENDER GRID
+  // ═══════════════════════════════════════════════════════════════
+  const grid = document.getElementById('cal-grid');
+
+  // ---- Day headers (row 1) ----
+  for (let d = 1; d <= DAYS_IN_MONTH; d++) {
+    const dow = DOW[d - 1];
+    const isSunday = dow === 'DOM';
+    const isToday = d === TODAY;
+    const el = document.createElement('div');
+    el.className = 'cal-day-h' + (isSunday ? ' sunday' : '') + (isToday ? ' today' : '');
+    el.style.gridColumn = String(d + 1);
+    el.style.gridRow = '1';
+    el.innerHTML = `<span class="num">${d}</span><span class="dow">${dow}</span>`;
+    grid.appendChild(el);
+  }
+
+  // ---- Groups + rooms + cells + bookings ----
+  let row = 2;
+  let isFirstGroup = true;
+  GROUPS.forEach((group) => {
+    // Group label row
+    const gEl = document.createElement('div');
+    gEl.className = 'cal-group' + (isFirstGroup ? ' first' : '');
+    gEl.style.gridRow = String(row);
+    gEl.textContent = group.label;
+    grid.appendChild(gEl);
+    isFirstGroup = false;
+
+    // Set this row to short height via grid-template-rows would be cleaner but we'll let auto-rows handle.
+    // Instead, we tag the group row's height via inline style.
+    gEl.style.height = '36px';
+    gEl.style.alignSelf = 'stretch';
+
+    row++;
+
+    // Each room row
+    group.rooms.forEach((rm) => {
+      // Room label (col 1)
+      const rEl = document.createElement('div');
+      rEl.className = 'cal-room-label';
+      rEl.style.gridRow = String(row);
+      rEl.innerHTML = `<span class="num">${rm.number}</span><span class="type">${rm.type}</span>`;
+      grid.appendChild(rEl);
+
+      // 31 day cells (cols 2-32)
+      for (let d = 1; d <= DAYS_IN_MONTH; d++) {
+        const dow = DOW[d - 1];
+        const cell = document.createElement('div');
+        const isWeekend = dow === 'SÁB' || dow === 'DOM';
+        const isToday = d === TODAY;
+        cell.className = 'cal-cell' + (isWeekend ? ' weekend' : '') + (isToday ? ' today-col' : '');
+        cell.style.gridRow = String(row);
+        cell.style.gridColumn = String(d + 1);
+        grid.appendChild(cell);
+      }
+
+      // Bookings for this room
+      const roomBookings = BOOKINGS.filter(b => b.room === rm.number);
+      roomBookings.forEach((b, i) => {
+        const el = document.createElement('button');
+        el.type = 'button';
+        const past = b.end <= TODAY && b.status !== 'pending' && b.status !== 'hold';
+        el.className = 'cal-booking ' + b.status +
+          (past ? ' past' : '') +
+          (b.todayCheckin ? ' today-checkin' : '') +
+          (b.urgent ? ' urgent' : '');
+        el.style.gridRow = String(row);
+        el.style.gridColumn = `${b.start + 1} / ${b.end + 1}`;
+        el.dataset.bookingIdx = String(BOOKINGS.indexOf(b));
+
+        if (b.status === 'confirmed') {
+          const checkIcon = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+          const span = b.end - b.start;
+          el.innerHTML = `${checkIcon}<span class="name">${b.surname}${span >= 3 ? ' · ' + (b.guests||2) + 'p' : ''}</span>`;
+        } else if (b.status === 'pending') {
+          const clockIcon = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+          el.innerHTML = `${clockIcon}<span class="name">${b.surname}</span>`;
+        } else if (b.status === 'hold') {
+          el.innerHTML = `<span class="name">(hold) ${b.surname}</span>`;
+        } else if (b.status === 'external') {
+          el.innerHTML = `<span class="name">${b.source}</span>`;
+        } else if (b.status === 'manual-block') {
+          el.innerHTML = `<span class="name">Bloqueada · ${b.label}</span>`;
+        }
+
+        grid.appendChild(el);
+      });
+
+      row++;
+    });
+  });
+
+  // ---- Today vertical line ----
+  // Compute left offset = 200 + ((TODAY - 1) / 31) * (gridWidth - 200)
+  // Easier: position by grid-column. Use a separate absolutely-positioned element.
+  function placeTodayLine() {
+    let line = document.getElementById('today-line');
+    if (!line) {
+      line = document.createElement('div');
+      line.id = 'today-line';
+      line.className = 'today-line';
+      grid.appendChild(line);
+    }
+    // Find a today-col cell to derive position
+    const refCell = grid.querySelector('.cal-day-h.today');
+    if (!refCell) return;
+    const gridRect = grid.getBoundingClientRect();
+    const cellRect = refCell.getBoundingClientRect();
+    const left = (cellRect.left - gridRect.left) + (cellRect.width / 2);
+    line.style.left = (left - 0.75) + 'px';
+  }
+  placeTodayLine();
+  window.addEventListener('resize', placeTodayLine);
+
+  // ═══════════════════════════════════════════════════════════════
+  // POPOVER
+  // ═══════════════════════════════════════════════════════════════
+  const pop = document.getElementById('popover');
+
+  function formatDateRange(start, end) {
+    return `${start} – ${end - 1} mayo`;
+  }
+  function statusLabel(status) {
+    return {
+      confirmed: 'Confirmada',
+      pending: 'Pago pendiente',
+      hold: 'Hold',
+      external: 'Externa',
+      'manual-block': 'Bloqueada',
+    }[status];
+  }
+  function renderPopover(b) {
+    const isExt = b.status === 'external' || b.status === 'manual-block';
+    const initials = isExt ? '' : (b.name || b.surname || '').split(/\s+/).slice(0,2).map(s => s[0]||'').join('').toUpperCase();
+    const avatar = isExt ? '' : `<span class="pop-avatar">${initials}</span>`;
+    const name = b.name || b.source || b.label || b.surname || '';
+    return `
+      <div class="pop-head">
+        <div class="who">
+          ${avatar}
+          <span class="pop-name">${name}</span>
+        </div>
+        <span class="pop-pill ${b.status}">${statusLabel(b.status)}</span>
+      </div>
+      <dl class="pop-data">
+        <dt>Fechas</dt><dd>${formatDateRange(b.start, b.end)} · <span class="oldstyle">${b.end - b.start}</span> noches</dd>
+        <dt>Habitación</dt><dd>${b.room}</dd>
+        ${b.total ? `<dt>Total</dt><dd>COP <span class="oldstyle">$${b.total.toLocaleString('es-CO')}</span></dd>` : ''}
+        ${b.pay ? `<dt>Pago</dt><dd>${b.pay}</dd>` : ''}
+        ${b.code ? `<dt>Código</dt><dd class="mono">${b.code}</dd>` : ''}
+        ${b.guests ? `<dt>Huéspedes</dt><dd><span class="oldstyle">${b.guests}</span> personas</dd>` : ''}
+      </dl>
+      <div class="pop-actions">
+        ${b.status === 'manual-block' ? '<button type="button" class="ghost">Editar bloqueo</button><button type="button" class="danger">Eliminar</button>'
+          : b.status === 'external' ? '<button type="button" class="ghost">Ver en ' + (b.source || '') + '</button>'
+          : '<button type="button" class="primary">Ver detalle</button><button type="button" class="ghost">Mensaje WhatsApp</button><button type="button" class="danger">Cancelar</button>'}
+      </div>
+    `;
+  }
+  function openPopover(target, b) {
+    pop.innerHTML = renderPopover(b);
+    pop.classList.add('open');
+    // Position
+    const rect = target.getBoundingClientRect();
+    const popW = 320;
+    let left = rect.left + rect.width / 2 - popW / 2;
+    let top = rect.bottom + 8;
+    // Clamp horizontally
+    left = Math.max(12, Math.min(window.innerWidth - popW - 12, left));
+    // If would overflow bottom, place above
+    pop.style.left = left + 'px';
+    pop.style.top = top + 'px';
+    const popRect = pop.getBoundingClientRect();
+    if (popRect.bottom > window.innerHeight - 12) {
+      pop.style.top = (rect.top - popRect.height - 8) + 'px';
+    }
+  }
+  function closePopover() {
+    pop.classList.remove('open');
+  }
+  grid.addEventListener('click', (e) => {
+    const btn = e.target.closest('.cal-booking');
+    if (!btn) return;
+    e.stopPropagation();
+    const idx = parseInt(btn.dataset.bookingIdx, 10);
+    openPopover(btn, BOOKINGS[idx]);
+  });
+  document.addEventListener('click', (e) => {
+    if (!pop.contains(e.target)) closePopover();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closePopover();
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  // MONTH PANEL
+  // ═══════════════════════════════════════════════════════════════
+  const panel = document.getElementById('month-panel');
+  document.getElementById('open-panel').addEventListener('click', (e) => {
+    e.stopPropagation();
+    panel.classList.add('open');
+  });
+  document.getElementById('close-panel').addEventListener('click', () => panel.classList.remove('open'));
+
+  // Mini bars
+  const bars = document.getElementById('panel-bars');
+  // Compute occupation per day from BOOKINGS
+  const TOTAL_ROOMS = 12;
+  const occByDay = new Array(DAYS_IN_MONTH).fill(0);
+  BOOKINGS.forEach(b => {
+    for (let d = b.start; d < b.end; d++) {
+      if (d >= 1 && d <= DAYS_IN_MONTH) occByDay[d - 1]++;
+    }
+  });
+  occByDay.forEach((cnt, i) => {
+    const bar = document.createElement('span');
+    const pct = (cnt / TOTAL_ROOMS) * 100;
+    bar.className = 'bar' + (i + 1 === TODAY ? ' today' : '');
+    bar.style.height = Math.max(2, pct * 0.6) + 'px';
+    bar.title = `Día ${i + 1}: ${cnt}/${TOTAL_ROOMS} (${Math.round(pct)}%)`;
+    bars.appendChild(bar);
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  // MOBILE LIST VIEW
+  // ═══════════════════════════════════════════════════════════════
+  const pillsEl = document.getElementById('day-pills');
+  let selectedDay = TODAY;
+
+  function renderPills() {
+    pillsEl.innerHTML = '';
+    for (let d = 1; d <= DAYS_IN_MONTH; d++) {
+      const dow = DOW[d - 1];
+      const isToday = d === TODAY;
+      const isSelected = d === selectedDay;
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'day-pill' + (isToday ? ' today' : '') + (isSelected ? ' selected' : '');
+      el.innerHTML = `<span class="dow">${dow}</span><span class="num">${d}</span>`;
+      el.addEventListener('click', () => {
+        selectedDay = d;
+        renderPills();
+        renderMobileEvents();
+      });
+      pillsEl.appendChild(el);
+    }
+    // Scroll to today
+    const todayPill = pillsEl.querySelector('.day-pill.selected') || pillsEl.querySelector('.day-pill.today');
+    if (todayPill) todayPill.scrollIntoView({ block: 'nearest', inline: 'center' });
+  }
+
+  function renderMobileEvents() {
+    const eventsEl = document.getElementById('mobile-events');
+    const title = document.getElementById('m-day-title');
+    const sub = document.getElementById('m-day-sub');
+    eventsEl.innerHTML = '';
+
+    const dow = DOW[selectedDay - 1];
+    title.innerHTML = `<em>${DOW_FULL[dow]}</em>, <span class="oldstyle">${selectedDay} mayo</span>`;
+
+    // Events on this day = bookings where start <= day < end OR exactly day == start (checkin) or day == end (checkout)
+    const events = BOOKINGS.filter(b => selectedDay >= b.start && selectedDay < b.end);
+    const checkins = events.filter(b => b.start === selectedDay).length;
+    const checkouts = BOOKINGS.filter(b => b.end === selectedDay).length;
+    sub.textContent = `${events.length} ${events.length === 1 ? 'evento' : 'eventos'} · ${checkins} ${checkins === 1 ? 'check-in' : 'check-ins'} · ${checkouts} ${checkouts === 1 ? 'check-out' : 'check-outs'}`;
+
+    if (events.length === 0) {
+      eventsEl.innerHTML = `<div style="text-align:center;padding:48px 24px;color:var(--ink-muted);font-size:14px;">Sin eventos este día.</div>`;
+      return;
+    }
+
+    events.forEach(b => {
+      const cls = b.status === 'manual-block' ? 'block' : b.status;
+      const arrowSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>';
+      const name = b.name || b.source || b.label || b.surname || '';
+      let metaText = '';
+      if (b.status === 'confirmed' || b.status === 'pending') {
+        const note = b.start === selectedDay ? '<strong>Check-in</strong>' : (b.end === selectedDay ? '<strong>Check-out</strong>' : 'En curso');
+        metaText = `Hab. ${b.room} · ${b.guests} personas · ${note}`;
+      } else if (b.status === 'external') {
+        metaText = `Hab. ${b.room} · <strong>${b.source}</strong> · ${b.start === selectedDay ? 'Check-in' : 'En curso'}`;
+      } else if (b.status === 'hold') {
+        metaText = `Hab. ${b.room} · Hold · pendiente de confirmación`;
+      } else if (b.status === 'manual-block') {
+        metaText = `Hab. ${b.room} · ${b.label}`;
+      }
+      const card = document.createElement('a');
+      card.href = '#';
+      card.className = 'mobile-event ' + cls;
+      card.innerHTML = `
+        <span class="strip" aria-hidden="true"></span>
+        <div class="body">
+          <p class="name">${name}</p>
+          <p class="meta">${metaText}</p>
+        </div>
+        <span class="arrow" aria-hidden="true">${arrowSvg}</span>
+      `;
+      eventsEl.appendChild(card);
+    });
+  }
+
+  renderPills();
+  renderMobileEvents();
+</script>
+
+</body>
+</html>
