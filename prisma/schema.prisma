@@ -10,6 +10,27 @@
 // - Tabla profiles tiene PK = auth.users.id (mismo UUID); el trigger
 //   handle_new_user (B3) la rellena al signup.
 // - RLS policies se agregan en B3, no aqui.
+//
+// ============================================================================
+// ⚠️ DRIFT WARNING — Phase B3 modifica el schema desde SQL puro
+// ============================================================================
+// Las migrations en supabase/migrations/2026052223*.sql aplican cambios que
+// NO estan reflejados en este archivo y que Prisma NO conoce:
+//
+//   - profiles.id FK -> auth.users.id (ON DELETE CASCADE)
+//   - bookings.nights → GENERATED ALWAYS AS (check_out - check_in) STORED
+//   - bookings.code default = HAB-YYYY-NNNNN (sequence booking_code_seq)
+//   - bookings.public_token default = 32 hex chars (gen_random_bytes(16))
+//   - properties.ical_export_secret default = 48 hex chars
+//   - updated_at DEFAULT now() + trigger set_updated_at en cada UPDATE
+//   - id DEFAULT gen_random_uuid() en 15 tablas
+//   - RLS habilitada + 52 policies + 9 SQL functions/triggers
+//
+// REGLA: a partir de B3, NO correr `prisma db push` directo, lo revertiria.
+// Para cambios de schema: usar `prisma migrate dev --create-only` + editar la
+// migration generada (o agregar otra supabase migration manual). Despues
+// `prisma migrate deploy` + `supabase db push --linked` segun corresponda.
+// ============================================================================
 
 generator client {
   provider = "prisma-client-js"
