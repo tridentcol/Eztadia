@@ -45,6 +45,9 @@ importers:
       '@types/react-dom':
         specifier: ^19.0.0
         version: 19.2.3(@types/react@19.2.15)
+      supabase:
+        specifier: ^2.101.0
+        version: 2.101.0
       tailwindcss:
         specifier: ^4.0.0
         version: 4.3.0
@@ -267,6 +270,46 @@ packages:
   '@next/swc-win32-x64-msvc@15.5.18':
     resolution: {integrity: sha512-LIu5me6QTANCd25E7I5uIEfvgQ06RK7tvHAbYo3zCb3VpxQEPvMcSpd87NwUABDT6MbGPdEGR5VRiK4PPTJhQg==}
     engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [win32]
+
+  '@supabase/cli-darwin-arm64@2.101.0':
+    resolution: {integrity: sha512-SoWYzu2CIE+rADWsZH6H0YZYF8nV2YMelZLbjAqzahb5RRgFOTMWGhKCUj6g4KlNvocUnU19JObUJ7oCx/9aHg==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@supabase/cli-darwin-x64@2.101.0':
+    resolution: {integrity: sha512-rPES03BF9KYkirq3X1Yll+T+eORueRvC858Yp2+2aQMvB4qxi6k+WI+ilCQ7NGzOJ3G0jl/ZG/KsSjZIa4AJ6g==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@supabase/cli-linux-arm64-musl@2.101.0':
+    resolution: {integrity: sha512-B5JFFKKpJLLMwn8vWUB7j5euZPytiDOLo9WYXp0mshg45OaFKjRcDImSzBzx4k0W8MK2x75rFEURca90Ic60Ug==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@supabase/cli-linux-arm64@2.101.0':
+    resolution: {integrity: sha512-E+hN1GRIFEi+U1Jf4Omw/gjwpSRTpJ5jai58tQana15AaXt3GCoG7z2YzWVnzD/mvAubTqA7SLHsV+A2lcdTGQ==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@supabase/cli-linux-x64-musl@2.101.0':
+    resolution: {integrity: sha512-pr9Ar1/aVaQVqjNSfwRgXHWJznQTIaxblGO+hKIl9k55Ajahiq8GConCwx6DjX1Wa9VW//5Dji+O0pkmFSfcHw==}
+    cpu: [x64]
+    os: [linux]
+
+  '@supabase/cli-linux-x64@2.101.0':
+    resolution: {integrity: sha512-7iU9uA+8pbmW5uz+yGxU0fM83a+8SH/gtKmSSRZrOu9vIGcugg9gLbN9GlWkG5P7I7wEjnoVKb7Jzea6onSeQA==}
+    cpu: [x64]
+    os: [linux]
+
+  '@supabase/cli-windows-arm64@2.101.0':
+    resolution: {integrity: sha512-mSnFDhTIAe9cr1iifv+DTQzpY/0WphywED2YT3yMGeu94jjxrXrreQkywxEaeSXTnc4ys1umtnWOB1CaBlYKag==}
+    cpu: [arm64]
+    os: [win32]
+
+  '@supabase/cli-windows-x64@2.101.0':
+    resolution: {integrity: sha512-xzZpybVWq62VF102abZr1EP3BbA2bYecwYm3G2dJk+6ua7nAIodu1fiGHAvBSR0BLGQmesNb6KCneawNL3XBsQ==}
     cpu: [x64]
     os: [win32]
 
@@ -561,6 +604,10 @@ packages:
       babel-plugin-macros:
         optional: true
 
+  supabase@2.101.0:
+    resolution: {integrity: sha512-9wqlvXGeI+VjOMUKOGEpcZzTJGLia6IOv8LWN3W2u8F6Xiv4ZqAuTuXCp3MWfkhV5x9KQaBtN5d6IiLEMWzkJA==}
+    hasBin: true
+
   tailwindcss@4.3.0:
     resolution: {integrity: sha512-y6nxMGB1nMW9R6k96e5gdIFzcfL/gTJRNaqGes1YvkLnPVXzWgbqFF2yLC0T8G774n24cx3Pe8XrKoniCOAH+Q==}
 
@@ -753,6 +800,30 @@ snapshots:
     optional: true
 
   '@next/swc-win32-x64-msvc@15.5.18':
+    optional: true
+
+  '@supabase/cli-darwin-arm64@2.101.0':
+    optional: true
+
+  '@supabase/cli-darwin-x64@2.101.0':
+    optional: true
+
+  '@supabase/cli-linux-arm64-musl@2.101.0':
+    optional: true
+
+  '@supabase/cli-linux-arm64@2.101.0':
+    optional: true
+
+  '@supabase/cli-linux-x64-musl@2.101.0':
+    optional: true
+
+  '@supabase/cli-linux-x64@2.101.0':
+    optional: true
+
+  '@supabase/cli-windows-arm64@2.101.0':
+    optional: true
+
+  '@supabase/cli-windows-x64@2.101.0':
     optional: true
 
   '@swc/helpers@0.5.15':
@@ -1011,6 +1082,17 @@ snapshots:
     dependencies:
       client-only: 0.0.1
       react: 19.2.6
+
+  supabase@2.101.0:
+    optionalDependencies:
+      '@supabase/cli-darwin-arm64': 2.101.0
+      '@supabase/cli-darwin-x64': 2.101.0
+      '@supabase/cli-linux-arm64': 2.101.0
+      '@supabase/cli-linux-arm64-musl': 2.101.0
+      '@supabase/cli-linux-x64': 2.101.0
+      '@supabase/cli-linux-x64-musl': 2.101.0
+      '@supabase/cli-windows-arm64': 2.101.0
+      '@supabase/cli-windows-x64': 2.101.0
 
   tailwindcss@4.3.0: {}
 
