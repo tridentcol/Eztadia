@@ -306,10 +306,12 @@ export function BookingForm({
         </p>
       )}
 
+      <Turnstile key={turnstileResetKey} onToken={setTurnstileToken} className="mt-6" />
+
       <button
         type="submit"
         disabled={isSubmitting}
-        className="mt-7 w-full h-14 rounded-[14px] bg-terracotta text-cream font-serif font-medium text-[17px] tracking-[-0.01em] hover:bg-clay active:scale-[0.99] transition-[background-color,transform] duration-200 disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
+        className="mt-4 w-full h-14 rounded-[14px] bg-terracotta text-cream font-serif font-medium text-[17px] tracking-[-0.01em] hover:bg-clay active:scale-[0.99] transition-[background-color,transform] duration-200 disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
       >
         {isSubmitting ? "Procesando…" : "Continuar al pago"}
         <IconArrowRight className="w-3.5 h-3.5" />
@@ -319,8 +321,6 @@ export function BookingForm({
         <IconLock className="w-3.5 h-3.5" />
         Tu información viaja cifrada. No guardamos datos de pago.
       </p>
-
-      <Turnstile key={turnstileResetKey} onToken={setTurnstileToken} className="mt-4" />
 
       <style jsx>{`
         :global(.form-input) {

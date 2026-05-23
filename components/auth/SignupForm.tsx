@@ -180,15 +180,15 @@ export function SignupForm() {
         <p className="ml-7 mt-1.5 text-xs text-danger">{errors.acceptTerms.message}</p>
       )}
 
+      <Turnstile key={turnstileResetKey} onToken={setTurnstileToken} className="mt-5" />
+
       <button
         type="submit"
         disabled={isSubmitting || computeStrength(password) < 2}
-        className="w-full h-12 mt-[18px] rounded-[14px] bg-terracotta text-cream text-sm font-medium hover:bg-clay active:scale-[0.99] transition-[background-color,transform] disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full h-12 mt-4 rounded-[14px] bg-terracotta text-cream text-sm font-medium hover:bg-clay active:scale-[0.99] transition-[background-color,transform] disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isSubmitting ? "Creando cuenta…" : "Crear mi cuenta"}
       </button>
-
-      <Turnstile key={turnstileResetKey} onToken={setTurnstileToken} className="mt-5" />
     </form>
   );
 }

@@ -103,10 +103,12 @@ export function LoginForm() {
       </Checkbox>
       <input type="hidden" {...register("remember", { value: remember })} />
 
+      <Turnstile key={turnstileResetKey} onToken={setTurnstileToken} className="mt-5" />
+
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full h-12 mt-[18px] rounded-[14px] bg-sage text-cream text-sm font-medium hover:bg-[#4F6759] active:scale-[0.99] transition-[background-color,transform] disabled:opacity-60 disabled:cursor-not-allowed"
+        className="w-full h-12 mt-4 rounded-[14px] bg-sage text-cream text-sm font-medium hover:bg-[#4F6759] active:scale-[0.99] transition-[background-color,transform] disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {isSubmitting ? "Entrando…" : "Continuar"}
       </button>
@@ -127,8 +129,6 @@ export function LoginForm() {
         <IconMail className="w-[14px] h-[14px]" />
         Recibe un magic link
       </button>
-
-      <Turnstile key={turnstileResetKey} onToken={setTurnstileToken} className="mt-5" />
     </form>
   );
 }
