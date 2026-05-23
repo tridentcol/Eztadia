@@ -111,8 +111,16 @@ export async function signUpAction(
   });
 
   if (error) {
-    if (error.message.toLowerCase().includes("registered")) {
+    console.error(`signup_failed status=${error.status ?? "?"} code=${error.code ?? "?"} message=${error.message}`);
+    const msg = error.message.toLowerCase();
+    if (msg.includes("registered")) {
       return { ok: false, error: "Ya hay una cuenta con ese email. Intenta iniciar sesion." };
+    }
+    if (msg.includes("invalid") && msg.includes("email")) {
+      return { ok: false, error: "Ese email no es valido. Revisa el dominio (ej. gmail.com)." };
+    }
+    if (msg.includes("password")) {
+      return { ok: false, error: "Esa contrasena no cumple los requisitos." };
     }
     return { ok: false, error: "No pudimos crear tu cuenta. Intenta de nuevo." };
   }
