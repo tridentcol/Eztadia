@@ -14,8 +14,8 @@ import type { PropertySettings } from "@/lib/property-settings";
  * - Campos sin columna en `properties` (políticas, toggles avanzados) viven en
  *   `booking_policy` jsonb. Parseado tolerante con defaults.
  * - `type` no existe en DB todavía — devolvemos "hotel" hasta que migremos.
- * - `photos` se lee de `gallery` jsonb cuando exista; mientras no, [] vacío.
- *   Upload real es Phase E6 (Storage buckets), Photos tab muestra placeholder.
+ * - `photos` se lee de `gallery` jsonb. Upload real wired via
+ *   `app/actions/photos.ts` (Phase E6).
  * - `fiscal` no tiene columnas — devolvemos valores neutros para que el tab
  *   se renderice sin crashear pero la UI mostrará "Próximamente".
  */
@@ -86,7 +86,7 @@ export async function getPropertySettingsFromDb(
       holdTtlManualHours: policy.advanced?.hold_ttl_manual_hours ?? 24,
     },
     photos: Array.isArray(data.gallery)
-      ? (data.gallery as { id: string; url: string; alt: string }[])
+      ? (data.gallery as { id: string; url: string; alt: string; path?: string }[])
       : [],
   };
 }

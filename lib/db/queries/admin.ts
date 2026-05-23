@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { requireSuperAdmin } from "@/lib/auth/session";
 import { mapDbError, NotFoundError } from "@/lib/errors";
 import type { Database } from "@/lib/supabase/database.types";
+import { inetToString } from "@/lib/db/inet";
 
 type ProfileRow  = Database["public"]["Tables"]["profiles"]["Row"];
 type PropertyRow = Database["public"]["Tables"]["properties"]["Row"];
@@ -523,7 +524,7 @@ export async function getAdminUserDetailFull(
     lastLoginAt,
     recentLogins: (loginsR.data ?? []).map((ev) => ({
       eventType: ev.event_type,
-      ip: ev.ip as string | null,
+      ip: inetToString(ev.ip),
       userAgent: ev.user_agent,
       country: ev.country,
       createdAt: ev.created_at,
@@ -1026,7 +1027,7 @@ export async function listAdminAuditLogs(opts: {
     resourceId: r.resource_id,
     propertyId: r.property_id,
     diff: r.diff,
-    ip: r.ip as string | null,
+    ip: inetToString(r.ip),
     userAgent: r.user_agent,
     createdAt: r.created_at,
     actor: r.actor_id ? actorMap.get(r.actor_id) ?? null : null,
@@ -1208,7 +1209,7 @@ export async function listAdminWebhookLogs(opts: {
     signatureValid: r.signature_valid,
     error: r.error,
     durationMs: r.duration_ms,
-    ip: r.ip as string | null,
+    ip: inetToString(r.ip),
     userAgent: r.user_agent,
     payload: r.payload,
     response: r.response,

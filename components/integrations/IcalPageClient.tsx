@@ -14,6 +14,7 @@ import {
   updateIcalFeedAction,
   deleteIcalFeedAction,
   regenerateIcalSecretAction,
+  syncIcalFeedNowAction,
 } from "@/app/actions/ical";
 
 export type IcalFeedView = {
@@ -49,7 +50,9 @@ export function IcalPageClient({
   const router = useRouter();
   const [drawer, setDrawer] = useState<DrawerState>(null);
   const [busy, startBusy] = useTransition();
-  const [banner, setBanner] = useState<string | null>(null);
+  const [banner, setBanner] = useState<
+    { kind: "error" | "success"; text: string } | null
+  >(null);
 
   const inbound = feeds.filter((f) => f.direction === "inbound");
   const outbound = feeds.filter((f) => f.direction === "outbound");
@@ -60,7 +63,7 @@ export function IcalPageClient({
     startBusy(async () => {
       const res = await deleteIcalFeedAction({ feedId: feed.id });
       if (!res.ok) {
-        setBanner(res.error);
+        setBanner({ kind: "error", text: res.error });
         return;
       }
       router.refresh();
@@ -75,9 +78,34 @@ export function IcalPageClient({
         isActive: !feed.isActive,
       });
       if (!res.ok) {
-        setBanner(res.error);
+        setBanner({ kind: "error", text: res.error });
         return;
       }
+      router.refresh();
+    });
+  }
+
+  function handleSyncNow(feed: IcalFeedView) {
+    setBanner(null);
+    startBusy(async () => {
+      const res = await syncIcalFeedNowAction({ feedId: feed.id });
+      if (!res.ok) {
+        setBanner({ kind: "error", text: res.error });
+        return;
+      }
+      if (!res.data.ok) {
+        setBanner({
+          kind: "error",
+          text: res.data.error ?? "No se pudo sincronizar.",
+        });
+        router.refresh();
+        return;
+      }
+      const { imported, removed } = res.data;
+      setBanner({
+        kind: "success",
+        text: `Sincronizado · ${imported} bloqueos importados, ${removed} eliminados.`,
+      });
       router.refresh();
     });
   }
@@ -87,9 +115,14 @@ export function IcalPageClient({
       {banner && (
         <div
           role="alert"
-          className="mb-6 flex gap-2.5 px-4 py-3 rounded-[10px] text-sm leading-[1.45] text-ink bg-[rgba(168,72,60,0.08)] border-l-[3px] border-danger"
+          className={[
+            "mb-6 flex gap-2.5 px-4 py-3 rounded-[10px] text-sm leading-[1.45] text-ink border-l-[3px]",
+            banner.kind === "success"
+              ? "bg-[rgba(94,138,95,0.10)] border-success"
+              : "bg-[rgba(168,72,60,0.08)] border-danger",
+          ].join(" ")}
         >
-          {banner}
+          {banner.text}
         </div>
       )}
 
@@ -104,6 +137,7 @@ export function IcalPageClient({
         onEdit={(f) => setDrawer({ mode: "edit", feed: f })}
         onDelete={handleDelete}
         onToggle={handleToggleActive}
+        onSyncNow={handleSyncNow}
         busy={busy}
       />
 
@@ -245,6 +279,7 @@ function FeedsSection({
   onEdit,
   onDelete,
   onToggle,
+  onSyncNow,
   busy,
 }: {
   title: string;
@@ -255,6 +290,7 @@ function FeedsSection({
   onEdit: (f: IcalFeedView) => void;
   onDelete: (f: IcalFeedView) => void;
   onToggle: (f: IcalFeedView) => void;
+  onSyncNow?: (f: IcalFeedView) => void;
   busy: boolean;
 }) {
   return (
@@ -295,6 +331,11 @@ function FeedsSection({
               onEdit={() => onEdit(f)}
               onDelete={() => onDelete(f)}
               onToggle={() => onToggle(f)}
+              onSyncNow={
+                onSyncNow && f.direction === "inbound"
+                  ? () => onSyncNow(f)
+                  : undefined
+              }
               busy={busy}
             />
           ))}
@@ -310,6 +351,7 @@ function FeedRow({
   onEdit,
   onDelete,
   onToggle,
+  onSyncNow,
   busy,
 }: {
   feed: IcalFeedView;
@@ -317,6 +359,7 @@ function FeedRow({
   onEdit: () => void;
   onDelete: () => void;
   onToggle: () => void;
+  onSyncNow?: () => void;
   busy: boolean;
 }) {
   return (
@@ -356,6 +399,21 @@ function FeedRow({
           onChange={onToggle}
           ariaLabel={`Activar ${feed.name}`}
         />
+        {onSyncNow && (
+          <button
+            type="button"
+            onClick={onSyncNow}
+            disabled={busy || !feed.isActive}
+            title={
+              !feed.isActive
+                ? "Activa el feed para sincronizar"
+                : "Forzar sincronización ahora"
+            }
+            className="h-8 px-3 rounded-[8px] text-ink-soft text-[12.5px] font-medium hover:bg-linen hover:text-ink disabled:opacity-60 transition-colors"
+          >
+            Sincronizar
+          </button>
+        )}
         <button
           type="button"
           onClick={onEdit}

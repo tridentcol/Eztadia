@@ -22,6 +22,7 @@ export default async function WompiConfigPage() {
 
   const cfg = await getWompiConfigForUI(propertyId);
   const isConnected = !!(cfg?.public_key && cfg.hasPrivateKey);
+  const isPaused = isConnected && !cfg?.is_active;
   const webhookUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/api/webhooks/wompi`;
 
   return (
@@ -52,10 +53,16 @@ export default async function WompiConfigPage() {
               <h1 className="font-serif italic font-medium text-[28px] text-ink m-0 tracking-[-0.02em]">
                 Configuración
               </h1>
-              {isConnected && (
+              {isConnected && !isPaused && (
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-medium uppercase tracking-[0.08em] bg-sage-tint text-sage border border-[rgba(92,117,103,0.18)]">
                   <span aria-hidden className="w-1.5 h-1.5 rounded-full bg-sage" />
                   Conectada
+                </span>
+              )}
+              {isPaused && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-medium uppercase tracking-[0.08em] bg-linen text-ink-soft border border-rule">
+                  <span aria-hidden className="w-1.5 h-1.5 rounded-full bg-ink-muted" />
+                  Pausada
                 </span>
               )}
             </div>
@@ -72,6 +79,7 @@ export default async function WompiConfigPage() {
               ? {
                   publicKey: cfg.public_key ?? "",
                   isTestMode: cfg.is_test_mode,
+                  isActive: cfg.is_active,
                   hasPrivateKey: cfg.hasPrivateKey,
                   hasEventsSecret: cfg.hasEventsSecret,
                 }

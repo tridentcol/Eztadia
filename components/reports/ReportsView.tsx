@@ -4,6 +4,7 @@ import type {
   PaymentMethodBreakdownRow,
   ReportMetrics,
   RoomTypeBreakdownRow,
+  SourceBreakdownRow,
 } from "@/lib/db/queries/reports";
 import { formatCOP } from "@/lib/format";
 import { IconBuilding, IconClock, IconMoon, IconTrend } from "./icons";
@@ -38,6 +39,13 @@ const PAYMENT_METHOD_LABEL: Record<string, string> = {
   manual_transfer: "Transferencia manual",
   external: "Reservado externo",
   admin_override: "Asignación admin",
+};
+
+const SOURCE_LABEL: Record<string, string> = {
+  direct: "Página propia (directo)",
+  booking_com: "Booking.com",
+  airbnb: "Airbnb",
+  manual: "Carga manual",
 };
 
 function formatPeriodLabel(fromIso: string, toIso: string): string {
@@ -75,6 +83,7 @@ export function ReportsView({
   monthly,
   byRoomType,
   byPaymentMethod,
+  bySource,
   exportSlot,
 }: {
   preset: PeriodPreset;
@@ -84,6 +93,7 @@ export function ReportsView({
   monthly: MonthlyRevenuePoint[];
   byRoomType: RoomTypeBreakdownRow[];
   byPaymentMethod: PaymentMethodBreakdownRow[];
+  bySource: SourceBreakdownRow[];
   exportSlot?: React.ReactNode;
 }) {
   const periodLabel = formatPeriodLabel(from, to);
@@ -148,6 +158,18 @@ export function ReportsView({
           </span>
         </header>
         <RevenueChart points={monthly} />
+      </section>
+
+      <section className="mt-14">
+        <header className="mb-4">
+          <h2 className="font-serif italic font-medium text-[18px] text-ink m-0">
+            Por canal
+          </h2>
+          <p className="text-[12px] text-ink-muted m-0 mt-1">
+            De dónde vinieron las reservas del período
+          </p>
+        </header>
+        <SourceTable rows={bySource} totalCents={metrics.revenueCents} />
       </section>
 
       <section className="mt-14 grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -378,6 +400,63 @@ function RoomTypeTable({ rows }: { rows: RoomTypeBreakdownRow[] }) {
               <p className="text-[11px] text-ink-muted m-0 mt-0.5 tabular-nums">
                 {pct.toFixed(0)}%
               </p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function SourceTable({
+  rows,
+  totalCents,
+}: {
+  rows: SourceBreakdownRow[];
+  totalCents: number;
+}) {
+  if (rows.length === 0) {
+    return (
+      <div className="bg-paper border border-rule rounded-2xl p-6 text-[13px] text-ink-muted">
+        Sin reservas en el período.
+      </div>
+    );
+  }
+  return (
+    <div className="bg-paper border border-rule rounded-2xl overflow-hidden">
+      {rows.map((r, i) => {
+        const pct = totalCents > 0 ? (r.revenueCents / totalCents) * 100 : 0;
+        const label = SOURCE_LABEL[r.source] ?? r.source;
+        return (
+          <div
+            key={r.source}
+            className={[
+              "px-5 py-3.5",
+              i > 0 ? "border-t border-rule" : "",
+            ].join(" ")}
+          >
+            <div className="flex items-center gap-4">
+              <div className="flex-1 min-w-0">
+                <p className="text-[13.5px] font-medium text-ink m-0">{label}</p>
+                <p className="text-[11.5px] text-ink-muted m-0 mt-0.5">
+                  {r.bookings} reservas · {r.nights} noches
+                </p>
+              </div>
+              <div className="text-right shrink-0">
+                <p className="font-serif oldstyle text-[16px] text-ink m-0 tabular-nums">
+                  {copShort(r.revenueCents)}
+                </p>
+                <p className="text-[11px] text-ink-muted m-0 mt-0.5 tabular-nums">
+                  {pct.toFixed(0)}%
+                </p>
+              </div>
+            </div>
+            <div className="mt-2 h-1 bg-linen rounded-full overflow-hidden">
+              <span
+                className="block h-full bg-gold rounded-full"
+                style={{ width: `${Math.min(100, pct)}%` }}
+                aria-hidden
+              />
             </div>
           </div>
         );

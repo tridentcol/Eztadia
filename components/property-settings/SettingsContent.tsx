@@ -26,7 +26,7 @@ export function SettingsContent({
     <div className="flex-1 min-w-0 px-5 py-10 sm:px-12 sm:py-12 pb-24 max-w-[1080px] overflow-hidden">
       {tab === "general" && <GeneralTab propertyId={propertyId} initial={settings.general} totalRooms={totalRooms} />}
       {tab === "identity" && <IdentityTab propertyId={propertyId} initial={settings.identity} />}
-      {tab === "photos" && <PhotosTab initial={settings.photos} />}
+      {tab === "photos" && <PhotosTab propertyId={propertyId} initial={settings.photos} />}
       {tab === "amenities" && <AmenitiesTab propertyId={propertyId} initial={settings.amenities} />}
       {tab === "policies" && <PoliciesTab propertyId={propertyId} initial={settings.policies} />}
       {tab === "schedules" && <SchedulesTab propertyId={propertyId} initial={settings.schedules} />}

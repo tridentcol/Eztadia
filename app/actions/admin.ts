@@ -1,9 +1,16 @@
 "use server";
 
 import { z } from "zod";
-import { listAdminAuditLogs } from "@/lib/db/queries/admin";
+import {
+  listAdminAuditLogs,
+  getAdminUserDetailFull,
+} from "@/lib/db/queries/admin";
+import { toAdminUserDetail } from "@/lib/admin/adapter";
+import { requireSuperAdmin } from "@/lib/auth/session";
 import { toCsv, type CsvColumn } from "@/lib/csv";
+import { uuid } from "@/lib/validation/common";
 import type { AdminAuditLogRow } from "@/lib/db/queries/admin";
+import type { AdminUserDetail } from "@/lib/admin";
 import { run } from "./_helpers";
 
 const isoOrUndef = z
@@ -25,6 +32,21 @@ export async function loadMoreAuditLogsAction(raw: unknown) {
   return run(loadMoreSchema, raw, async ({ cursor, limit }) => {
     const rows = await listAdminAuditLogs({ cursor, limit: limit ?? 200 });
     return { rows };
+  });
+}
+
+const userDetailSchema = z.object({ userId: uuid });
+
+/**
+ * Fetch on-demand del detalle de un usuario admin — usado cuando el row
+ * cae fuera del bloque pre-cargado por el server component (>N filas).
+ */
+export async function getAdminUserDetailAction(raw: unknown) {
+  return run(userDetailSchema, raw, async ({ userId }) => {
+    const me = await requireSuperAdmin();
+    const full = await getAdminUserDetailFull(userId);
+    if (!full) return null as AdminUserDetail | null;
+    return toAdminUserDetail(full, me.id) as AdminUserDetail | null;
   });
 }
 

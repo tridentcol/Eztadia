@@ -167,5 +167,5 @@ export type PropertySettings = {
   schedules: SchedulesValues;
   fiscal: FiscalValues;
   advanced: AdvancedValues;
-  photos: { id: string; url: string; alt: string }[];
+  photos: { id: string; url: string; alt: string; path?: string }[];
 };

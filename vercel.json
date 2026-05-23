@@ -4,6 +4,10 @@
     {
       "path": "/api/cron/expire-holds",
       "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/ical-sync",
+      "schedule": "*/15 * * * *"
     }
   ]
 }

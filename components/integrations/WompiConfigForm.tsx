@@ -13,6 +13,7 @@ import { IconEye, IconEyeSlash } from "@/components/auth/icons";
 import {
   saveWompiConfigAction,
   removeWompiConfigAction,
+  setWompiActiveAction,
 } from "@/app/actions/wompi";
 
 const schema = z.object({
@@ -27,6 +28,7 @@ type Values = z.infer<typeof schema>;
 export type WompiConfigInitial = {
   publicKey: string;
   isTestMode: boolean;
+  isActive: boolean;
   hasPrivateKey: boolean;
   hasEventsSecret: boolean;
 };
@@ -57,6 +59,28 @@ export function WompiConfigForm({
   const [saving, setSaving] = useState(false);
   const [saveBanner, setSaveBanner] = useState<string | null>(null);
   const [removing, setRemoving] = useState(false);
+  const [isActive, setIsActive] = useState(initial?.isActive ?? true);
+  const [togglingActive, setTogglingActive] = useState(false);
+
+  async function onToggleActive() {
+    if (!initial) return;
+    const next = !isActive;
+    setTogglingActive(true);
+    setSaveBanner(null);
+    const prev = isActive;
+    setIsActive(next); // optimista
+    try {
+      const res = await setWompiActiveAction({ propertyId, isActive: next });
+      if (!res.ok) {
+        setIsActive(prev);
+        setSaveBanner(res.error);
+        return;
+      }
+      setSaveBanner(next ? "Pagos PSE activados." : "Pagos PSE pausados.");
+    } finally {
+      setTogglingActive(false);
+    }
+  }
 
   async function onSave(v: Values) {
     setSaving(true);
@@ -165,6 +189,40 @@ export function WompiConfigForm({
           placeholder={initial?.hasEventsSecret ? "•••• guardado (re-pegar para cambiar)" : "evt_prod_…"}
           {...register("eventsSecret")}
         />
+
+        {initial && (
+          <div className="mt-5 flex items-center justify-between gap-4 bg-paper border border-rule rounded-[14px] px-4 py-3.5">
+            <div className="min-w-0">
+              <p className="text-[14px] font-medium text-ink m-0">
+                {isActive ? "Pagos PSE activos" : "Pagos PSE pausados"}
+              </p>
+              <p className="text-[11.5px] text-ink-muted m-0 mt-0.5 leading-snug">
+                {isActive
+                  ? "Los huéspedes pueden pagar con PSE desde tu página pública."
+                  : "Las nuevas reservas no podrán pagar con PSE. Los webhooks de pagos existentes siguen procesándose."}
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={isActive}
+              onClick={onToggleActive}
+              disabled={togglingActive}
+              className={[
+                "relative shrink-0 w-12 h-7 rounded-full transition-colors duration-200 outline-0 focus-visible:shadow-[0_0_0_3px_var(--color-sage-tint)] disabled:opacity-60",
+                isActive ? "bg-sage" : "bg-rule-strong",
+              ].join(" ")}
+            >
+              <span
+                aria-hidden
+                className={[
+                  "absolute top-[3px] left-[3px] w-[22px] h-[22px] rounded-full bg-paper transition-transform duration-200",
+                  isActive ? "translate-x-5" : "translate-x-0",
+                ].join(" ")}
+              />
+            </button>
+          </div>
+        )}
 
         {initial && (
           <button

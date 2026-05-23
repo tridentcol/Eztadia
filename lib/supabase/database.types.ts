@@ -1067,6 +1067,7 @@ export type Database = {
         Row: {
           created_at: string
           events_secret_encrypted: string | null
+          is_active: boolean
           is_test_mode: boolean
           private_key_encrypted: string | null
           property_id: string
@@ -1076,6 +1077,7 @@ export type Database = {
         Insert: {
           created_at?: string
           events_secret_encrypted?: string | null
+          is_active?: boolean
           is_test_mode?: boolean
           private_key_encrypted?: string | null
           property_id: string
@@ -1085,6 +1087,7 @@ export type Database = {
         Update: {
           created_at?: string
           events_secret_encrypted?: string | null
+          is_active?: boolean
           is_test_mode?: boolean
           private_key_encrypted?: string | null
           property_id?: string

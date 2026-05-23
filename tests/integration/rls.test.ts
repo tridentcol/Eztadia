@@ -102,6 +102,8 @@ afterAll(async () => {
   await admin.from("whatsapp_messages").delete().eq("property_id", propB.id);
   await admin.from("whatsapp_configs").delete().eq("property_id", propA.id);
   await admin.from("whatsapp_configs").delete().eq("property_id", propB.id);
+  await admin.from("wompi_configs").delete().eq("property_id", propA.id);
+  await admin.from("wompi_configs").delete().eq("property_id", propB.id);
   await admin.from("ical_feeds").delete().eq("property_id", propA.id);
   await admin.from("ical_feeds").delete().eq("property_id", propB.id);
   await admin.from("email_logs").delete().eq("property_id", propA.id);
@@ -393,6 +395,64 @@ describe("RLS isolation · whatsapp_messages", () => {
   });
 });
 
+describe("RLS isolation · wompi_configs", () => {
+  beforeAll(async () => {
+    await admin
+      .from("wompi_configs")
+      .insert({
+        property_id: propA.id,
+        public_key: "pub_test_PA",
+        is_test_mode: true,
+        is_active: true,
+      });
+    await admin
+      .from("wompi_configs")
+      .insert({
+        property_id: propB.id,
+        public_key: "pub_test_PB",
+        is_test_mode: true,
+        is_active: true,
+      });
+  });
+
+  it("user A sees his own wompi_config", async () => {
+    const { data } = await userA.client
+      .from("wompi_configs")
+      .select("property_id, public_key, is_active")
+      .eq("property_id", propA.id)
+      .maybeSingle();
+    expect(data?.public_key).toBe("pub_test_PA");
+    expect(data?.is_active).toBe(true);
+  });
+
+  it("user A does NOT see user B's wompi_config", async () => {
+    const { data } = await userA.client
+      .from("wompi_configs")
+      .select("property_id")
+      .eq("property_id", propB.id)
+      .maybeSingle();
+    expect(data).toBeNull();
+  });
+
+  it("user A cannot toggle is_active on user B's wompi_config", async () => {
+    const { data, error } = await userA.client
+      .from("wompi_configs")
+      .update({ is_active: false })
+      .eq("property_id", propB.id)
+      .select();
+    expect(error).toBeNull();
+    expect(data?.length ?? 0).toBe(0);
+
+    // Y la fila de B sigue intacta vista por admin.
+    const { data: stillActive } = await admin
+      .from("wompi_configs")
+      .select("is_active")
+      .eq("property_id", propB.id)
+      .maybeSingle();
+    expect(stillActive?.is_active).toBe(true);
+  });
+});
+
 describe("RLS isolation · ical_feeds", () => {
   let feedA: { id: string };
   let feedB: { id: string };
@@ -445,6 +505,134 @@ describe("RLS isolation · ical_feeds", () => {
       .from("ical_feeds")
       .delete()
       .eq("id", feedB.id)
+      .select();
+    expect(error).toBeNull();
+    expect(data?.length ?? 0).toBe(0);
+  });
+});
+
+describe("RLS isolation · external_blocks", () => {
+  // Blocks importados por el cron iCal sync (lib/ical/sync.ts) — verificamos
+  // que un member solo ve los de SUS propiedades y no puede borrar los ajenos.
+  // Setup: feeds + room dedicados al test para no acoplarse a describes vecinos.
+  let blockA: { id: string };
+  let blockB: { id: string };
+
+  beforeAll(async () => {
+    const { data: rtA } = await admin
+      .from("room_types")
+      .insert({
+        property_id: propA.id,
+        name_es: "Suite ext",
+        base_price_cents: 50_000,
+        capacity_adults: 2,
+      })
+      .select()
+      .single();
+    const { data: rA } = await admin
+      .from("rooms")
+      .insert({
+        property_id: propA.id,
+        room_type_id: rtA!.id,
+        number: "A-ext",
+      })
+      .select()
+      .single();
+    const { data: feedA } = await admin
+      .from("ical_feeds")
+      .insert({
+        property_id: propA.id,
+        room_id: rA!.id,
+        name: "Booking A (ext blocks)",
+        direction: "inbound",
+        url: "https://example.com/A-ext.ics",
+      })
+      .select()
+      .single();
+    const { data: ebA } = await admin
+      .from("external_blocks")
+      .insert({
+        ical_feed_id: feedA!.id,
+        property_id: propA.id,
+        room_id: rA!.id,
+        external_uid: "uid-A@booking",
+        start_date: "2030-06-01",
+        end_date: "2030-06-04",
+        summary: "Booking import A",
+      })
+      .select()
+      .single();
+    blockA = { id: ebA!.id };
+
+    const { data: rtB } = await admin
+      .from("room_types")
+      .insert({
+        property_id: propB.id,
+        name_es: "Suite ext B",
+        base_price_cents: 50_000,
+        capacity_adults: 2,
+      })
+      .select()
+      .single();
+    const { data: rB } = await admin
+      .from("rooms")
+      .insert({
+        property_id: propB.id,
+        room_type_id: rtB!.id,
+        number: "B-ext",
+      })
+      .select()
+      .single();
+    const { data: feedB2 } = await admin
+      .from("ical_feeds")
+      .insert({
+        property_id: propB.id,
+        room_id: rB!.id,
+        name: "Airbnb B (ext blocks)",
+        direction: "inbound",
+        url: "https://example.com/B-ext.ics",
+      })
+      .select()
+      .single();
+    const { data: ebB } = await admin
+      .from("external_blocks")
+      .insert({
+        ical_feed_id: feedB2!.id,
+        property_id: propB.id,
+        room_id: rB!.id,
+        external_uid: "uid-B@airbnb",
+        start_date: "2030-06-10",
+        end_date: "2030-06-12",
+        summary: "Booking import B",
+      })
+      .select()
+      .single();
+    blockB = { id: ebB!.id };
+  });
+
+  it("user A sees his own external_block", async () => {
+    const { data } = await userA.client
+      .from("external_blocks")
+      .select("id, external_uid")
+      .eq("id", blockA.id)
+      .maybeSingle();
+    expect(data?.external_uid).toBe("uid-A@booking");
+  });
+
+  it("user A does NOT see user B's external_block", async () => {
+    const { data } = await userA.client
+      .from("external_blocks")
+      .select("id")
+      .eq("id", blockB.id)
+      .maybeSingle();
+    expect(data).toBeNull();
+  });
+
+  it("user A cannot DELETE user B's external_block", async () => {
+    const { data, error } = await userA.client
+      .from("external_blocks")
+      .delete()
+      .eq("id", blockB.id)
       .select();
     expect(error).toBeNull();
     expect(data?.length ?? 0).toBe(0);

@@ -9,6 +9,7 @@ import {
   getRevenueByMonth,
   getBreakdownByRoomType,
   getBreakdownByPaymentMethod,
+  getBreakdownBySource,
   getReportBookingsForExport,
 } from "@/lib/db/queries/reports";
 import { PropertyTabs } from "@/components/calendar/PropertyTabs";
@@ -77,13 +78,15 @@ export default async function ReportsPage({
   const preset = resolvePreset(sp.p);
   const { from, to } = resolveRange(preset);
 
-  const [metrics, monthly, byRoomType, byPaymentMethod, exportBookings] = await Promise.all([
-    getReportMetrics(propertyId, from, to),
-    getRevenueByMonth(propertyId, 12),
-    getBreakdownByRoomType(propertyId, from, to),
-    getBreakdownByPaymentMethod(propertyId, from, to),
-    getReportBookingsForExport(propertyId, from, to),
-  ]);
+  const [metrics, monthly, byRoomType, byPaymentMethod, bySource, exportBookings] =
+    await Promise.all([
+      getReportMetrics(propertyId, from, to),
+      getRevenueByMonth(propertyId, 12),
+      getBreakdownByRoomType(propertyId, from, to),
+      getBreakdownByPaymentMethod(propertyId, from, to),
+      getBreakdownBySource(propertyId, from, to),
+      getReportBookingsForExport(propertyId, from, to),
+    ]);
 
   return (
     <>
@@ -100,6 +103,7 @@ export default async function ReportsPage({
           monthly={monthly}
           byRoomType={byRoomType}
           byPaymentMethod={byPaymentMethod}
+          bySource={bySource}
           exportSlot={<ExportCsvButton bookings={exportBookings} from={from} to={to} />}
         />
       </main>

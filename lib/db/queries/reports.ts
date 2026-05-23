@@ -220,6 +220,53 @@ export async function getBreakdownByRoomType(
   );
 }
 
+export type SourceBreakdownRow = {
+  source: Database["public"]["Enums"]["BookingSource"];
+  bookings: number;
+  nights: number;
+  revenueCents: number;
+};
+
+/**
+ * Cuántos bookings vienen de qué canal: direct (página propia), booking_com,
+ * airbnb, manual (cargados a mano). Crítico para entender dependencia de OTAs.
+ */
+export async function getBreakdownBySource(
+  propertyId: string,
+  from: string,
+  to: string,
+): Promise<SourceBreakdownRow[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("bookings")
+    .select("source, total_cents, nights")
+    .eq("property_id", propertyId)
+    .in("status", REALIZED_STATUSES)
+    .gte("check_in", from)
+    .lt("check_in", to);
+
+  if (error) throw mapDbError(error);
+
+  const grouped = new Map<
+    Database["public"]["Enums"]["BookingSource"],
+    SourceBreakdownRow
+  >();
+  for (const r of data ?? []) {
+    const cur =
+      grouped.get(r.source) ??
+      { source: r.source, bookings: 0, nights: 0, revenueCents: 0 };
+    cur.bookings += 1;
+    cur.nights += r.nights ?? 0;
+    cur.revenueCents += r.total_cents;
+    grouped.set(r.source, cur);
+  }
+
+  return Array.from(grouped.values()).sort(
+    (a, b) => b.revenueCents - a.revenueCents,
+  );
+}
+
 export type PaymentMethodBreakdownRow = {
   method: Database["public"]["Enums"]["PaymentMethod"];
   bookings: number;

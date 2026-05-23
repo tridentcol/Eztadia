@@ -41,9 +41,12 @@ export default async function IntegrationsPage() {
     getPropertyIcalSecret(propertyId),
   ]);
 
-  const wompiStatus: IntegrationStatus =
-    wompiCfg?.public_key && wompiCfg.hasPrivateKey
-      ? "connected"
+  const wompiStatus: IntegrationStatus = !wompiCfg
+    ? "disconnected"
+    : wompiCfg.public_key && wompiCfg.hasPrivateKey
+      ? wompiCfg.is_active
+        ? "connected"
+        : "partial"
       : "disconnected";
 
   const whatsappStatus: IntegrationStatus = !waCfg

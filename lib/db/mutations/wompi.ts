@@ -24,9 +24,24 @@ export async function upsertWompiConfig(input: WompiConfigInput): Promise<void> 
       private_key_encrypted: encrypt(input.privateKey),
       events_secret_encrypted: encrypt(input.eventsSecret),
       is_test_mode: input.isTestMode,
+      // Al guardar credenciales asumimos que el owner las quiere activas. El
+      // toggle "pausar pagos" se hace por separado con setWompiActive().
+      is_active: true,
     },
     { onConflict: "property_id" },
   );
+  if (error) throw mapDbError(error);
+}
+
+export async function setWompiActive(
+  propertyId: string,
+  isActive: boolean,
+): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("wompi_configs")
+    .update({ is_active: isActive })
+    .eq("property_id", propertyId);
   if (error) throw mapDbError(error);
 }
 
@@ -52,13 +67,17 @@ export async function loadWompiCredsForProperty(propertyId: string): Promise<{
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("wompi_configs")
-    .select("public_key, private_key_encrypted, is_test_mode")
+    .select("public_key, private_key_encrypted, is_test_mode, is_active")
     .eq("property_id", propertyId)
     .maybeSingle();
   if (error) throw mapDbError(error);
   if (!data || !data.public_key || !data.private_key_encrypted) {
     return null;
   }
+  // is_active=false → owner pauseo pagos. No emitir nuevos payment links.
+  // (Los webhooks de pagos pre-existentes siguen procesándose; eso usa
+  // events_secret, no estas credenciales.)
+  if (!data.is_active) return null;
   return {
     publicKey: data.public_key,
     privateKey: decrypt(data.private_key_encrypted),
@@ -73,7 +92,7 @@ export async function loadWompiCredsForProperty(propertyId: string): Promise<{
 export async function getWompiConfigForUI(
   propertyId: string,
 ): Promise<
-  | (Pick<WompiConfigRow, "public_key" | "is_test_mode"> & {
+  | (Pick<WompiConfigRow, "public_key" | "is_test_mode" | "is_active"> & {
       hasPrivateKey: boolean;
       hasEventsSecret: boolean;
     })
@@ -82,7 +101,9 @@ export async function getWompiConfigForUI(
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("wompi_configs")
-    .select("public_key, private_key_encrypted, events_secret_encrypted, is_test_mode")
+    .select(
+      "public_key, private_key_encrypted, events_secret_encrypted, is_test_mode, is_active",
+    )
     .eq("property_id", propertyId)
     .maybeSingle();
   if (error) throw mapDbError(error);
@@ -90,6 +111,7 @@ export async function getWompiConfigForUI(
   return {
     public_key: data.public_key,
     is_test_mode: data.is_test_mode,
+    is_active: data.is_active,
     hasPrivateKey: !!data.private_key_encrypted,
     hasEventsSecret: !!data.events_secret_encrypted,
   };

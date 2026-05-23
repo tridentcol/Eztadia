@@ -14,8 +14,10 @@ import {
   updateIcalFeedSchema,
   deleteIcalFeedSchema,
   regenerateIcalSecretSchema,
+  syncIcalFeedNowSchema,
 } from "@/lib/validation/integrations";
 import { logAudit } from "@/lib/audit";
+import { syncIcalFeed } from "@/lib/ical/sync";
 import { run } from "./_helpers";
 
 export async function createIcalFeedAction(raw: unknown) {
@@ -73,6 +75,34 @@ export async function deleteIcalFeedAction(raw: unknown) {
     revalidatePath("/dashboard/integrations/ical");
     revalidatePath("/dashboard/integrations");
     return { ok: true as const };
+  });
+}
+
+export async function syncIcalFeedNowAction(raw: unknown) {
+  return run(syncIcalFeedNowSchema, raw, async (input) => {
+    const propertyId = await getIcalFeedPropertyId(input.feedId);
+    // Manager+ puede forzar sync — es operación de mantenimiento.
+    await requirePropertyRole(propertyId, "manager");
+    const outcome = await syncIcalFeed(input.feedId);
+    await logAudit({
+      action: "ical.feed_synced_manual",
+      resourceType: "ical_feed",
+      resourceId: input.feedId,
+      propertyId,
+      diff: {
+        ok: outcome.ok,
+        imported: outcome.imported,
+        removed: outcome.removed,
+        error: outcome.error,
+      },
+    });
+    revalidatePath("/dashboard/integrations/ical");
+    return {
+      ok: outcome.ok,
+      imported: outcome.imported,
+      removed: outcome.removed,
+      error: outcome.error,
+    };
   });
 }
 

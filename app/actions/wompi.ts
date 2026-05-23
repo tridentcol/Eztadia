@@ -3,7 +3,11 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { requirePropertyRole } from "@/lib/auth/session";
-import { upsertWompiConfig, deleteWompiConfig } from "@/lib/db/mutations/wompi";
+import {
+  upsertWompiConfig,
+  deleteWompiConfig,
+  setWompiActive,
+} from "@/lib/db/mutations/wompi";
 import { uuid } from "@/lib/validation/common";
 import { logAudit } from "@/lib/audit";
 import { run } from "./_helpers";
@@ -33,6 +37,27 @@ export async function saveWompiConfigAction(raw: unknown) {
     revalidatePath("/dashboard/integrations/wompi");
     revalidatePath("/dashboard/integrations");
     return { ok: true as const };
+  });
+}
+
+const toggleActiveSchema = z.object({
+  propertyId: uuid,
+  isActive: z.boolean(),
+});
+
+export async function setWompiActiveAction(raw: unknown) {
+  return run(toggleActiveSchema, raw, async (input) => {
+    await requirePropertyRole(input.propertyId, "manager");
+    await setWompiActive(input.propertyId, input.isActive);
+    await logAudit({
+      action: input.isActive ? "wompi.config_activated" : "wompi.config_paused",
+      resourceType: "wompi_config",
+      resourceId: input.propertyId,
+      propertyId: input.propertyId,
+    });
+    revalidatePath("/dashboard/integrations/wompi");
+    revalidatePath("/dashboard/integrations");
+    return { ok: true as const, isActive: input.isActive };
   });
 }
 

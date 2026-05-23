@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { AdminUserRow, AdminUserDetail } from "@/lib/admin";
+import { getAdminUserDetailAction } from "@/app/actions/admin";
 import { UsersTable } from "./UsersTable";
 import { UsersCards } from "./UsersCards";
 import { UserDetailDrawer } from "./UserDetailDrawer";
@@ -9,13 +10,18 @@ import { IconSearch, IconChevronDown } from "../icons";
 
 export function UsersPageClient({
   rows,
-  details,
+  details: initialDetails,
 }: {
   rows: AdminUserRow[];
   details: Record<string, AdminUserDetail>;
 }) {
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  // Cache local: arranca con pre-cargados del server, agrega los fetcheados
+  // on-demand. `null` = ya fetcheado pero no existe; ausente = no intentado.
+  const [details, setDetails] = useState<
+    Record<string, AdminUserDetail | null>
+  >(initialDetails);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -26,6 +32,21 @@ export function UsersPageClient({
         r.email.toLowerCase().includes(q),
     );
   }, [rows, query]);
+
+  const fetchDetail = useCallback(async (userId: string) => {
+    const res = await getAdminUserDetailAction({ userId });
+    if (res.ok) {
+      setDetails((prev) => ({ ...prev, [userId]: res.data ?? null }));
+    }
+  }, []);
+
+  // Cuando seleccionas un user sin detalle pre-cargado, lo fetchea.
+  // Mientras se resuelve, el Drawer ya muestra <Skeleton/> (detail=null).
+  useEffect(() => {
+    if (!selectedId) return;
+    if (selectedId in details) return; // ya cacheado (o null final)
+    void fetchDetail(selectedId);
+  }, [selectedId, details, fetchDetail]);
 
   const detail = selectedId ? details[selectedId] ?? null : null;
 

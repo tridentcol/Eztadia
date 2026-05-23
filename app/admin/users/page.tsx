@@ -17,10 +17,11 @@ export default async function AdminUsersPage() {
   const fullRows = await listAdminUsersFull({ limit: 200 });
   const rows = fullRows.map((r) => toAdminUserRow(r, me.id));
 
-  // Pre-cargar detalles para los primeros 50 — el drawer abre instantáneo.
-  // Para más, el drawer haría fetch on-demand; por ahora cabe en una página.
+  // Pre-cargar detalles para los primeros 25 — el drawer abre instantáneo
+  // en el head típico. Para filas más abajo (>25) el client hace fetch
+  // on-demand vía getAdminUserDetailAction y el drawer muestra skeleton.
   const detailEntries = await Promise.all(
-    fullRows.slice(0, 50).map(async (r) => {
+    fullRows.slice(0, 25).map(async (r) => {
       const full = await getAdminUserDetailFull(r.id);
       return full ? ([r.id, toAdminUserDetail(full, me.id)] as const) : null;
     }),

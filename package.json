@@ -26,6 +26,7 @@
     "@supabase/supabase-js": "^2.106.1",
     "@tanstack/react-table": "^8.20.5",
     "next": "^15.1.0",
+    "node-ical": "^0.26.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",

@@ -61,3 +61,7 @@ export const deleteIcalFeedSchema = z.object({
 export const regenerateIcalSecretSchema = z.object({
   propertyId: uuid,
 });
+
+export const syncIcalFeedNowSchema = z.object({
+  feedId: uuid,
+});
