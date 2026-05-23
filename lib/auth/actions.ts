@@ -122,6 +122,9 @@ export async function signUpAction(
     if (msg.includes("password")) {
       return { ok: false, error: "Esa contrasena no cumple los requisitos." };
     }
+    if (error.status === 429 || msg.includes("rate limit")) {
+      return { ok: false, error: "Demasiados intentos. Esperá unos minutos y volvé a probar." };
+    }
     return { ok: false, error: "No pudimos crear tu cuenta. Intenta de nuevo." };
   }
 
