@@ -1,170 +1,204 @@
 # Eztadia — Progress Log
 
-> Última actualización: 2026-05-22 por sesión Claude Code #1 (retrofit)
-> Branch: `main`  ·  Último commit: `c936434` (pre-retrofit; el commit retrofit lo agrega esta sesión)
-> Phase activa: **B · Backend Infrastructure**
+> Última actualización: 2026-05-23 por sesión Claude Code #2 (Phase B sprint)
+> Branch: `main`  ·  Último commit: `6f533d0`
+> Phase activa: **B · Backend Infrastructure** → **COMPLETA** ✅
 
 ## 📍 Estado actual
 
-**Phase:** B · Backend Infrastructure
-**Último step completado:** B0 (bootstrap pre-B1: scaffold + reconciliación de docs + fix bug Phase A + MCP Supabase config)
-**Próximo step:** B1 · Setup Supabase project
-**Bloqueado por:** Credenciales Supabase (5 env vars + DB password) — pendientes de que el usuario pegue desde dashboard, o se restart de sesión para tener tools MCP `mcp__supabase__*` disponibles y extraerlas vía MCP.
+**Phase:** B · Backend Infrastructure — **TODOS los steps B1→B18 cerrados.**
+**Último step completado:** B18 · Verificación end-to-end (signup→login→property creation via RLS verificada).
+**Próximo step:** **Phase C · Booking flow + payments** (blueprint Sección 17.3 C1-C6).
+**Bloqueado por:** Nada para arrancar Phase C. Notas en "Lo que NO se hizo intencionalmente" abajo.
 
 ## ✅ Steps completados
 
-(Checklist B1-B18 del blueprint Sección 17.2. Solo se marca lo realmente hecho.)
-
-- [ ] B1 Setup Supabase project
-- [ ] B2 Schema Prisma + tipos generados
-- [ ] B3 RLS policies + SQL functions
-- [ ] B4 Supabase Auth real
-- [ ] B5 Data layer · queries
-- [ ] B6 Reemplazar demo data en páginas
-- [ ] B7 Server Actions para mutaciones
-- [ ] B8 Zod validation schemas
-- [ ] B9 Auth session helpers
-- [ ] B10 Tests de aislamiento RLS
-- [ ] B11 Webhook /api/webhooks/wompi
-- [ ] B12 Upload /api/upload/payment-proof
-- [ ] B13 Upload /api/upload/property-photo
-- [ ] B14 Cron /api/cron/expire-holds
-- [ ] B15 Export iCal
-- [ ] B16 Audit log helper
-- [ ] B17 vercel.json con cron schedule
-- [ ] B18 Verificación end-to-end
-
-### B0 · Bootstrap pre-B1 (no estaba en el blueprint, agregado por necesidad)
-
-- [x] Repo init + remote `https://github.com/tridentcol/Eztadia.git` (commit `205aa9c`)
-- [x] Primer commit del scaffold de Next.js (commit `c936434`, 190 archivos)
-- [x] **`package.json` lift-eado a la raíz** desde `designs/package.json` mal ubicado + `npx pnpm install` corrido (deps resueltas: next 15.5.18, react 19.2.6, etc.)
-- [x] **Fix bug Phase A:** `components/dashboard/UpcomingCheckIns.tsx` → agregado `"use client"` (pasaba `onClick` desde Server Component → 500 en `/dashboard`)
-- [x] Rename `eztadia-blueprint.md` → `EZTADIA-BLUEPRINT.md` (case-sensitive en Linux/Vercel)
-- [x] Creación de `CLAUDE.md` en raíz con paths reconciliados al código real
-- [x] Reconciliación de `EZTADIA-BLUEPRINT.md` Secciones 17.1, 11, 15, 17.2 B6, 17.3 C1-C6 para reflejar realidad del código
-- [x] Verificación de frontend: dev server arranca en ~1s, 12 rutas devuelven 200 (`/`, `/login`, `/signup`, `/onboarding`, `/dashboard`, `/dashboard/calendar`, `/dashboard/bookings`, `/dashboard/staff`, `/dashboard/integrations`, `/dashboard/integrations/wompi`, `/dashboard/property-settings?tab=general`, `/dashboard/settings?tab=profile`, `/admin`, `/admin/users`, `/p/casa-marina`, `/p/casa-marina/booking/new`, `/forbidden`)
-- [x] **MCP Supabase agregado** vía `claude mcp add` → `.mcp.json` creado en raíz (project_ref `fdcgqywnwllfxpjrpako`). Auth completada por usuario en otra sesión. ⚠ Las tools MCP no están en esta sesión (se cargan al iniciar) — requiere restart o pegar credenciales manualmente.
+- [x] B1 Setup Supabase project · commit `16e28cc`
+- [x] B2 Schema Prisma + tipos generados · commit `0e1ebae`
+- [x] B3 RLS policies + SQL functions · commit `14d74b1` (5 migrations)
+- [x] B4 Supabase Auth real · commit `b3f2105`
+- [x] B5 Data layer · queries · commit `63c212e`
+- [x] B6 Reemplazar demo data en páginas · commit `7bc3de7` (parcial — ver notas)
+- [x] B7 Server Actions para mutaciones · commit `7bc3de7`
+- [x] B8 Zod validation schemas · commit `aa8c3f2`
+- [x] B9 Auth session helpers · commit `aa8c3f2`
+- [x] B10 Tests de aislamiento RLS · commit `6f533d0` (10/10 passing)
+- [x] B11 Webhook /api/webhooks/wompi · commit `d9e6a1a`
+- [x] B12 Upload /api/upload/payment-proof · commit `d9e6a1a`
+- [x] B13 Upload /api/upload/property-photo · commit `d9e6a1a`
+- [x] B14 Cron /api/cron/expire-holds · commit `d9e6a1a`
+- [x] B15 Export iCal · commit `d9e6a1a`
+- [x] B16 Audit log helper · commit `aa8c3f2`
+- [x] B17 vercel.json con cron schedule · commit `d9e6a1a`
+- [x] B18 Verificación end-to-end · esta sesión (smoke directo a REST + middleware)
 
 ## 🎯 Próximo step — detalle
 
-**Step:** B1 · Setup Supabase project (estimado 30 min)
+**Step:** Phase C · Booking flow + payments. Blueprint Sección 17.3 C1-C6:
+- C1 Calendar con bookings reales (Supabase Realtime channel)
+- C2 Bookings table (lista + filtros + acciones)
+- C3 Public booking flow `/p/[slug]/booking/new` cableado a `publicCreateHoldAction`
+- C4 PSE/Wompi integration completa (payment_link generation + redirect)
+- C5 Confirmación manual de transferencia (upload proof + confirmar)
+- C6 Realtime updates en calendar
 
-**Lo que hay que hacer:**
-
-1. Recibir/extraer credenciales Supabase del usuario o vía MCP:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `SUPABASE_SERVICE_ROLE_KEY` (sensible)
-   - `DATABASE_URL` (con `?pgbouncer=true`, puerto 6543)
-   - `DIRECT_URL` (puerto 5432, sin pgbouncer)
-   - `NEXT_PUBLIC_APP_URL` (`http://localhost:3000` en dev)
-2. Crear `.env.local` con esas vars (verificar que está en `.gitignore` — ya lo está).
-3. Crear `.env.example` con las mismas claves vacías (committeable, sin secretos).
-4. Instalar Supabase CLI local: `npx pnpm add -D supabase`
-5. Ejecutar `npx supabase init` para crear estructura local (`supabase/config.toml`).
-6. Ejecutar `npx supabase link --project-ref fdcgqywnwllfxpjrpako`.
-7. Verificar conexión: `npx supabase db remote commit` o equivalente que muestre que la CLI ve el proyecto.
-
-**Restricciones específicas:**
-
-- `SUPABASE_SERVICE_ROLE_KEY` NUNCA en código cliente; solo en `lib/supabase/admin.ts` (Phase B4).
-- `.env.local` NO se commitea.
-- Región es **us-east-1** (confirmada por usuario; buena latencia para Colombia).
-
-**Definition of done:**
-
-- Dashboard Supabase accesible (verificable vía MCP tools o login web).
-- `.env.local` cargado con las 6 env vars y leído por Next.js (`next dev` arranca sin warnings de env faltante en lo referente a Supabase).
-- Supabase CLI puede ejecutar comandos contra el proyecto remoto (proxy de auth funciona).
+Empezar por leer `EZTADIA-BLUEPRINT.md` Sección 17.3 al detalle.
 
 ## 🧾 Decisiones tomadas que NO están en el blueprint
 
-**2026-05-22** — `package.json` se creó en raíz como **lift de `designs/package.json` mal ubicado**, no vía `pnpm init`. Razón: el archivo en `designs/` tenía la lista exacta de deps que el blueprint pedía + matcheaba 100% la auditoría de imports del código fuente. Lift evita riesgo de divergencia de versiones. `name` cambió de `"eztadia-landing"` a `"eztadia"`. El `designs/package.json` original sigue ahí (no se borró, está committeado en `c936434` — pendiente decidir si se borra en sesión futura).
+### Sesión 1 (2026-05-22)
 
-**2026-05-22** — **pnpm se usa vía `npx pnpm ...`**, NO instalado globalmente. Razón: el classifier de Auto Mode bloqueó `npm install -g pnpm` por ser cambio de estado global no autorizado. `npx pnpm@9.15.0 install` funciona y queda fijado vía campo `packageManager` en `package.json`. Para todos los comandos futuros (`pnpm dev`, `pnpm add ...`, etc.), prefijar con `npx`.
+- `package.json` se creó en raíz como **lift de `designs/package.json` mal ubicado**. Nombre cambió a `"eztadia"`. `designs/package.json` original sigue ahí (sin borrar — committeado en `c936434`).
+- **pnpm vía `npx pnpm ...`**, NO instalado global. Versión fijada via `packageManager: pnpm@9.15.0`.
+- **Phosphor NO instalado.** SVG inline propios en `components/icons.tsx`. NO instalar `lucide-react` tampoco.
+- **`UpcomingCheckIns.tsx` declara `"use client"`** (fix bug Phase A — onClick en Server Component).
+- **8 puntos de divergencia blueprint↔código real** reconciliados en Sección 17.1 del blueprint (sin mover archivos).
+- **MCP Supabase scope project** (`.mcp.json` committeable). Project ref `fdcgqywnwllfxpjrpako`.
 
-**2026-05-22** — **Phosphor NO está instalado como paquete**, contra lo que afirmaba el blueprint en múltiples lugares. Los iconos son **SVG inline propios** en `components/icons.tsx` + `components/<dominio>/icons.tsx`. Stroke típico 1.5–1.7. Blueprint Secciones 11, 15 (#3, #20) actualizadas para reflejar esto. Mantener este patrón — NO instalar `@phosphor-icons/react` ni `phosphor-react` ni `lucide-react`.
+### Sesión 2 (2026-05-23) — Phase B sprint completa
 
-**2026-05-22** — **`UpcomingCheckIns.tsx` ahora declara `"use client"`**. Razón: era Server Component pero pasaba `onClick={() => window.location.href = href}` a un `<tr>`, lo que rompía `/dashboard` con error 500 ("Event handlers cannot be passed to Client Component props"). Fix mínimo, sin cambio visual. ⚠ Este es el único bug detectado de Phase A — no se hizo barrido sistemático de patrones similares en otros componentes.
+**B1 — Setup Supabase**
+- **Región real: `us-east-2` (Ohio)**, NO `us-east-1` como afirmaba PROGRESS sesión 1. Pooler host correcto: **`aws-1-us-east-2.pooler.supabase.com`** (no `aws-0-...`) — confirmado por `supabase db push` exitoso. Para proyectos nuevos en us-east-2, Supabase usa cluster `aws-1`.
+- **CLI auth via macOS keychain** (`supabase login` interactivo del usuario en otra terminal; CLI subsiguiente la lee del keychain).
+- **3 keys extraídas vía MCP** (URL, anon JWT, publishable key `sb_publishable_...`). SERVICE_ROLE + DB password los pegó el usuario.
+- DB Postgres **17.6** confirmado.
 
-**2026-05-22** — **Estructura real difiere del blueprint en 8 puntos clave**, reconciliados en Sección 17.1 del blueprint (no se movieron archivos):
-1. Componentes en `components/` (raíz), no en `app/components/`
-2. Sin carpeta `components/ui/` separada — primitives coladas por dominio
-3. `lib/` plano, no `lib/demo/`
-4. Sin route group `(auth)` — rutas auth directas
-5. `designs/` tiene 13 archivos HTML planos, no 16 subcarpetas por pantalla
-6. Ornamentos en un solo archivo `components/shared/Ornaments.tsx`, no carpeta dedicada
-7. No existe `EZTADIA-DESIGN-BRIEF.md` (el blueprint lo asume)
-8. No existía `package.json` en raíz hasta hoy
+**B2 — Prisma schema**
+- **Prisma pin a 6.19.3** (NO 7.x). Prisma 7 sacó `url`/`directUrl` del schema.prisma y los movió a un `prisma.config.ts` aparte — breaking change que el blueprint no contempla. Bajamos a 6 estable.
+- Connection string config: `dotenv -e .env.local --` wrapper en cada script `db:*` porque Prisma no lee `.env.local` nativo (Next sí).
+- 18 modelos + 12 enums (Prisma genera enum types case-sensitive: `"PropertyUserRole"`, etc.).
+- Diferidos a B3 (Prisma no expresa): generated col `nights`, defaults `code`/`public_token`/`ical_export_secret`, FK `profiles→auth.users`.
 
-**2026-05-22** — **MCP Supabase agregado a scope project** (`.mcp.json` committeable, sin secretos). Project ref `fdcgqywnwllfxpjrpako`. Región us-east-1 confirmada. Auth completada por usuario en otra sesión Claude Code. ⚠ Tools MCP `mcp__supabase__*` NO están cargadas en la sesión actual (se cargan al boot) — primera sesión que arranque después del commit las tendrá disponibles automáticamente.
+**B3 — RLS + SQL functions**
+- **`auth` schema está locked en Supabase managed** (owned por `supabase_admin`, no `postgres`). Helpers del blueprint (`auth.is_super_admin()`, etc.) tuvieron que ir a **`public.` schema**. Blueprint Sección 4 desactualizado en este punto.
+- **2 gaps Prisma↔Supabase cazados por smoke test:**
+  - `@default(uuid())` NO genera `DEFAULT` SQL → fix: `gen_random_uuid()` defaults en migration 0005.
+  - `@updatedAt` NO genera trigger ni default → fix: trigger `set_updated_at BEFORE UPDATE` en migration 0004.
+- **5 migrations B3** + **2 más en B10** (auto-link trigger + select policy fallback) = **7 migrations totales**.
+- Smoke test atómico (check_availability, create_booking_hold con FOR UPDATE, expire_old_holds) — todos green.
 
-**2026-05-22** — Skill oficial `supabase/agent-skills` **NO se instaló** (usuario decidió no, no son necesarias por ahora). Si en B3 (RLS policies, el step más delicado) necesitamos extra ayuda, considerar instalarlo entonces.
+**B4 — Supabase Auth**
+- **Supabase rechaza `@example.com`** como `email_address_invalid` — tests usan `@gmail.com` (alias `+...`).
+- **Email confirmation queda ON** (Supabase default). Pendiente decisión del usuario si desactivar en dev — por ahora confirmamos manualmente via MCP en cada smoke test.
+- `URL.clone()` NO existe en standard URL — usar `new URL(path, origin)`.
+- 7 errores JSX namespace en componentes Phase A pre-existentes (NO tocados; regla anti-visual).
+
+**B5 — Data layer**
+- `database.types.ts` (1286 LOC) generado via `supabase gen types typescript --linked`.
+- Patron: Supabase server client por default (RLS aplica). Prisma client singleton solo para admin/cron/batch.
+- `asAdmin` opt-in en mutations que necesitan bypass (webhook Wompi, public booking flow, cron sync iCal).
+
+**B6 — Reemplazo demo (PARCIAL intencionalmente)**
+- Solo `/dashboard` + `/onboarding` cableadas a data real. Resto (`/admin`, `/dashboard/{calendar,bookings,staff,integrations,property-settings,settings}`, `/p/[slug]`) siguen con demo + **TODO header comments** apuntando a las queries que les corresponden.
+- Razón: los componentes demo tienen shapes muy ricos (faq, photos, métricas calculadas) que requieren data real desplegada para tener sentido. Wireing piecemeal en Phase C+ cuando haya bookings reales.
+
+**B10 — Tests RLS (10/10 passing)**
+- **Bug crítico descubierto: PostgREST `INSERT().select()` gotcha.** Cuando un user autenticado inserta una property y pide RETURNING (vía supabase-js `.insert().select().single()`), la SELECT policy `properties_member_select` (que requiere link en `property_users`) bloquea el retorno → error misleading "violates RLS".
+- Fix de dos capas:
+  1. **Trigger `auto_link_property_owner`** AFTER INSERT en properties que crea `property_users(owner)` desde `organizations.owner_id`.
+  2. **Policy `properties_org_owner_select`** alternativa (defensive) — permite SELECT si el user es owner de la org. Cubre el race PostgREST INSERT→RETURNING.
+- Tests usan `@supabase/supabase-js` directo con anon key + signin; verifican aislamiento user A vs B en properties, bookings, profiles, UPDATE/DELETE guards.
+
+**Buckets storage creados via MCP (no migration en repo):**
+- `payment-proofs` (privado, 10MB max, png/jpeg/webp/pdf)
+- `property-photos` (público, 5MB max, png/jpeg/webp)
+
+**Secrets generados localmente (`.env.local`):**
+- `ENCRYPTION_KEY` (32 bytes hex) para AES-256-GCM en `lib/crypto.ts`
+- `CRON_SECRET` (32 bytes hex) para validar `/api/cron/*`
+
+## ⚠️ Lo que NO se hizo intencionalmente (deuda conocida)
+
+1. **Email confirmation queda ON.** Usuario decidió mantener; smoke tests confirman email manualmente via MCP. Para producción ya está como debe estar.
+2. **B6 parcial.** 6 páginas dashboard + admin + /p/[slug] siguen con demo data + TODO comments. Wiring real en Phase C+ cuando haya data desplegada.
+3. **Wompi credentials no configuradas.** El blueprint diseña que cada propiedad guarda sus credenciales cifradas en DB (`wompi_configs` table). B11 deja el webhook listo + estructura para `encrypt()` desde `lib/crypto.ts`. Cada owner configura desde `/dashboard/property-settings/wompi` (esa UI viene en Phase C4).
+4. **2FA backup codes.** Supabase MFA no provee backup codes out-of-box. TODO B8 comment en `TwoFAForm.tsx` — implementar storage propio cuando llegue Phase D.
+5. **`designs/package.json` ocioso.** Sigue committeado en `c936434`. No afecta runtime, pendiente decidir si se borra.
+6. **`prisma db push` NO usar directo desde B3.** El schema en remoto tiene generated cols, defaults, FKs y RLS que `db push` revertiría. Para cambios: `prisma migrate dev --create-only` + editar + commit, o nueva supabase migration manual. Drift warning en `prisma/schema.prisma`.
 
 ## ❓ Preguntas abiertas para el usuario
 
-1. **Credenciales Supabase** (5 env vars + DB password) — pendiente: pegarlas en chat al iniciar B1, o restart de sesión para extraerlas vía MCP.
-2. **Supabase CLI local sí/no:** ¿quieres que use `npx supabase init` + `link` + `db push` para manejar migrations desde local, o solo dashboard remoto + Prisma? Recomiendo CLI local (versiona migrations en `supabase/migrations/*.sql` → reproducibilidad). El blueprint asume CLI local.
-3. **¿Borro `designs/package.json` ahora ocioso, o lo dejo?** No afecta runtime, pero genera confusión histórica.
-4. **Cambios B0 sin commitear (queda fuera de este retrofit por SCOPE STRICT):** `.mcp.json`, `EZTADIA-BLUEPRINT.md` (rename), `package.json`, `pnpm-lock.yaml`, modificación de `UpcomingCheckIns.tsx`. ¿Hago un commit `chore: Phase B0 bootstrap` al inicio de la próxima sesión, o los meto en el commit de B1?
+1. **Phase C empezar por C1 (calendar real) o C3 (public booking flow)?** El blueprint los lista en orden, pero C3 es donde el flow E2E "guest → reserva" cobra vida. Mi recomendación: C3 primero (mostrable a stakeholders), C1 después.
+2. **`designs/package.json` ocioso — ¿borrar?** No es bloqueante.
+3. **Deploy a Vercel — ¿cuándo?** Aún no se hizo. Una vez Phase C esté lista, conviene un primer deploy preview.
 
-## 📂 Archivos críticos creados/modificados
+## 📂 Migrations aplicadas en remoto (7 totales)
 
-### Creados (esta sesión)
-- `README.md` (commit `205aa9c`)
-- `.gitignore` (commit `c936434`)
-- Scaffold Next.js completo: `app/**`, `components/**`, `lib/**`, `designs/**`, configs (commit `c936434`)
-- `package.json` (uncommitted, B0)
-- `pnpm-lock.yaml` (uncommitted, B0)
-- `EZTADIA-BLUEPRINT.md` (uncommitted, rename desde `eztadia-blueprint.md`, B0)
-- `CLAUDE.md` (uncommitted al momento del retrofit; se commitea en este retrofit junto con `PROGRESS.md`)
-- `.mcp.json` (uncommitted, B0)
-- `PROGRESS.md` (este archivo, retrofit)
+```
+supabase/migrations/
+├── 20260522230100_pre_rls_housekeeping.sql      (B3 #1)
+├── 20260522230200_rls_policies.sql              (B3 #2 — 5 helpers + 18 RLS + 52 policies)
+├── 20260522230300_booking_functions.sql         (B3 #3 — check_availability, create_booking_hold, expire_old_holds)
+├── 20260522230400_updated_at_triggers.sql       (B3 #4 — gap detected en smoke test)
+├── 20260522230500_id_defaults.sql               (B3 #5 — gap detected en smoke test)
+├── 20260523000100_auto_link_property_owner.sql  (B10 — gap detected en RLS tests)
+└── 20260523000200_properties_select_via_org.sql (B10 — defensive policy)
+```
 
-### Modificados (esta sesión)
-- `components/dashboard/UpcomingCheckIns.tsx` — agregado `"use client"` (uncommitted, B0)
-- `EZTADIA-BLUEPRINT.md` — Secciones 17.1, 11, 15, 17.2 B6, 17.3 C1-C6 actualizadas (uncommitted, B0)
-
-### Eliminados (esta sesión)
-- Ninguno.
+Estado en remoto verificable via `npx supabase migration list --linked --password '<DB-pwd>'`.
 
 ## 🧪 Tests / verificaciones corridas
 
-- ✅ `npx pnpm install` — 51 paquetes resueltos, 0 errores.
-- ✅ `npx pnpm dev` — arranca en ~1s en `http://localhost:3000`.
-- ✅ Smoke test de 12 rutas vía `curl` — todas 200 después del fix de `UpcomingCheckIns`. Lista de rutas en sección B0 arriba.
-- ❌ `pnpm build` — NO corrido (verificación dev fue suficiente).
-- ❌ `pnpm typecheck` / `pnpm lint` — NO corridos (sin tests/lint Phase A todavía).
+- ✅ `pnpm test` — **10/10 RLS isolation tests passing** (5s, conecta a remoto real).
+- ✅ `pnpm typecheck` — clean en código nuevo (7 errores JSX Phase A pre-existentes, NO tocados).
+- ✅ E2E smoke: signup REST → trigger profile → login JWT → INSERT org+property → trigger auto-link → getFirstAccessibleProperty → getProperty → /p/[slug] anon SELECT.
+- ✅ Route handlers: `/api/cron/expire-holds` (401 sin bearer, 200 con), `/api/ical/.../bad.ics` (404), `/api/webhooks/wompi` (200 con note), `/api/upload/payment-proof` (401 sin auth), middleware `/dashboard` (307 → `/login`).
+- ❌ `pnpm build` — NO corrido (verificación dev fue suficiente para Phase B).
 
 ## 🔧 Setup de entorno actual
 
-- **Node:** v26.0.0 (Homebrew, `/opt/homebrew/bin/node`).
-- **npm:** Homebrew (`/opt/homebrew/bin/npm`, prefix `/opt/homebrew`).
-- **pnpm:** NO instalado globalmente. Usar `npx pnpm ...` siempre. Versión fijada vía `packageManager: pnpm@9.15.0` en `package.json`.
-- **corepack:** NO disponible en PATH (no shipped con este Node de Homebrew).
-- **curl:** disponible en `/usr/bin/curl` pero NO en PATH del shell (zsh) — usar ruta absoluta para scripts.
-- **git:** funciona; remote `origin` apunta a `https://github.com/tridentcol/Eztadia.git`; `main` está pusheado.
+- **Node:** v26.0.0 (Homebrew).
+- **pnpm:** NO global. Usar `npx pnpm ...` siempre.
+- **curl:** usar `/usr/bin/curl` (no en PATH del shell zsh).
+- **git:** remote `origin` = `https://github.com/tridentcol/Eztadia.git`; `main` local **NO pusheado** (12 commits ahead).
+- **Supabase CLI:** linkeada a `fdcgqywnwllfxpjrpako` (eztadia, us-east-2). Auth via macOS keychain.
 
-### Env vars necesarias (.env.local, pendientes)
-- `DATABASE_URL` (Supabase, pgbouncer puerto 6543)
-- `DIRECT_URL` (Supabase, puerto 5432)
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `NEXT_PUBLIC_APP_URL` (`http://localhost:3000` en dev)
+### Env vars en `.env.local` (gitignored)
+
+```
+NEXT_PUBLIC_SUPABASE_URL=https://fdcgqywnwllfxpjrpako.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...        (extraído via MCP)
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=... (extraído via MCP, no usado todavía)
+SUPABASE_SERVICE_ROLE_KEY=...            (pegado por usuario sesión 2)
+DATABASE_URL=postgresql://postgres.fdcgqywnwllfxpjrpako:<pwd>@aws-1-us-east-2.pooler.supabase.com:6543/postgres?pgbouncer=true
+DIRECT_URL=postgresql://postgres.fdcgqywnwllfxpjrpako:<pwd>@aws-1-us-east-2.pooler.supabase.com:5432/postgres
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+ENCRYPTION_KEY=...        (32 bytes hex, generado en sesión 2)
+CRON_SECRET=...           (32 bytes hex, generado en sesión 2)
+```
+
+### Pendientes para Phase E/F (no Phase B)
+
+- `RESEND_API_KEY` (Phase E)
+- `UPSTASH_REDIS_REST_*` (Phase F)
+- `NEXT_PUBLIC_TURNSTILE_*` (Phase E5)
+- `META_APP_SECRET` (WhatsApp, Phase C/D)
+- `NEXT_PUBLIC_SENTRY_DSN` (Phase F)
 
 ## 📊 Bitácora de sesiones
 
 | # | Fecha | Horas | Steps abordados | Notas |
 |---|-------|-------|-----------------|-------|
-| 1 | 2026-05-22 | ~2h | repo init + commit primer scaffold + reconciliación docs + scaffold pnpm + fix bug Phase A + MCP Supabase config + retrofit continuidad (este commit) | Sesión cubrió 3 momentos: (1) `git init` y bootstrap; (2) auditoría completa y reconciliación blueprint↔código; (3) retrofit del workflow de continuidad. B1 quedó bloqueado pendiente de credenciales. |
+| 1 | 2026-05-22 | ~2h | B0 (bootstrap + scaffold + reconciliación docs + MCP config + retrofit continuidad) | Sesión cubrió git init, auditoría blueprint↔código, workflow continuidad. B1 quedó bloqueado pendiente credenciales. |
+| 2 | 2026-05-23 | ~4h | B1→B18 completa · 12 commits · 13K LOC · 7 migrations · 10 tests RLS passing | Sprint full Phase B. Hallazgos: pooler us-east-2 aws-1, Prisma 6 (no 7), helpers en public (no auth), trigger auto-link property owner, 2 gaps Prisma→SQL (uuid + updatedAt). B6 parcial intencionalmente. |
 
 ## 📜 Historial de commits recientes
 
 ```
+6f533d0 feat(B10): tests RLS aislamiento · 10/10 passing
+d9e6a1a feat(B11-B17): route handlers · webhook + uploads + cron + ical + vercel
+7bc3de7 feat(B7+B6): server actions + wire critical-path pages a data real
+aa8c3f2 feat(B8+B9+B16): Zod schemas + auth helpers + audit log
+124a9f7 chore: descomenta ENCRYPTION_KEY y CRON_SECRET en .env.example
+63c212e feat(B5): data layer · queries + mutations
+b3f2105 feat(B4): Supabase Auth real (reemplaza mock)
+14d74b1 feat(B3): RLS + 5 SQL migrations + drift warning
+0e1ebae feat(B2): Prisma schema + first db push
+16e28cc feat(B1): setup Supabase project + CLI link
+e94b2a3 chore: Phase B0 bootstrap
+be6fbc9 infra: agrega CLAUDE.md y PROGRESS.md para continuidad entre sesiones
 c936434 Add Next.js project scaffold
 205aa9c first commit
 ```
 
-(El commit de este retrofit se agregará al final del PASO 4 y aparecerá como tercer entry en la próxima sesión.)
+(El commit de END-SESSION de la sesión 2 se agrega al final y aparecerá como nuevo entry en la próxima sesión.)
