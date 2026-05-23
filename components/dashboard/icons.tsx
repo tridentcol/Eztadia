@@ -132,3 +132,9 @@ export const IconPlus = (p: P) => (
     <path d="M12 5v14" />
   </svg>
 );
+export const IconChart = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M3 17 9 11l4 4 8-8" />
+    <path d="M14 4h7v7" />
+  </svg>
+);

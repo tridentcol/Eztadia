@@ -39,7 +39,7 @@ const SECTIONS: { label: string; items: { href: string; label: string; Icon: Ico
       { href: "/admin/emails", label: "Emails", Icon: IconMail },
       { href: "/admin/whatsapp", label: "WhatsApp", Icon: IconChatCircle },
       { href: "/admin/webhooks", label: "Webhooks", Icon: IconLightning },
-      { href: "/admin/errors", label: "Errores", Icon: IconBug, badge: 3 },
+      { href: "/admin/errors", label: "Errores", Icon: IconBug },
     ],
   },
   {

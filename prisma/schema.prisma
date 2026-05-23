@@ -222,6 +222,7 @@ model Property {
   whatsappConfig    WhatsappConfig?
   whatsappMessages  WhatsappMessage[]
   emailLogs         EmailLog[]
+  webhookLogs       WebhookLog[]
 
   @@index([organizationId])
   @@index([slug])
@@ -555,6 +556,31 @@ model AuditLog {
   @@index([actorId, createdAt])
   @@index([action, createdAt])
   @@map("audit_logs")
+}
+
+model WebhookLog {
+  id              String   @id @default(uuid()) @db.Uuid
+  provider        String
+  eventType       String?  @map("event_type")
+  propertyId      String?  @map("property_id") @db.Uuid
+  requestId       String?  @map("request_id")
+  status          String
+  httpStatus      Int?     @map("http_status")
+  signatureValid  Boolean? @map("signature_valid")
+  payload         Json?
+  response        Json?
+  error           String?
+  durationMs      Int?     @map("duration_ms")
+  ip              String?  @db.Inet
+  userAgent       String?  @map("user_agent")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  property Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([provider, createdAt])
+  @@index([propertyId, createdAt])
+  @@index([status, createdAt])
+  @@map("webhook_logs")
 }
 
 model LoginEvent {

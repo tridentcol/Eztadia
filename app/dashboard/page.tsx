@@ -6,6 +6,11 @@ import {
   getActivePropertyId,
 } from "@/lib/auth/session";
 import { getProperty } from "@/lib/db/queries/property";
+import {
+  getWeekPulseMetrics,
+  getAttentionItems,
+  getUpcomingCheckInsDashboard,
+} from "@/lib/db/queries/dashboard";
 import { Greeting } from "@/components/dashboard/Greeting";
 import { AttentionList } from "@/components/dashboard/AttentionList";
 import { WeekPulse } from "@/components/dashboard/WeekPulse";
@@ -16,19 +21,21 @@ export const metadata: Metadata = {
 };
 
 export default async function DashboardHome() {
-  // Auth guard: middleware ya redirige a /login si no hay sesion. Aqui
-  // verificamos que el user tenga propiedad — sino, onboarding.
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
 
   const propertyId = await getActivePropertyId();
   if (!propertyId) redirect("/onboarding");
 
-  // Datos reales para Greeting (resto sigue en demo hasta tener bookings)
-  const property = await getProperty(propertyId);
+  const [property, pulse, attention, upcoming] = await Promise.all([
+    getProperty(propertyId),
+    getWeekPulseMetrics(propertyId),
+    getAttentionItems(propertyId),
+    getUpcomingCheckInsDashboard(propertyId),
+  ]);
 
-  // TODO(B6 incremental): wire AttentionList/WeekPulse/UpcomingCheckIns a
-  // queries reales cuando exista data (bookings, payments). Por ahora demo.
+  // Demo siempre vivo solo para owner+property fallbacks de shape. El resto
+  // viene de DB.
   const demoSnapshot = getOwnerSnapshot();
   const snapshot = {
     ...demoSnapshot,
@@ -50,6 +57,10 @@ export default async function DashboardHome() {
       name: property.name,
       city: property.city ?? "",
     },
+    pulse,
+    attention,
+    upcoming,
+    // unreadMessages sigue demo hasta Phase E2 (no hay flag de unread).
   };
 
   const now = new Date();

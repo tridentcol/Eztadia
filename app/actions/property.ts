@@ -85,6 +85,7 @@ export async function updatePropertyAction(raw: unknown) {
     if (patch.minStayNights !== undefined) dbPatch.min_stay_nights = patch.minStayNights;
     if (patch.maxStayNights !== undefined) dbPatch.max_stay_nights = patch.maxStayNights;
     if (patch.isActive !== undefined) dbPatch.is_active = patch.isActive;
+    if (patch.contactPhone !== undefined) dbPatch.contact_phone = patch.contactPhone;
 
     const updated = await updateProperty(id, dbPatch);
     await logAudit({

@@ -224,6 +224,63 @@ describe("RLS isolation · bookings", () => {
   });
 });
 
+describe("RLS isolation · webhook_logs", () => {
+  let webhookA: { id: string };
+  let webhookB: { id: string };
+
+  beforeAll(async () => {
+    // Insert via service_role: una fila por propiedad + una global (sin property_id).
+    const { data: rowA } = await admin
+      .from("webhook_logs")
+      .insert({
+        provider: "wompi",
+        property_id: propA.id,
+        status: "processed",
+        event_type: "transaction.updated",
+      })
+      .select()
+      .single();
+    const { data: rowB } = await admin
+      .from("webhook_logs")
+      .insert({
+        provider: "wompi",
+        property_id: propB.id,
+        status: "processed",
+        event_type: "transaction.updated",
+      })
+      .select()
+      .single();
+    webhookA = { id: rowA!.id };
+    webhookB = { id: rowB!.id };
+  });
+
+  it("user A sees his own webhook_logs", async () => {
+    const { data } = await userA.client
+      .from("webhook_logs")
+      .select("id")
+      .eq("id", webhookA.id)
+      .maybeSingle();
+    expect(data?.id).toBe(webhookA.id);
+  });
+
+  it("user A does NOT see user B's webhook_logs", async () => {
+    const { data } = await userA.client
+      .from("webhook_logs")
+      .select("id")
+      .eq("id", webhookB.id)
+      .maybeSingle();
+    expect(data).toBeNull();
+  });
+
+  it("user A cannot INSERT into webhook_logs (no policy)", async () => {
+    const { error } = await userA.client
+      .from("webhook_logs")
+      .insert({ provider: "wompi", status: "received", property_id: propA.id });
+    // RLS bloquea: PostgREST devuelve un error o 0 filas. Aceptamos cualquiera.
+    expect(error).not.toBeNull();
+  });
+});
+
 describe("RLS isolation · profiles", () => {
   it("user A can read his own profile", async () => {
     const { data } = await userA.client

@@ -7,6 +7,7 @@ const TABS = [
   { href: "/dashboard", label: "Resumen" },
   { href: "/dashboard/bookings", label: "Reservas" },
   { href: "/dashboard/calendar", label: "Calendario" },
+  { href: "/dashboard/reports", label: "Reportes" },
   { href: "/dashboard/rooms", label: "Habitaciones" },
   { href: "/dashboard/pricing", label: "Precios" },
   { href: "/dashboard/staff", label: "Staff" },

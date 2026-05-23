@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { uuid, slug } from "./common";
+import { uuid, slug, phoneE164 } from "./common";
 
 export const createPropertySchema = z.object({
   organizationName: z.string().min(2, "Nombre de organizacion requerido."),
@@ -23,6 +23,7 @@ export const updatePropertySchema = z.object({
   minStayNights: z.number().int().min(1).max(365).optional(),
   maxStayNights: z.number().int().min(1).max(365).nullable().optional(),
   isActive: z.boolean().optional(),
+  contactPhone: phoneE164.nullable().optional(),
 });
 
 export type CreatePropertyInput = z.infer<typeof createPropertySchema>;

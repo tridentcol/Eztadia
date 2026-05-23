@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       audit_logs: {
@@ -928,6 +903,68 @@ export type Database = {
           },
         ]
       }
+      webhook_logs: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          error: string | null
+          event_type: string | null
+          http_status: number | null
+          id: string
+          ip: unknown
+          payload: Json | null
+          property_id: string | null
+          provider: string
+          request_id: string | null
+          response: Json | null
+          signature_valid: boolean | null
+          status: string
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          error?: string | null
+          event_type?: string | null
+          http_status?: number | null
+          id?: string
+          ip?: unknown
+          payload?: Json | null
+          property_id?: string | null
+          provider: string
+          request_id?: string | null
+          response?: Json | null
+          signature_valid?: boolean | null
+          status: string
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          error?: string | null
+          event_type?: string | null
+          http_status?: number | null
+          id?: string
+          ip?: unknown
+          payload?: Json | null
+          property_id?: string | null
+          provider?: string
+          request_id?: string | null
+          response?: Json | null
+          signature_valid?: boolean | null
+          status?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_logs_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       whatsapp_configs: {
         Row: {
           access_token_encrypted: string | null
@@ -1265,9 +1302,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       AuditActorType: ["user", "system", "webhook"],

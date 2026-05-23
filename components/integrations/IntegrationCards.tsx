@@ -160,12 +160,12 @@ export function WhatsAppCard({ data }: { data: Integrations["whatsapp"] }) {
       <p className="text-[11px] text-ink-muted m-0 mb-[18px] tracking-[0.02em]">
         Phone: <span className="oldstyle">{data.phone}</span>
       </p>
-      <button
-        type="button"
+      <Link
+        href="/dashboard/integrations/whatsapp"
         className="mt-auto inline-flex items-center justify-center gap-2 h-10 rounded-xl text-sage border border-sage bg-transparent text-sm font-medium hover:bg-sage-tint transition-colors"
       >
-        Editar configuración {ARROW}
-      </button>
+        {data.status === "disconnected" ? "Conectar" : "Editar configuración"} {ARROW}
+      </Link>
     </CardShell>
   );
 }
@@ -258,12 +258,12 @@ export function IcalCard({ data }: { data: Integrations["ical"] }) {
         </p>
       </section>
 
-      <button
-        type="button"
+      <Link
+        href="/dashboard/integrations/ical"
         className="mt-auto inline-flex items-center justify-center gap-2 h-10 rounded-xl text-sage border border-sage bg-transparent text-sm font-medium hover:bg-sage-tint transition-colors"
       >
         Ver / editar feeds {ARROW}
-      </button>
+      </Link>
     </CardShell>
   );
 }

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { PropertyTabs } from "@/components/calendar/PropertyTabs";
 import {
   WompiCard,
@@ -6,14 +7,60 @@ import {
   IcalCard,
 } from "@/components/integrations/IntegrationCards";
 import { ComingSoonSection } from "@/components/integrations/ComingSoon";
-import { getIntegrations } from "@/lib/integrations";
+import { getIntegrations, type IntegrationStatus } from "@/lib/integrations";
+import {
+  getCurrentProfile,
+  getActivePropertyId,
+} from "@/lib/auth/session";
+import { getWompiConfigForUI } from "@/lib/db/mutations/wompi";
+import {
+  getWhatsAppConfigForUI,
+  listIcalFeeds,
+  getPropertyIcalSecret,
+} from "@/lib/db/queries/integrations";
 
 export const metadata: Metadata = {
-  title: "Integraciones · Casa Marina — Eztadia",
+  title: "Integraciones — Eztadia",
 };
 
-export default function IntegrationsPage() {
-  const integrations = getIntegrations();
+export default async function IntegrationsPage() {
+  const profile = await getCurrentProfile();
+  if (!profile) redirect("/login");
+
+  const propertyId = await getActivePropertyId();
+  if (!propertyId) redirect("/onboarding");
+
+  // Demo data sigue describiendo features estáticos (commission %, copy de
+  // marketing). El status real lo computamos de DB y lo sobrescribimos.
+  const demo = getIntegrations();
+
+  const [wompiCfg, waCfg, icalFeeds, icalSecret] = await Promise.all([
+    getWompiConfigForUI(propertyId),
+    getWhatsAppConfigForUI(propertyId),
+    listIcalFeeds(propertyId),
+    getPropertyIcalSecret(propertyId),
+  ]);
+
+  const wompiStatus: IntegrationStatus =
+    wompiCfg?.public_key && wompiCfg.hasPrivateKey
+      ? "connected"
+      : "disconnected";
+
+  const whatsappStatus: IntegrationStatus = !waCfg
+    ? "disconnected"
+    : waCfg.hasAccessToken && waCfg.isActive
+      ? "connected"
+      : "partial";
+
+  const inboundActive = icalFeeds.filter(
+    (f) => f.direction === "inbound" && f.is_active,
+  );
+  const icalStatus: IntegrationStatus =
+    !icalSecret && inboundActive.length === 0
+      ? "disconnected"
+      : icalSecret && inboundActive.length > 0
+        ? "connected"
+        : "partial";
 
   return (
     <>
@@ -29,9 +76,9 @@ export default function IntegrationsPage() {
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          <WompiCard data={integrations.wompi} />
-          <WhatsAppCard data={integrations.whatsapp} />
-          <IcalCard data={integrations.ical} />
+          <WompiCard data={{ ...demo.wompi, status: wompiStatus }} />
+          <WhatsAppCard data={{ ...demo.whatsapp, status: whatsappStatus }} />
+          <IcalCard data={{ ...demo.ical, status: icalStatus }} />
         </div>
 
         <ComingSoonSection />

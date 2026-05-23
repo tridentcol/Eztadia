@@ -576,6 +576,296 @@ export async function listAdminAuditLogs(opts: {
   }));
 }
 
+/* ─── WHATSAPP (admin) ─── */
+
+type WhatsappStatus = Database["public"]["Enums"]["WhatsappMessageStatus"];
+type MessageDirection = Database["public"]["Enums"]["MessageDirection"];
+
+export type AdminWhatsappRow = {
+  id: string;
+  direction: MessageDirection;
+  status: WhatsappStatus;
+  fromPhone: string;
+  toPhone: string;
+  body: string | null;
+  templateName: string | null;
+  error: string | null;
+  metaMessageId: string | null;
+  bookingId: string | null;
+  createdAt: string;
+  property: { id: string; name: string; slug: string } | null;
+};
+
+/**
+ * Lista whatsapp_messages cross-tenant para super_admin.
+ *
+ * Por que admin client: las policies de whatsapp_messages requieren
+ * membership en la propiedad (`has_property_access`). Admin cross-tenant
+ * pasa por requireSuperAdmin + admin client (mismo patron que audit_logs).
+ */
+export async function listAdminWhatsappMessages(opts: {
+  search?: string;        // body or phone
+  status?: WhatsappStatus;
+  direction?: MessageDirection;
+  propertyId?: string;
+  from?: string;          // ISO timestamp created_at >=
+  to?: string;            // ISO timestamp created_at <=
+  limit?: number;
+} = {}): Promise<AdminWhatsappRow[]> {
+  await requireSuperAdmin();
+  const admin = createAdminClient();
+
+  let q = admin
+    .from("whatsapp_messages")
+    .select(
+      "id, direction, status, from_phone, to_phone, body, template_name, error, meta_message_id, booking_id, property_id, created_at",
+    );
+
+  if (opts.search) {
+    const s = opts.search.replace(/[%_]/g, (m) => "\\" + m);
+    q = q.or(`body.ilike.%${s}%,from_phone.ilike.%${s}%,to_phone.ilike.%${s}%`);
+  }
+  if (opts.status) q = q.eq("status", opts.status);
+  if (opts.direction) q = q.eq("direction", opts.direction);
+  if (opts.propertyId) q = q.eq("property_id", opts.propertyId);
+  if (opts.from) q = q.gte("created_at", opts.from);
+  if (opts.to) q = q.lte("created_at", opts.to);
+
+  q = q.order("created_at", { ascending: false }).limit(opts.limit ?? 200);
+
+  const { data, error } = await q;
+  if (error) throw mapDbError(error);
+  const rows = data ?? [];
+
+  const propertyIds = Array.from(
+    new Set(rows.map((r) => r.property_id).filter((v): v is string => Boolean(v))),
+  );
+
+  const propsR = propertyIds.length > 0
+    ? await admin.from("properties").select("id, name, slug").in("id", propertyIds)
+    : { data: [] as { id: string; name: string; slug: string }[], error: null };
+  if (propsR.error) throw mapDbError(propsR.error);
+
+  const propertyMap = new Map(
+    (propsR.data ?? []).map((p) => [p.id, p]),
+  );
+
+  return rows.map((r) => ({
+    id: r.id,
+    direction: r.direction,
+    status: r.status,
+    fromPhone: r.from_phone,
+    toPhone: r.to_phone,
+    body: r.body,
+    templateName: r.template_name,
+    error: r.error,
+    metaMessageId: r.meta_message_id,
+    bookingId: r.booking_id,
+    createdAt: r.created_at,
+    property: r.property_id ? propertyMap.get(r.property_id) ?? null : null,
+  }));
+}
+
+/* ─── WEBHOOKS (admin) ─── */
+
+export type AdminWebhookLogRow = {
+  id: string;
+  provider: string;
+  eventType: string | null;
+  requestId: string | null;
+  status: string;
+  httpStatus: number | null;
+  signatureValid: boolean | null;
+  error: string | null;
+  durationMs: number | null;
+  ip: string | null;
+  userAgent: string | null;
+  payload: AuditLogRow["diff"];
+  response: AuditLogRow["diff"];
+  createdAt: string;
+  property: { id: string; name: string; slug: string } | null;
+};
+
+export async function listAdminWebhookLogs(opts: {
+  search?: string;          // event_type / request_id / error
+  provider?: string;
+  status?: string;
+  propertyId?: string;
+  from?: string;
+  to?: string;
+  limit?: number;
+} = {}): Promise<AdminWebhookLogRow[]> {
+  await requireSuperAdmin();
+  const admin = createAdminClient();
+
+  let q = admin
+    .from("webhook_logs")
+    .select(
+      `id, provider, event_type, request_id, status, http_status, signature_valid,
+       error, duration_ms, ip, user_agent, payload, response, property_id, created_at`,
+    );
+
+  if (opts.search) {
+    const s = opts.search.replace(/[%_]/g, (m) => "\\" + m);
+    q = q.or(
+      `event_type.ilike.%${s}%,request_id.ilike.%${s}%,error.ilike.%${s}%`,
+    );
+  }
+  if (opts.provider) q = q.eq("provider", opts.provider);
+  if (opts.status) q = q.eq("status", opts.status);
+  if (opts.propertyId) q = q.eq("property_id", opts.propertyId);
+  if (opts.from) q = q.gte("created_at", opts.from);
+  if (opts.to) q = q.lte("created_at", opts.to);
+
+  q = q.order("created_at", { ascending: false }).limit(opts.limit ?? 300);
+
+  const { data, error } = await q;
+  if (error) throw mapDbError(error);
+  const rows = data ?? [];
+
+  const propertyIds = Array.from(
+    new Set(
+      rows.map((r) => r.property_id).filter((v): v is string => Boolean(v)),
+    ),
+  );
+  const propsR = propertyIds.length > 0
+    ? await admin
+        .from("properties")
+        .select("id, name, slug")
+        .in("id", propertyIds)
+    : { data: [] as { id: string; name: string; slug: string }[], error: null };
+  if (propsR.error) throw mapDbError(propsR.error);
+
+  const propertyMap = new Map(
+    (propsR.data ?? []).map((p) => [p.id, p]),
+  );
+
+  return rows.map((r) => ({
+    id: r.id,
+    provider: r.provider,
+    eventType: r.event_type,
+    requestId: r.request_id,
+    status: r.status,
+    httpStatus: r.http_status,
+    signatureValid: r.signature_valid,
+    error: r.error,
+    durationMs: r.duration_ms,
+    ip: r.ip as string | null,
+    userAgent: r.user_agent,
+    payload: r.payload,
+    response: r.response,
+    createdAt: r.created_at,
+    property: r.property_id ? propertyMap.get(r.property_id) ?? null : null,
+  }));
+}
+
+export async function listAdminWebhookProviders(): Promise<string[]> {
+  await requireSuperAdmin();
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("webhook_logs")
+    .select("provider")
+    .limit(500);
+  if (error) throw mapDbError(error);
+  const set = new Set<string>();
+  for (const r of data ?? []) set.add(r.provider);
+  return Array.from(set).sort();
+}
+
+/* ─── EMAILS (admin) ─── */
+
+type EmailStatus = Database["public"]["Enums"]["EmailStatus"];
+
+export type AdminEmailRow = {
+  id: string;
+  status: EmailStatus;
+  subject: string;
+  template: string;
+  toEmail: string;
+  resendId: string | null;
+  createdAt: string;
+  property: { id: string; name: string; slug: string } | null;
+};
+
+/**
+ * Lista email_logs cross-tenant. property_id es nullable (emails sistema —
+ * password reset, etc. — no son property-scoped).
+ */
+export async function listAdminEmailLogs(opts: {
+  search?: string;        // subject or to_email
+  status?: EmailStatus;
+  template?: string;
+  propertyId?: string;
+  from?: string;
+  to?: string;
+  limit?: number;
+} = {}): Promise<AdminEmailRow[]> {
+  await requireSuperAdmin();
+  const admin = createAdminClient();
+
+  let q = admin
+    .from("email_logs")
+    .select(
+      "id, status, subject, template, to_email, resend_id, property_id, created_at",
+    );
+
+  if (opts.search) {
+    const s = opts.search.replace(/[%_]/g, (m) => "\\" + m);
+    q = q.or(`subject.ilike.%${s}%,to_email.ilike.%${s}%`);
+  }
+  if (opts.status) q = q.eq("status", opts.status);
+  if (opts.template) q = q.eq("template", opts.template);
+  if (opts.propertyId) q = q.eq("property_id", opts.propertyId);
+  if (opts.from) q = q.gte("created_at", opts.from);
+  if (opts.to) q = q.lte("created_at", opts.to);
+
+  q = q.order("created_at", { ascending: false }).limit(opts.limit ?? 200);
+
+  const { data, error } = await q;
+  if (error) throw mapDbError(error);
+  const rows = data ?? [];
+
+  const propertyIds = Array.from(
+    new Set(rows.map((r) => r.property_id).filter((v): v is string => Boolean(v))),
+  );
+
+  const propsR = propertyIds.length > 0
+    ? await admin.from("properties").select("id, name, slug").in("id", propertyIds)
+    : { data: [] as { id: string; name: string; slug: string }[], error: null };
+  if (propsR.error) throw mapDbError(propsR.error);
+
+  const propertyMap = new Map(
+    (propsR.data ?? []).map((p) => [p.id, p]),
+  );
+
+  return rows.map((r) => ({
+    id: r.id,
+    status: r.status,
+    subject: r.subject,
+    template: r.template,
+    toEmail: r.to_email,
+    resendId: r.resend_id,
+    createdAt: r.created_at,
+    property: r.property_id ? propertyMap.get(r.property_id) ?? null : null,
+  }));
+}
+
+/**
+ * Distinct templates (para popular filter dropdown).
+ */
+export async function listAdminEmailTemplates(): Promise<string[]> {
+  await requireSuperAdmin();
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("email_logs")
+    .select("template")
+    .limit(500);
+  if (error) throw mapDbError(error);
+  const set = new Set<string>();
+  for (const r of data ?? []) set.add(r.template);
+  return Array.from(set).sort();
+}
+
 /**
  * Lista valores distintos de resource_type presentes en audit_logs (para
  * popular el filter dropdown). Cap a 50 para no traer una pagina entera.
