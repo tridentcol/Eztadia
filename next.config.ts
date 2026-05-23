@@ -12,11 +12,6 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["node-ical"],
   experimental: {
     optimizePackageImports: [],
-    // Middleware corre en Node.js (no Edge) porque @supabase/ssr usa
-    // __dirname al bundlearse, que no existe en Edge runtime y crasheaba
-    // el middleware en Vercel con ReferenceError: __dirname is not defined.
-    // @ts-expect-error nodeMiddleware existe en Next 15.5 runtime pero no en sus tipos públicos todavía.
-    nodeMiddleware: true,
   },
 };
 
