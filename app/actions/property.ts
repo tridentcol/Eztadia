@@ -19,6 +19,7 @@ import {
   requireProfile,
   requireProperty,
   requirePropertyRole,
+  getFirstAccessibleProperty,
   ACTIVE_PROPERTY_COOKIE,
 } from "@/lib/auth/session";
 import { logAudit } from "@/lib/audit";
@@ -32,6 +33,15 @@ import { run } from "./_helpers";
 export async function createPropertyOnboardingAction(raw: unknown) {
   const result = await run(createPropertySchema, raw, async (input) => {
     const profile = await requireProfile();
+
+    // Idempotencia: si el user ya completo onboarding, no re-crear nada.
+    // El wizard puede re-disparar el effect en remount/refresh y chocar
+    // con properties_slug_key UNIQUE en el segundo intento.
+    const existing = await getFirstAccessibleProperty();
+    if (existing) {
+      return { propertyId: existing, slug: undefined as string | undefined };
+    }
+
     const supabase = await createClient();
 
     // 1. Crear organization
