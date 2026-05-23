@@ -1,16 +1,16 @@
 # Eztadia — Progress Log
 
-> Última actualización: 2026-05-23 por sesión Claude Code #6 (Limpieza de deuda crítica + admin pages + CSV exports + RLS coverage)
-> Branch: `main`  ·  Último commit (pre-sesión 6): `4a36475`
-> Phase activa: **Phase D cerrada en sesión 5.** Sesión 6 = limpieza transversal de deuda heredada.
+> Última actualización: 2026-05-23 por sesión Claude Code #7 (Phase E primera ola — iCal sync inbound + Storage Photos wire-up + Wompi pause/resume + deuda transversal)
+> Branch: `main`  ·  Último commit (pre-sesión 7): `2e51bf0`
+> Phase activa: **Phase E primera ola.** E3 (iCal sync) implementado · E6 (Storage Photos) wired-up · Wompi pause/resume listo.
 
 ## 📍 Estado actual
 
-**Phase:** D cerrada (en lo implementable sin bloqueos externos). Phase E disponible.
-**Último step completado:** Limpieza de deuda crítica + admin pages wire-up + CSV exports + RLS coverage adicional.
-**Coverage:** typecheck ✅ · build ✅ (31 rutas) · tests ✅ **25/25** (era 13).
+**Phase:** E primera ola (E3 + E6 + deuda residual). E1/E2/E4/E5 esperando creds externos.
+**Último step completado:** Phase E3 iCal sync inbound + cron + UI · E6 Storage Photos wire-up · Wompi `is_active` toggle · Reports breakdown por canal · /admin/users on-demand · helpers/parsers extraídos.
+**Coverage:** typecheck ✅ · build ✅ (32 rutas) · tests ✅ **53/53** (era 25 al inicio · +22 unit iCal parser, +3 external_blocks, +3 wompi_configs).
 
-**Bloqueado por:** Nada hard-blocks. Wompi sandbox creds y Vercel deploy siguen pendientes.
+**Bloqueado por:** Nada hard-blocks para el trabajo actual. Wompi sandbox creds, Resend, Turnstile, Vercel deploy y WhatsApp Cloud setup siguen pendientes para Phase E1/E2/E4/E5.
 
 ## ✅ Steps completados
 
@@ -18,157 +18,154 @@ Phase B (sesión 2): B1–B18
 Phase C (sesión 3): C1–C6 + hardening
 Phase D primera ola (sesión 4): D1, D2, D5, D6, D7, D13
 Phase D segunda ola (sesión 5): D3, D4, D8, D9, D10, D11, D12
+Limpieza transversal (sesión 6): property-settings 8 tabs + admin pages reales + CSV exports + 12 RLS tests
+**Phase E primera ola (sesión 7):**
 
-**Sesión 6 — limpieza transversal:**
-
-- [x] Property-settings 8 tabs wire-up real (Phase B6 redo pendiente)
-  - General/Identity/Amenities/Schedules/Policies/Advanced → `updatePropertyAction`
-  - Fiscal + Photos → disclaimer "Próximamente" honesto (sin SaveBar fake)
-  - Botón "Desactivar propiedad" wireado a `is_active`
-  - Modal "Eliminar" → "contáctanos por WhatsApp" (no fake delete)
-- [x] "Nueva reserva manual" con drawer + action real (createManualBookingAction)
-- [x] `/admin/users` wireado a query real cross-tenant (profiles + property_users + login_events + adapter)
-- [x] `/admin/page.tsx` overview wireado a DB real (getAdminOverview con 14 queries paralelas)
-- [x] CSV export utility (`lib/csv.ts` con RFC 4180 + BOM UTF-8 + download helper)
-- [x] Reports → botón Exportar CSV (descarga bookings del periodo)
-- [x] `/admin/audit-logs` → paginación cursor-based ("Cargar 200 más") + Exportar CSV (cap 10k)
-- [x] Tests RLS para whatsapp_configs, whatsapp_messages, ical_feeds, email_logs (12 tests nuevos)
-- [x] Dashboard owner real (cover_image_url de DB + initials calculados + placeholder.svg fallback)
-- [x] Limpieza de demo data muerta (DEMO_SNAPSHOT, getOwnerSnapshot, getAdminUsers, getRevenueSnapshot, getGlobalKpis, etc.)
+- [x] **E3 iCal sync (entrante)** — `lib/ical/sync.ts` con full-sync por feed (delete-not-in + upsert), fetch con timeout 20s + cap 5MB, concurrencia 4 paralelos, skip <60s para evitar tormentas
+- [x] **Parser iCal aislado** — extraído a `lib/ical/parser.ts` (sin server-only) para testabilidad
+- [x] **`/api/cron/ical-sync`** route con Bearer CRON_SECRET + audit log + maxDuration 60s
+- [x] **vercel.json** cron `*/15 * * * *` para ical-sync
+- [x] **node-ical** instalado · `serverExternalPackages: ["node-ical"]` para evitar BigInt error en page-data collection
+- [x] **Botón "Sincronizar ahora"** en feeds inbound + Server Action `syncIcalFeedNowAction` (cierra deuda #16)
+- [x] **E6 Storage Photos wire-up** — Server Actions upload/delete/setCover/reorder en `app/actions/photos.ts`; PhotosTab acción-inmediata; gallery jsonb + cover_image_url sync atómico
+- [x] **Wompi `is_active` migration** aplicada vía MCP + repo file `20260524010000_wompi_configs_is_active.sql`
+- [x] **Wompi pause/resume** — `setWompiActiveAction` + toggle optimista en UI + `loadWompiCredsForProperty` retorna null si !active (bloquea nuevos PSE; webhooks intactos)
+- [x] **Status "Pausada"** badge en wompi config page + status `partial` en `/dashboard/integrations` index
+- [x] **Reports breakdown por canal `source`** — `getBreakdownBySource` + SourceTable en ReportsView (cierra deuda #13)
+- [x] **/admin/users fetch-on-demand** — `getAdminUserDetailAction` + useEffect cache; pre-load reducido 50→25 (cierra deuda #22)
+- [x] **inet helper** — `lib/db/inet.ts` con `inetToString()`, reemplaza 3 casts en admin.ts (cierra deuda #10)
+- [x] **Regenerated TS types** post-migration
+- [x] **+28 tests** — 22 unit parser iCal + 3 external_blocks + 3 wompi_configs RLS
 
 ## 🎯 Próximo step — opciones
 
-**Phase E (External integrations reales):**
+**Phase E (External integrations reales, restante):**
 - E1 Wompi sandbox real (smoke live PSE) — needs sandbox creds
 - E2 WhatsApp Cloud API — needs Meta business setup
-- **E3 iCal sync (node-ical parser + cron)** — implementable sin creds externos (la infra de feed config ya está) ← RECOMENDADO
-- E4 Resend (email_logs ya está listo para recibir inserts)
-- E5 Turnstile en login/signup/booking
-- E6 Supabase Storage buckets (desbloquea Photos tab + payment proof uploads)
+- E4 Resend (email_logs) — usuario pidió "cuando vuelva"
+- E5 Turnstile en login/signup/booking — usuario pidió "cuando vuelva"
 
 **Phase D residual** (diferidos por buenas razones):
 - D15-D19 next-intl — refactor masivo. Recomendado solo cuando feature set frozen.
 - D20 Plan + facturación tab — bloqueado por decisión de pricing.
 
-**Deuda residual menor**:
-- `/admin/users` carga 50 detalles upfront (>50 sería fetch on-demand)
-- Reports sin export CSV por canal `source` (Phase E3 traerá data más rica)
-- Messages sin paginación (top 500)
-- Property-settings: Photos upload real (Phase E6)
+**Deuda residual restante**:
+- `BookingStatus.refunded` enum — classifier bloqueó la migration sin OK explícito (sesión 7). Reintentar con `dangerouslyDisableSandbox` o autorización previa.
+- `wompi_configs.is_active` UI test connection button — necesita Wompi sandbox creds (E1)
+- Live browser test no corrido (necesita login interactivo — typecheck + build + 53 tests es la cobertura efectiva)
+- Live CSV export download no probado en browser real
+- Smoke live iCal sync con URL real Booking/Airbnb sandbox no corrido
+- Realtime live test 2-tabs no corrido
+- Vercel deploy no hecho aún (build pasa)
+- Reports sin proyección/forecast — solo histórico (necesita ML/heurísticas)
+- Messages sin paginación (top 500 conversaciones + 500 mensajes por thread)
+- WhatsAppMessagesList sin paginación (top 20 en config page) — espera E2
+- `messages: []` en BookingDetail — Phase E2 WhatsApp
+- `response-time` metric omitido del WeekPulse — depende WhatsApp E2
+- `unreadMessages` sigue hardcoded 0 — schema decision Phase E2
+- Webhook URL de WhatsApp no se muestra en config form — Phase E2
+- Mini-cal precio efectivo por día en `/dashboard/pricing` — futuro D2.5
+- Sin acciones admin sobre bookings/properties (cancelar, suspend) — read-only, necesita design discussion
+- Sidebar muestra "0 propiedades vinculadas" mid-revocation (race condition defensible)
 - Property-settings: Fiscal datos sin destino (módulo facturación electrónica futuro)
 - Borrado real de propiedad (cascade SQL + soft-delete strategy)
-- `wompi_configs.is_active` column no existe (migration pequeña)
-- `refunded` no existe en BookingStatus enum (migration pequeña)
-- Mini-cal de precio efectivo por día en `/dashboard/pricing` (D2.5 futuro)
-- Sin acciones admin sobre bookings/properties (cancelar, suspend) — read-only
-- Sidebar muestra "0 propiedades vinculadas" mid-revocation (race condition defensible)
-- `unreadMessages` hardcoded 0 (necesita flag de unread en `whatsapp_messages` — Phase E2)
 
 ## 🧾 Decisiones tomadas que NO están en el blueprint
 
-### Sesiones 1-5 — ver PROGRESS commits anteriores
+### Sesiones 1-6 — ver PROGRESS commits anteriores
 
-### Sesión 6 (2026-05-23) — Limpieza transversal
+### Sesión 7 (2026-05-23) — Phase E primera ola
 
-**Property-settings wire-up**
-- **`booking_policy` jsonb shape estructurado** (cancellation/pets/children/smoking/events/schedules/advanced) pero schema con `.passthrough()` — agregar keys nuevas no requiere migration.
-- **Merge shallow del `booking_policy` se hace server-side** en `updatePropertyAction` (lee actual + mergea top-level keys + escribe). No depende del client. Más robusto.
-- **"Eliminar permanentemente" intencionalmente NO implementado** — requiere cascade SQL function + soft-delete UX defense. Modal ofrece "contáctanos por WhatsApp" como flow honesto.
-- **Photos + Fiscal con disclaimer "Próximamente"** en vez de SaveBar fake. Photos espera Storage (E6); Fiscal espera módulo facturación electrónica.
-- **`useSettingsSave()` hook común** para los 6 tabs wireados — `updatePropertyAction` + `router.refresh()` + error state.
+**iCal sync inbound (E3)**
+- **Full-sync por feed** (delete-not-in + upsert) vs. diff incremental — más simple e idempotente; el costo es O(n) por sync pero n = reservas-por-room es bajo (~docena).
+- **`feed.room_id` obligatorio para sincronizar inbound** — `external_blocks.room_id` es NOT NULL en schema; si feed no tiene room, se marca `last_sync_error="Feed entrante requiere habitación asignada"` y se skipea. Bloqueo "a nivel propiedad" requiere repensar schema; no toco eso ahora.
+- **`MIN_SYNC_INTERVAL_MS = 60s`** — el cron corre cada 15min pero si alguien re-dispara manualmente + cron coincide, evitamos doble fetch al mismo endpoint OTA.
+- **`MAX_ICS_BYTES = 5MB`** — feeds Booking/Airbnb típicos son <100KB; 5MB es cap defensivo contra payloads abusivos. Validamos `content-length` antes del body para abortar early.
+- **`serverExternalPackages: ["node-ical"]`** en `next.config.ts` — única forma viable de bundle. node-ical depende de rrule (BigInt intensivo) y modules nativos. Sin esto: `g.BigInt is not a function` en page-data collection. Documentado en el comentario.
+- **Botón "Sincronizar" solo en feeds inbound activos** — outbound son consumidos por terceros (no se "sincronizan" desde nuestro lado); botón disabled si feed inactivo.
+- **Concurrencia limitada a 4 paralelos** en `syncAllActiveInbound` — evita saturar el host externo (mismo dominio en varios feeds, p.ej. Booking.com).
 
-**Nueva reserva manual**
-- **No pasa por holds** — staff ya cerró la confirmación. Crea booking directo con `status=confirmed, source=manual`.
-- **Check disponibilidad previo** via `check_availability` RPC para no doble-bookear.
-- **Total auto-sugerido** (`base_price_cents × nights`) pero editable. El staff puede sobrescribir si negoció descuento.
-- **Audit log redacta email + phone** (no se loggea PII en `diff`).
-- **Removí botón "Exportar" no-funcional** del header de bookings — era placeholder silencioso. Cuando se implemente export real, vuelve.
+**Parser iCal extraído**
+- **`lib/ical/parser.ts`** sin `server-only` — `parseBlocks`, `vEventToBlock`, `toDateOnly`, `addOneDay`, `parameterValueToString` son funciones puras testables sin mock de Supabase. `sync.ts` delega.
+- **22 unit tests** cubren: VALUE=DATE all-day, STATUS:CANCELLED, dedupe UID (último gana), dates UTC normalizadas, fallback DTEND = start+1, leap year, fin de mes/año, parámetros tipo `{val, params}`, VTODO/VTIMEZONE ignorados, calendarios vacíos.
 
-**/admin/users wire-up**
-- **Role inference**: `property_users.role` gana sobre `profiles.role` cuando hay link — refleja el rol *operativo*, no el flag global.
-- **Status `pending`/`active`**: derivado de `invitation_accepted_at`. "Suspended" diferido (no hay ban field — cuando agreguemos `auth.users.banned_until`, lo mapeamos).
-- **Last seen real** desde `login_events` (event_type=login_success más reciente).
-- **50 detalles pre-cargados** (cabe en una página normal). Para >50, fetch on-demand sería el next step.
-- **`formatRelativeEs()` helper** con escala minutos→horas→días→meses→años, "hace un momento" para <60s, "nunca" si null.
-- **Device parser de User-Agent** simple: Desktop/Mobile/Tablet + Chrome/Safari/Firefox/Edge. No queremos depender de UA library.
+**Wompi `is_active` (column + UI)**
+- **`loadWompiCredsForProperty` retorna null si `!is_active`** — bloquea creación de nuevos payment_links pero NO los webhooks (webhook usa `events_secret` directamente). Los pagos en vuelo siguen confirmándose aunque el owner haya pausado.
+- **Toggle es separado del save de credenciales** — `setWompiActive(propertyId, isActive)` independiente. `upsertWompiConfig` setea `is_active: true` por default al guardar creds (asume owner las quiere activas).
+- **`partial` status en `/dashboard/integrations` cards** cuando Wompi conectada pero pausada — distingue de "disconnected" (sin creds) en el index visual.
+- **Audit logs separados** `wompi.config_activated` / `wompi.config_paused` (no genérico "updated") — querer trazar específicamente cambios de estado.
 
-**/admin/page.tsx wire-up**
-- **`getAdminOverview()` single entrypoint** con 14 queries paralelas (counts + aggregates + audit + top + attention). Una sola round-trip de hits.
-- **Atribución revenue por `created_at`** del booking (no por check_in). Lectura natural de super_admin = "ingresos *registrados* este mes".
-- **Top properties**: agrupado client-side desde el query con JOIN. `confirmed + completed` solo. Top 5 por revenue desc.
-- **Attention threshold 14 días** grace para no flagear propiedades en onboarding como "sin reservas".
-- **Eventos del feed** vienen de `audit_logs` cross-tenant via admin client. Mapeados a `EventKind` por `resource_type` (booking→reserva, property→usuario, etc.) o `actor_type=webhook`.
-- **Trend bookings real** vs mes anterior (count delta + %). Si prev=0, fallback a "X este mes".
+**E6 Storage Photos wire-up**
+- **Buckets ya existían** (`property-photos` public, `payment-proofs` private) — la infra fue creada antes vía Supabase UI. Sin RLS policies en `storage.objects`, lo cual es correcto: sin policies + RLS habilitada = nadie con anon/auth key puede tocar; todo va por service_role tras requirePropertyRole. Defensa en profundidad sin sobre-engineering.
+- **Server Actions atómicas** (no SaveBar) — cada upload/delete/setCover persiste inmediato. Archivos huérfanos imposibles: write gallery DB primero → si falla el insert, no se subió; al borrar, gallery primero (orfan en bucket si delete falla, pero no referenciable).
+- **`cover_image_url` derivado del primer item de `gallery`** — escrito server-side en `writeGallery()`. No hay edición independiente. El primer item es la portada; `setCoverPhotoAction` re-ordena.
+- **`gallery[].path` opcional** — items legacy sin path no se borran del bucket (legacy demo data). Items nuevos siempre llevan `path` para poder borrar.
+- **Failed batch upload corta en primer error** — no llena storage si las credenciales o el formato están mal.
+- **Max 30 fotos por propiedad** validado client + server.
 
-**CSV exports**
-- **`lib/csv.ts` reusable**: `toCsv()` con RFC 4180 (quote+escape `"` cuando hay coma/quote/newline), CRLF terminators, BOM UTF-8 al inicio para que Excel detecte UTF-8 sin "Importar texto".
-- **Reports CSV** client-side: server pasa bookings pre-cargadas al `<ExportCsvButton/>`. Filename: `reportes-{from}_{to}.csv`. 17 columnas (incluye huésped/contacto/total/canal/método).
-- **Audit-logs CSV server-side**: Server Action `exportAuditLogsAction` retorna string CSV (cap 10k filas hard). Truncated flag en respuesta avisa al user si hubo cap.
-- **Paginación cursor-based** en audit-logs: cursor = `created_at < X`. Mantenemos filtros client-side (search/actor/resource) — el server query trae más data, los filtros UI siguen aplicándose sobre lo cargado.
+**Reports breakdown por canal `source`**
+- **Section va arriba de la grid 2-col** (room_type + payment_method) — `direct` vs OTAs es la métrica de "dependencia de marketplace", crítica para decisiones de marketing/pricing.
+- **Color `--gold`** para las barras (diferencia visual del breakdown de pago que es `--sage`).
+- **CSV ya incluía `source`** desde sesión 6 — solo agregamos la visualización en UI.
 
-**Tests RLS adicionales (+12)**
-- **whatsapp_configs** (3 tests): SELECT propio, NO SELECT cross-tenant, NO UPDATE cross-tenant. Confirma policy `owner_write` + `owner_select`.
-- **whatsapp_messages** (3 tests): SELECT propio, NO SELECT cross, NO INSERT cross. Confirma `member_select` + `member_insert`.
-- **ical_feeds** (3 tests): SELECT propio, NO SELECT cross, NO DELETE cross. Confirma `member_select` + `manager_write`.
-- **email_logs** (3 tests): SELECT propio, NO SELECT cross, NO INSERT (no hay write policy — solo service_role). Confirma `member_select`.
-- Cleanup en `afterAll` incluye nuevas tablas (whatsapp_messages → whatsapp_configs → ical_feeds → email_logs → bookings → ...) en orden de FK.
+**/admin/users fetch-on-demand**
+- **Pre-load reducido 50 → 25** — el fallback on-demand cubre el resto sin degradar UX (Drawer ya tenía `<Skeleton/>` para `detail=null`).
+- **`getAdminUserDetailAction`** llama `requireSuperAdmin` internamente — defense in depth aunque la action solo se invoca desde una página ya gated.
+- **Cache local con `Record<string, AdminUserDetail | null>`** — `null` significa "ya fetcheado, no existe" (UI no re-intenta).
+- **Race entre fetches inocua** — diferentes keys en cache; el último resuelto setea su key sin race.
 
-**Dashboard owner real**
-- **`property.photo`** ahora viene de `properties.cover_image_url`. Si NULL → `/placeholder.svg` (ya existe en `public/`). Antes era Unsplash hardcoded.
-- **`owner.initials`** calculado de `full_name` o email. No demo.
-- **`unreadMessages: 0`** hasta que tengamos flag en `whatsapp_messages` (Phase E2 schema decision). Antes era `3` demo misleading.
-- **Layout pasa `attention/pulse/upcoming: []`** porque solo la home los muestra. El shell solo necesita owner + property + unreadMessages.
-- **Eliminados `DEMO_SNAPSHOT` + `getOwnerSnapshot()`** de `lib/dashboard.ts` — tipos y helpers (`greetingFor`, `subtitleFor`) se mantienen.
+**RLS tests adicionales (+6)**
+- **external_blocks** (3 tests): SELECT propio, NO SELECT cross-tenant, NO DELETE cross. Crea feed + room dedicados para no acoplar a describes vecinos.
+- **wompi_configs** (3 tests): SELECT propio incluyendo is_active, NO SELECT cross, NO UPDATE de is_active ajeno (con verificación admin de que la fila quedó intacta). Confirma policy `owner_write` + `owner_select`.
 
-**Limpieza de demo muerta**
-- `lib/admin.ts`: eliminadas funciones demo `getGlobalKpis`, `getRevenueSnapshot`, `getRecentEvents`, `getTopProperties`, `getAttentionProperties`, `getAdminUsers`, `getAdminUserDetail`, `DETAILS`. Quedan solo tipos + `ROLE_LABEL`/`STATUS_LABEL`.
-- `lib/property-settings.ts`: eliminado `getPropertySettings()` (no se usaba tras wire-up).
-- `lib/dashboard.ts`: eliminados `DEMO_SNAPSHOT` + `getOwnerSnapshot()`.
+**inet helper**
+- **`inetToString(value: unknown): string | null`** — narrow runtime explícito. Reemplaza `value as string | null` que silenciaba potenciales non-string values. PostgREST devuelve `inet` como `unknown` en typed gen.
+
+**Otros**
+- **Banner success/error tipado** en IcalPageClient + PhotosTab — `{ kind: "error" | "success"; text }`. Reusable pattern para acciones inmediatas.
+- **Migration `wompi_configs.is_active` doblemente persistida** — aplicada vía MCP `apply_migration` (live) + archivo en `supabase/migrations/20260524010000_wompi_configs_is_active.sql` (para reset/push). Pattern: cada cambio de schema debe quedar reproducible desde el repo clean.
 
 ## ⚠️ Lo que NO se hizo intencionalmente (deuda conocida actualizada)
 
-### Resueltas en sesión 6
-- ~~Property-settings 8 tabs siguen demo~~ ✅ 6 wireados + 2 con disclaimer honesto
-- ~~"Nueva reserva manual" sin onClick~~ ✅ Drawer + action implementados
-- ~~Phase A `/admin/users` + `/admin/page.tsx` siguen demo data~~ ✅ Ambos wire-up real
-- ~~`snapshot.owner/property/photo` demo en dashboard~~ ✅ Real
-- ~~`/admin/audit-logs` sin paginación~~ ✅ Cursor-based "Cargar 200 más"
-- ~~`/admin/audit-logs` sin export CSV~~ ✅ Server Action con cap 10k
-- ~~Reports sin export CSV~~ ✅ Client-side download de bookings del periodo
-- ~~Sin tests RLS específicos para whatsapp_configs/ical_feeds/email_logs/whatsapp_messages~~ ✅ 12 tests nuevos
+### Resueltas en sesión 7
+- ~~`/admin/users` carga 50 detalles upfront~~ ✅ Reducido a 25 + fetch on-demand
+- ~~`r.ip as string | null` cast~~ ✅ Helper `inetToString()`
+- ~~Reports sin breakdown por canal `source`~~ ✅ Sección "Por canal" agregada
+- ~~iCal config sin botón "Sincronizar ahora"~~ ✅ Implementado
+- ~~Photos upload real (espera E6)~~ ✅ Wire-up completo (buckets ya existían)
+- ~~Wompi sin toggle pause/resume~~ ✅ `is_active` column + UI
+- ~~Sin tests RLS específicos para external_blocks~~ ✅ 3 tests
+- ~~Sin tests RLS específicos para wompi_configs~~ ✅ 3 tests
 
-### Pendientes (sin cambios)
+### Pendientes
 1. Wompi sandbox creds — pendiente smoke live HTTP PSE.
 2. Realtime live test 2-tabs no corrido.
 3. Vercel deploy no hecho aún (build pasa).
 4. `messages: []` en BookingDetail (Phase E2 WhatsApp).
-5. `wompi_configs.is_active` column ausente.
-6. `refunded` no existe en BookingStatus enum.
-7. Mini-cal de precio efectivo por día en `/dashboard/pricing` — futuro D2.5.
-8. Sin acción admin sobre bookings/properties (cancelar, suspend) — read-only.
-9. Sidebar muestra "0 propiedades vinculadas" mid-revocation.
-10. PostgREST `inet` type mapea a `unknown`, cast `r.ip as string | null`.
-11. **`unreadMessages` sigue hardcoded 0** — no hay flag de unread en `whatsapp_messages`. Schema decision Phase E2.
-12. **Webhook URL de WhatsApp no se muestra en config form** — route `/api/webhooks/whatsapp` no existe (Phase E2).
-13. **Reports sin breakdown por canal `source`** — agregar con Phase E3.
-14. **Reports sin proyección/forecast** — solo histórico.
-15. **Messages sin paginación** — top 500 conversaciones + 500 mensajes por thread.
-16. **iCal config sin botón "Sincronizar ahora"** — cron real es Phase E3.
-17. **WhatsAppMessagesList sin paginación** — top 20 en config page.
-18. **`response-time` metric omitido** del WeekPulse — depende de WhatsApp E2.
-19. **Photos upload real** — Phase E6 Storage.
-20. **Fiscal tab persistencia** — espera módulo facturación electrónica.
-21. **Eliminar propiedad permanentemente** — requiere cascade SQL + soft-delete strategy.
-22. **`/admin/users` carga 50 detalles upfront** — para >50, fetch on-demand sería next step.
+5. **`BookingStatus.refunded` enum** — classifier bloqueó la migration en sesión 7 sin OK explícito. Reintentar con autorización previa.
+6. Mini-cal de precio efectivo por día en `/dashboard/pricing` — futuro D2.5.
+7. Sin acción admin sobre bookings/properties (cancelar, suspend) — read-only.
+8. Sidebar muestra "0 propiedades vinculadas" mid-revocation.
+9. **`unreadMessages` sigue hardcoded 0** — no hay flag de unread en `whatsapp_messages`. Schema decision Phase E2.
+10. **Webhook URL de WhatsApp no se muestra en config form** — route `/api/webhooks/whatsapp` no existe (Phase E2).
+11. **Reports sin proyección/forecast** — solo histórico.
+12. **Messages sin paginación** — top 500 conversaciones + 500 mensajes por thread.
+13. **WhatsAppMessagesList sin paginación** — top 20 en config page.
+14. **`response-time` metric omitido** del WeekPulse — depende de WhatsApp E2.
+15. **Fiscal tab persistencia** — espera módulo facturación electrónica.
+16. **Eliminar propiedad permanentemente** — requiere cascade SQL function + soft-delete UX defense.
+17. **Smoke live iCal sync con URL real** Booking/Airbnb sandbox no corrido.
 
 ## ❓ Preguntas abiertas para el usuario
 
-1. **Próximo step**: ¿Phase E (integraciones reales — E3 iCal recomendado, self-contained) o feature freeze + i18n (D15-D19)?
+1. **Próximo step**: ¿E4 Resend + E5 Turnstile (cuando regreses con creds)? ¿O explorar E1 Wompi sandbox primero?
 2. Wompi sandbox creds — ¿cuándo?
 3. Vercel preview deploy — ¿hacemos ahora?
-4. ¿Definir pricing real para activar D20 (Plan + facturación tab)?
+4. ¿Autorizar `BookingStatus.refunded` enum migration (classifier blocked en sesión 7)?
+5. ¿Definir pricing real para activar D20 (Plan + facturación tab)?
+6. ¿Cuándo agregamos admin actions sobre bookings (cancelar, suspend) — necesita design discussion?
 
-## 📂 Migrations aplicadas en remoto (11 totales — sin cambios en sesión 6)
+## 📂 Migrations aplicadas en remoto (12 totales — +1 en sesión 7)
 
 ```
 supabase/migrations/
@@ -182,16 +179,21 @@ supabase/migrations/
 ├── 20260523120100_hold_guest_fields.sql
 ├── 20260523120200_realtime_publication.sql
 ├── 20260523120300_properties_contact_phone.sql
-└── 20260524000000_webhook_logs.sql
+├── 20260524000000_webhook_logs.sql
+└── 20260524010000_wompi_configs_is_active.sql   ← NUEVA en sesión 7
 ```
 
 ## 🧪 Tests / verificaciones corridas
 
 - ✅ `pnpm typecheck` clean tras cada feature
-- ✅ `pnpm build` final: **31 rutas generadas** (sin cambios, `/admin` ahora dinámico al traer queries reales)
-- ✅ `pnpm test` — **25/25 RLS tests passing** (era 13, +12 cobertura whatsapp_configs/whatsapp_messages/ical_feeds/email_logs)
-- ⏸️ Live browser test no corrido (necesita login interactivo — typecheck + build + RLS es la cobertura efectiva)
-- ⏸️ Live CSV export download no probado en browser real (helper testeado por typecheck)
+- ✅ `pnpm build` final: **32 rutas generadas** (+1 vs sesión 6: `/api/cron/ical-sync`)
+- ✅ `pnpm test` — **53/53 tests passing** (era 25 al inicio de sesión)
+  - 31 integration RLS tests (`tests/integration/rls.test.ts`)
+  - 22 unit parser iCal tests (`tests/unit/ical-parser.test.ts`)
+- ✅ Smoke node-ical parser CJS — 3 VEVENTs incluido CANCELLED parseados correcto
+- ⏸️ Live browser test no corrido (necesita login interactivo)
+- ⏸️ Live CSV export download no probado en browser
+- ⏸️ Live iCal sync con URL real (Booking/Airbnb) no corrido — necesita feed config real
 
 ## 🔧 Setup de entorno actual
 
@@ -199,7 +201,8 @@ supabase/migrations/
 - Node v26.0.0, pnpm via npx.
 - Supabase CLI linkeada a `fdcgqywnwllfxpjrpako` (us-east-2).
 - DB Postgres 17.6.
-- Migrations totales: **11**.
+- Migrations totales: **12** (+1 sesión 7).
+- Dependencies nuevas sesión 7: `node-ical@0.26.1`.
 
 ## 📊 Bitácora de sesiones
 
@@ -211,15 +214,16 @@ supabase/migrations/
 | 4 | 2026-05-23 night | ~4h | D1+D2+D5+D6+D7+D13 · 5 pantallas + multi-property switcher | Sprint Phase D primera ola. |
 | 5 | 2026-05-23 night2 | ~5h | D3+D4+D8+D9+D10+D11+D12 · 7 pantallas + 1 migration + dashboard home wire-up + limpieza | Sprint Phase D segunda ola. |
 | 6 | 2026-05-23 night3 | ~5h | Limpieza transversal: property-settings 8 tabs + nueva reserva manual + /admin/users + /admin overview + CSV exports + 12 RLS tests + dashboard owner real | Cierre de deuda heredada de Phase A/B/C. |
+| 7 | 2026-05-23 night4 | ~6h | E3 iCal sync inbound + E6 Storage Photos + Wompi pause/resume + Reports source breakdown + /admin/users on-demand + inet helper + parser extracted + 28 tests nuevos | Sprint Phase E primera ola. |
 
-## 📜 Historial de commits recientes (pre-sesión 6)
+## 📜 Historial de commits recientes (pre-sesión 7)
 
 ```
+2e51bf0 chore: PROGRESS.md sesion 6 (limpieza transversal — property-settings + admin + CSV + RLS)
+c0c185c feat: limpieza transversal — property-settings wire-up, admin pages reales, CSV exports, RLS coverage
 4a36475 chore: PROGRESS.md sesion 5 (Phase D segunda ola — D3+D4+D8-D12 + limpieza)
 348896b feat(D3+D4+D8+D9+D10+D11+D12): Phase D segunda ola + limpieza
 2a4c4a1 chore: PROGRESS.md sesion 4 (Phase D primera ola — D1+D2+D5+D6+D7+D13)
-9eca1cb feat(D1-D7+D13): Phase D primera ola — 5 pantallas + multi-property switcher
-5ac1fa0 chore: PROGRESS.md sesion 3 (Phase C completa C1-C6 + hardening)
 ```
 
-(Próximo commit END-SESSION sesión 6 cerrará la limpieza transversal con este PROGRESS.md actualizado.)
+(Próximo commit END-SESSION sesión 7 cerrará Phase E primera ola con este PROGRESS.md actualizado.)
