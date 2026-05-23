@@ -63,11 +63,12 @@ export function Step2PropertyForm({ onBack }: { onBack: () => void }) {
     }
   }, [watchedName, watchedSlug, setValue]);
 
-  // Persist live
   const values = watch();
+  // Persist live (subscription pattern — evita loop por nueva ref de watch() cada render)
   useEffect(() => {
-    setProperty(values);
-  }, [values, setProperty]);
+    const sub = watch((data) => setProperty(data as Partial<typeof property>));
+    return () => sub.unsubscribe();
+  }, [watch, setProperty]);
 
   return (
     <form

@@ -79,8 +79,9 @@ export function Step1OrgForm() {
 
   const values = watch();
   useEffect(() => {
-    setOrg(values);
-  }, [values, setOrg]);
+    const sub = watch((data) => setOrg(data as typeof org));
+    return () => sub.unsubscribe();
+  }, [watch, setOrg]);
 
   return (
     <form onSubmit={handleSubmit(() => next())} noValidate className="flex flex-col">

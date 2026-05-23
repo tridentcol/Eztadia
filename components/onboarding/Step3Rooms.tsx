@@ -43,12 +43,15 @@ export function Step3RoomsForm({ onBack }: { onBack: () => void }) {
 
   const values = watch();
   useEffect(() => {
-    setRooms({
-      typeName: values.typeName,
-      beds: values.beds,
-      pricePerNight: values.pricePerNight,
-    });
-  }, [values, setRooms]);
+    const sub = watch((data) =>
+      setRooms({
+        typeName: data.typeName,
+        beds: data.beds,
+        pricePerNight: data.pricePerNight,
+      }),
+    );
+    return () => sub.unsubscribe();
+  }, [watch, setRooms]);
 
   const formatPrice = (n: number) =>
     n > 0 ? n.toLocaleString("es-CO") : "";
