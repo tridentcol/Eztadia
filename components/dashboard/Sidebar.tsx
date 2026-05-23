@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState, type JSX } from "react";
+import { useEffect, useRef, useState, useTransition, type JSX } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   IconHouse,
   IconCalendar,
@@ -20,8 +20,16 @@ import {
   IconLogout,
 } from "./icons";
 import type { OwnerSnapshot } from "@/lib/dashboard";
+import { setActivePropertyAction } from "@/app/actions/property";
 
 type IconCmp = (p: { className?: string }) => JSX.Element;
+
+export type AvailableProperty = {
+  id: string;
+  name: string;
+  slug: string;
+  city: string | null;
+};
 
 const SECTIONS: { label: string; items: { href: string; label: string; Icon: IconCmp; badgeKey?: "unread" }[] }[] = [
   {
@@ -50,16 +58,22 @@ const SECTIONS: { label: string; items: { href: string; label: string; Icon: Ico
 
 export function Sidebar({
   snapshot,
+  availableProperties = [],
+  activePropertyId = null,
   mobileOpen,
   onMobileClose,
 }: {
   snapshot: OwnerSnapshot;
+  availableProperties?: AvailableProperty[];
+  activePropertyId?: string | null;
   mobileOpen: boolean;
   onMobileClose: () => void;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [propOpen, setPropOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
+  const [switching, startSwitch] = useTransition();
   const propRef = useRef<HTMLDivElement | null>(null);
   const userRef = useRef<HTMLDivElement | null>(null);
 
@@ -71,6 +85,20 @@ export function Sidebar({
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
+
+  function selectProperty(id: string) {
+    if (id === activePropertyId) {
+      setPropOpen(false);
+      return;
+    }
+    startSwitch(async () => {
+      const res = await setActivePropertyAction({ propertyId: id });
+      setPropOpen(false);
+      if (res.ok) {
+        router.refresh();
+      }
+    });
+  }
 
   return (
     <aside
@@ -118,29 +146,72 @@ export function Sidebar({
             id="prop-menu"
             role="menu"
             aria-label="Tus propiedades"
-            className="absolute top-full left-0 right-0 mt-1 bg-paper border border-rule rounded-xl p-2 z-30"
+            className="absolute top-full left-0 right-0 mt-1 bg-paper border border-rule rounded-xl p-2 z-30 max-h-[60vh] overflow-y-auto"
             style={{ boxShadow: "var(--shadow-pop, var(--shadow-soft))" }}
           >
+            {availableProperties.length === 0 ? (
+              <p className="text-[12.5px] text-ink-muted px-2.5 py-2 m-0">
+                No tienes propiedades vinculadas.
+              </p>
+            ) : (
+              availableProperties.map((p) => {
+                const isActive = p.id === activePropertyId;
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    role="menuitem"
+                    onClick={() => selectProperty(p.id)}
+                    disabled={switching}
+                    aria-current={isActive ? "true" : undefined}
+                    className={[
+                      "w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-colors disabled:opacity-50",
+                      isActive
+                        ? "bg-sage-tint"
+                        : "hover:bg-linen",
+                    ].join(" ")}
+                  >
+                    <span
+                      aria-hidden
+                      className={[
+                        "w-7 h-7 rounded-md shrink-0 inline-flex items-center justify-center font-serif italic text-[12px] font-medium",
+                        isActive ? "bg-sage text-cream" : "bg-cream text-ink-soft border border-rule",
+                      ].join(" ")}
+                    >
+                      {p.name.slice(0, 1)}
+                    </span>
+                    <span className="flex-1 min-w-0">
+                      <span
+                        className={[
+                          "block text-[13px] font-medium truncate",
+                          isActive ? "text-sage" : "text-ink",
+                        ].join(" ")}
+                      >
+                        {p.name}
+                      </span>
+                      {p.city && (
+                        <span className="block text-[11.5px] text-ink-muted truncate">
+                          {p.city}
+                        </span>
+                      )}
+                    </span>
+                    {isActive && (
+                      <span
+                        aria-hidden
+                        className="text-[10.5px] uppercase tracking-[0.06em] text-sage font-semibold shrink-0"
+                      >
+                        Actual
+                      </span>
+                    )}
+                  </button>
+                );
+              })
+            )}
+            <div aria-hidden className="h-px bg-rule mx-1 my-1.5" />
             <Link
-              href={`/dashboard`}
+              href="/onboarding"
               role="menuitem"
               onClick={() => setPropOpen(false)}
-              className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-linen transition-colors"
-            >
-              <span
-                aria-hidden
-                className="w-7 h-7 rounded-md bg-cover bg-center"
-                style={{ backgroundImage: `url('${snapshot.property.photo}')` }}
-              />
-              <span className="text-[13px] font-medium text-ink">
-                {snapshot.property.name}
-                <span className="text-ink-muted font-normal"> · {snapshot.property.city}</span>
-              </span>
-            </Link>
-            <div aria-hidden className="h-px bg-rule mx-1 my-1.5" />
-            <button
-              type="button"
-              role="menuitem"
               className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-linen transition-colors text-left"
             >
               <span
@@ -150,7 +221,7 @@ export function Sidebar({
                 <IconPlus className="w-3.5 h-3.5 text-sage" />
               </span>
               <span className="text-[13px] font-medium text-sage">Crear nueva propiedad</span>
-            </button>
+            </Link>
           </div>
         )}
       </div>

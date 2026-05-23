@@ -1,5 +1,6 @@
 import "server-only";
 import { cache } from "react";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
@@ -8,6 +9,9 @@ import {
   UnauthenticatedError,
 } from "@/lib/errors";
 import type { Database } from "@/lib/supabase/database.types";
+
+/** Cookie name para la propiedad activa del switcher multi-property (D13). */
+export const ACTIVE_PROPERTY_COOKIE = "eztadia.active_property";
 
 type ProfileRow      = Database["public"]["Tables"]["profiles"]["Row"];
 type PropertyUserRow = Database["public"]["Tables"]["property_users"]["Row"];
@@ -141,6 +145,73 @@ export const getFirstAccessibleProperty = cache(async (): Promise<string | null>
 
   if (error || !data) return null;
   return data.property_id;
+});
+
+/**
+ * Verifica que el user tiene acceso a una propiedad sin tirar errores
+ * (a diferencia de requireProperty). Util para validar cookies persistidas.
+ */
+async function hasAccessToProperty(
+  userId: string,
+  propertyId: string,
+): Promise<boolean> {
+  const profile = await getCurrentProfile();
+  if (profile?.role === "super_admin") return true;
+
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("property_users")
+    .select("user_id")
+    .eq("property_id", propertyId)
+    .eq("user_id", userId)
+    .not("invitation_accepted_at", "is", null)
+    .maybeSingle();
+  return Boolean(data);
+}
+
+/**
+ * Resuelve la propiedad activa del user para el dashboard multi-property.
+ *
+ * Orden:
+ *   1. Cookie `eztadia.active_property` (validada contra membership actual)
+ *   2. Fallback: primera propiedad accesible
+ *
+ * Si la cookie apunta a una propiedad a la que el user ya no pertenece
+ * (revocaron acceso), se ignora silenciosamente y se usa el fallback.
+ */
+export const getActivePropertyId = cache(async (): Promise<string | null> => {
+  const user = await getCurrentUser();
+  if (!user) return null;
+
+  const cookieStore = await cookies();
+  const cookieValue = cookieStore.get(ACTIVE_PROPERTY_COOKIE)?.value;
+
+  if (cookieValue && /^[0-9a-f-]{36}$/i.test(cookieValue)) {
+    const ok = await hasAccessToProperty(user.id, cookieValue);
+    if (ok) return cookieValue;
+  }
+
+  return getFirstAccessibleProperty();
+});
+
+/**
+ * Lista propiedades accesibles del user actual (para el switcher).
+ * Devuelve forma minimal usada por la UI; el caller no debe asumir mas.
+ */
+export const listAccessibleProperties = cache(async (): Promise<
+  { id: string; name: string; slug: string; city: string | null }[]
+> => {
+  const user = await getCurrentUser();
+  if (!user) return [];
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("properties")
+    .select("id, name, slug, city")
+    .order("created_at", { ascending: true });
+
+  if (error || !data) return [];
+  return data;
 });
 
 /**

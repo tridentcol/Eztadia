@@ -1,17 +1,21 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { Sidebar } from "./Sidebar";
+import { Sidebar, type AvailableProperty } from "./Sidebar";
 import { Topbar } from "./Topbar";
 import type { OwnerSnapshot } from "@/lib/dashboard";
 
 export function DashboardShell({
   snapshot,
   breadcrumb,
+  availableProperties = [],
+  activePropertyId = null,
   children,
 }: {
   snapshot: OwnerSnapshot;
   breadcrumb?: { href?: string; label: string }[];
+  availableProperties?: AvailableProperty[];
+  activePropertyId?: string | null;
   children: ReactNode;
 }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -20,6 +24,8 @@ export function DashboardShell({
     <div className="lg:grid lg:grid-cols-[240px_1fr] min-h-screen">
       <Sidebar
         snapshot={snapshot}
+        availableProperties={availableProperties}
+        activePropertyId={activePropertyId}
         mobileOpen={drawerOpen}
         onMobileClose={() => setDrawerOpen(false)}
       />

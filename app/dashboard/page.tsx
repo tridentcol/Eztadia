@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { getOwnerSnapshot } from "@/lib/dashboard";
 import {
   getCurrentProfile,
-  getFirstAccessibleProperty,
+  getActivePropertyId,
 } from "@/lib/auth/session";
 import { getProperty } from "@/lib/db/queries/property";
 import { Greeting } from "@/components/dashboard/Greeting";
@@ -21,7 +21,7 @@ export default async function DashboardHome() {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
 
-  const propertyId = await getFirstAccessibleProperty();
+  const propertyId = await getActivePropertyId();
   if (!propertyId) redirect("/onboarding");
 
   // Datos reales para Greeting (resto sigue en demo hasta tener bookings)

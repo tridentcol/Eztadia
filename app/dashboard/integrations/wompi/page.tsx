@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   getCurrentProfile,
-  getFirstAccessibleProperty,
+  getActivePropertyId,
 } from "@/lib/auth/session";
 import { getWompiConfigForUI } from "@/lib/db/mutations/wompi";
 import { PropertyTabs } from "@/components/calendar/PropertyTabs";
@@ -17,7 +17,7 @@ export default async function WompiConfigPage() {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
 
-  const propertyId = await getFirstAccessibleProperty();
+  const propertyId = await getActivePropertyId();
   if (!propertyId) redirect("/onboarding");
 
   const cfg = await getWompiConfigForUI(propertyId);

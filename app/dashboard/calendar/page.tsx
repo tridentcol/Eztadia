@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import {
   getCurrentProfile,
-  getFirstAccessibleProperty,
+  getActivePropertyId,
 } from "@/lib/auth/session";
 import { getCalendarData } from "@/lib/db/queries/calendar";
 import { buildCalendarMonth } from "@/lib/calendar/adapter";
@@ -32,7 +32,7 @@ export default async function CalendarPage({
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
 
-  const propertyId = await getFirstAccessibleProperty();
+  const propertyId = await getActivePropertyId();
   if (!propertyId) redirect("/onboarding");
 
   const today = todayInBogota();

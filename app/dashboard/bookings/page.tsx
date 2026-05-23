@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import {
   getCurrentProfile,
-  getFirstAccessibleProperty,
+  getActivePropertyId,
 } from "@/lib/auth/session";
 import { getProperty } from "@/lib/db/queries/property";
 import { listBookings } from "@/lib/db/queries/bookings";
@@ -35,7 +35,7 @@ export default async function BookingsPage() {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
 
-  const propertyId = await getFirstAccessibleProperty();
+  const propertyId = await getActivePropertyId();
   if (!propertyId) redirect("/onboarding");
 
   const property = await getProperty(propertyId);

@@ -2,16 +2,24 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
+import { z } from "zod";
 import {
   createPropertySchema,
   updatePropertySchema,
 } from "@/lib/validation/property";
+import { uuid } from "@/lib/validation/common";
 import {
   createProperty,
   updateProperty,
 } from "@/lib/db/mutations/properties";
 import { createClient } from "@/lib/supabase/server";
-import { requireProfile, requirePropertyRole } from "@/lib/auth/session";
+import {
+  requireProfile,
+  requireProperty,
+  requirePropertyRole,
+  ACTIVE_PROPERTY_COOKIE,
+} from "@/lib/auth/session";
 import { logAudit } from "@/lib/audit";
 import { mapDbError } from "@/lib/errors";
 import { run } from "./_helpers";
@@ -89,5 +97,32 @@ export async function updatePropertyAction(raw: unknown) {
     revalidatePath("/dashboard/property-settings");
     revalidatePath(`/p/${updated.slug}`);
     return { property: updated };
+  });
+}
+
+/**
+ * Setea la propiedad activa del switcher multi-property (D13).
+ * Valida que el user es miembro antes de persistir.
+ */
+const setActivePropertySchema = z.object({ propertyId: uuid });
+
+export async function setActivePropertyAction(raw: unknown) {
+  return run(setActivePropertySchema, raw, async ({ propertyId }) => {
+    // requireProperty tira ForbiddenError si no es miembro.
+    await requireProperty(propertyId);
+
+    const cookieStore = await cookies();
+    cookieStore.set(ACTIVE_PROPERTY_COOKIE, propertyId, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 365, // 1 ano
+      path: "/",
+    });
+
+    // Revalida todo el segmento dashboard (queries cachean por request, pero
+    // layout + pages necesitan recompute).
+    revalidatePath("/dashboard", "layout");
+    return { propertyId };
   });
 }

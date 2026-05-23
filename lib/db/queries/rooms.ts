@@ -9,6 +9,7 @@ type RoomRow     = Database["public"]["Tables"]["rooms"]["Row"];
 type SeasonalRateRow = Database["public"]["Tables"]["seasonal_rates"]["Row"];
 
 export type RoomTypeWithRates = RoomTypeRow & { seasonal_rates: SeasonalRateRow[] };
+export type RoomTypeWithRooms = RoomTypeRow & { rooms: RoomRow[] };
 
 /**
  * Carga un room_type por id. Si `asAdmin`, bypass RLS — uso valido en el
@@ -62,4 +63,32 @@ export async function listRooms(
   const { data, error } = await q.order("number", { ascending: true });
   if (error) throw mapDbError(error);
   return data ?? [];
+}
+
+/**
+ * Lista room_types de una propiedad con sus rooms anidados.
+ * Optimizado para la pantalla /dashboard/rooms.
+ * RLS: members ven todo (activos e inactivos).
+ */
+export async function listRoomTypesWithRooms(
+  propertyId: string,
+): Promise<RoomTypeWithRooms[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("room_types")
+    .select("*, rooms(*)")
+    .eq("property_id", propertyId)
+    .order("is_active", { ascending: false })
+    .order("base_price_cents", { ascending: true });
+
+  if (error) throw mapDbError(error);
+
+  // Sort rooms within each type por numero asc (no se puede en el query nested order
+  // sin foreignTable hint awkward — mejor TS-side).
+  return (data ?? []).map((rt) => ({
+    ...rt,
+    rooms: [...(rt.rooms ?? [])].sort((a, b) =>
+      a.number.localeCompare(b.number, "es", { numeric: true }),
+    ),
+  })) as RoomTypeWithRooms[];
 }
