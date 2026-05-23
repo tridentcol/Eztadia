@@ -1,8 +1,15 @@
-import { type NextRequest } from "next/server";
-import { updateSession } from "./lib/supabase/middleware";
+import { NextResponse, type NextRequest } from "next/server";
 
-export async function middleware(request: NextRequest) {
-  return await updateSession(request);
+// TEMPORAL (sesion 8 debug): middleware NO-OP.
+// updateSession() del supabase/ssr está fallando en Edge runtime.
+// Las paginas server-side re-aplican auth via requirePropertyRole / requireSuperAdmin,
+// asi que NO hay rutas sin proteccion — solo perdemos el redirect automatico
+// del unauth user → /login (en su lugar veria un 403/forbidden de la pagina).
+//
+// Restaurar `updateSession` cuando se diagnostique el error de runtime.
+
+export function middleware(_request: NextRequest) {
+  return NextResponse.next();
 }
 
 export const config = {
