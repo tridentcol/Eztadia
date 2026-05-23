@@ -1,20 +1,20 @@
 # Eztadia — Progress Log
 
-> Última actualización: 2026-05-23 por sesión Claude Code #8 (Phase E segunda ola — E4 Resend + E5 Turnstile · Vercel deploy bloqueado por bug runtime)
-> Branch: `main`  ·  Último commit: `947aad7`
-> Phase activa: **Phase E segunda ola.** E4 (Resend) + E5 (Turnstile) implementados + wire-up · Vercel deploy preview **bloqueado en runtime**.
+> Última actualización: 2026-05-23 por sesión Claude Code #10 (END-SESSION)
+> Branch: `main`  ·  Último commit en origin: `4058cac`  ·  Último commit local sin pushear: `f4e309e` (Prisma cleanup de sesión 9, decisión separada)
+> Phase activa: **Phase E segunda ola — DESTRABADA en Vercel.** Deploy productivo responde 200 con HTML real de la app. Listos para validar smoke en browser y avanzar E1/E2.
 
 ## 📍 Estado actual
 
-**Phase:** E segunda ola (E4 + E5). E1/E2 pendientes de creds. E3/E6 ya estaban en sesión 7.
-**Último step completado:** E4 Resend (6 templates + dispatch + wire-up booking/payment + migration `email_status.failed`) · E5 Turnstile (verify server + widget cliente + wire-up 4 forms) · Push 30 commits a `origin/main` por primera vez (repo estaba en Phase A en GitHub).
-**Coverage local:** typecheck ✅ · build ✅ (35 rutas; +3 vs sesión 7: `/forbidden`, build de `/p/casa-marina`, ajustes) · tests ✅ **53/53**.
-**Coverage producción:** ❌ Vercel deploy preview **no carga** — `500 ReferenceError: __dirname is not defined` en TODAS las rutas.
+**Phase:** E segunda ola desbloqueada. E4 Resend + E5 Turnstile implementados y pushados (sesión 8). Deploy Vercel destrabado (sesión 10).
+**Último step completado:** **Vercel deploy funcional.** Root cause real del 404 NOT_FOUND global encontrado: `framework: null` en project Vercel (descubierto vía `mcp__vercel__get_project`). Fix: `"framework": "nextjs"` explícito en `vercel.json`. Stack actual = Next 16.2.6 + proxy.ts (Node runtime) + webpack opt-out.
+**Coverage local:** typecheck ✅ · build ✅ · tests 53/53 ✅.
+**Coverage producción:** ✅ `eztadia.vercel.app` responde 200 con HTML real (`<title>Eztadia — La forma serena de gestionar habitaciones.</title>`, tokens del design system, fonts cargando). Vercel Deployment Protection sigue activa (401 SSO para usuarios no autenticados, comportamiento esperado de preview deploys).
 
-**Bloqueado por:**
-- **Vercel runtime bug (`__dirname is not defined`)** — afecta todas las rutas con 500. Eliminé `lib/db/index.ts` (Prisma singleton no usado) + agregué `@prisma/client` a `serverExternalPackages` (commit `947aad7`). Falta validar si el deploy con ese cambio destraba o si hay otro culpable transitivo.
-- Wompi sandbox creds (E1) — usuario decidió standby
-- WhatsApp Meta setup (E2) — no se inicio en sesion 8
+**Bloqueado por:** ninguno técnico. Pendientes humanos:
+- Wompi sandbox creds (E1) — usuario en standby
+- WhatsApp Meta setup (E2) — usuario no se animó
+- Verificar dominio en Resend (F10) — emails solo al owner de la cuenta hasta que se verifique
 
 ## ✅ Steps completados
 
@@ -24,104 +24,87 @@ Phase D primera ola (sesión 4): D1, D2, D5, D6, D7, D13
 Phase D segunda ola (sesión 5): D3, D4, D8, D9, D10, D11, D12
 Limpieza transversal (sesión 6): property-settings 8 tabs + admin pages reales + CSV exports + 12 RLS tests
 Phase E primera ola (sesión 7): E3 iCal sync + E6 Storage Photos + Wompi is_active + Reports source breakdown + admin/users on-demand
-**Phase E segunda ola (sesión 8):**
+Phase E segunda ola (sesión 8): E4 Resend + E5 Turnstile + push 30 commits a GitHub + crons daily (Hobby) + `.env.vercel.local` generado · Vercel deploy bloqueado al cierre
 
-- [x] **E4 Resend wire-up completo**
-  - `lib/email/send.ts` — wrapper Resend con logging a `email_logs` (best-effort, idempotente)
-  - `lib/email/dispatch.ts` — helpers `sendPaymentConfirmedEmail` + `sendPaymentRejectedEmail` que cargan context (booking + property + room) y disparan email + booking-confirmation cuando aplique
-  - **6 templates React Email**: `_layout`, `booking-pending-payment`, `booking-confirmation`, `payment-confirmed`, `payment-rejected`, `staff-invitation`, `password-reset`
-  - Sistema de diseño: Fraunces italic para marca (sage), paleta tierra inline, fonts del sistema (serif fallback)
-  - Wire-up real: `publicCreateHoldAction` → pending-payment · `confirmManualPaymentAction` → confirmed · webhook Wompi → confirmed/rejected
-  - **Migration `email_status_failed`** aplicada (additive enum value)
-  - `EmailsPageClient` actualizado para filtrar/mostrar status `failed`
-- [x] **E5 Turnstile wire-up completo**
-  - `lib/turnstile/verify.ts` — verify server-side con graceful degradation (sin keys = pasa)
-  - `components/auth/Turnstile.tsx` — widget cliente con script lazy de Cloudflare api.js + onToken callback
-  - Wire-up 4 forms: `LoginForm`, `SignupForm`, `ResetRequestForm`, `BookingForm` público (reemplazando placeholders `DEMO_SITE_KEY`)
-  - Server actions ampliadas con `turnstileToken` opcional + `verifyTurnstile()`
-- [x] **Push 30 commits a `origin/main`** — el repo en GitHub estaba en Phase A; primer push real del trabajo de Phase B-E
-- [x] **vercel.json** crons cambiados de `*/5` y `*/15` a `0 4 * * *` y `0 5 * * *` (Hobby plan limita a 1/día)
-- [x] **`.env.vercel.local`** generado (gitignored) con las 13 vars listas para Vercel
-- [⏸️] **Vercel deploy preview** — NO completado. Bug runtime persiste tras 6 intentos de fix (ver "Decisiones tomadas" + "Próximos steps"). El último intento es `947aad7`; falta validar.
+**Sesión 9 (mid-session restart, 2026-05-23):**
+- [x] Vercel MCP server agregado a `~/.claude.json` (scope local). Restart forzado para que apareciera en `/mcp`.
+- [x] Commit local `f4e309e` — `chore(vercel): eliminar Prisma completo` (4 archivos, -871/+2 líneas: borra `prisma/schema.prisma`, remueve 7 scripts npm, saca `@prisma/client` de `serverExternalPackages`, `pnpm remove prisma @prisma/client`). **NO pusheado.** Resultó NO ser el bug (sesión 10 lo confirmó) pero sigue siendo dead-code cleanup válido.
+- [x] Verde local: typecheck · build (35 rutas) · 53/53 tests.
 
-- [x] **E3 iCal sync (entrante)** — `lib/ical/sync.ts` con full-sync por feed (delete-not-in + upsert), fetch con timeout 20s + cap 5MB, concurrencia 4 paralelos, skip <60s para evitar tormentas
-- [x] **Parser iCal aislado** — extraído a `lib/ical/parser.ts` (sin server-only) para testabilidad
-- [x] **`/api/cron/ical-sync`** route con Bearer CRON_SECRET + audit log + maxDuration 60s
-- [x] **vercel.json** cron `*/15 * * * *` para ical-sync
-- [x] **node-ical** instalado · `serverExternalPackages: ["node-ical"]` para evitar BigInt error en page-data collection
-- [x] **Botón "Sincronizar ahora"** en feeds inbound + Server Action `syncIcalFeedNowAction` (cierra deuda #16)
-- [x] **E6 Storage Photos wire-up** — Server Actions upload/delete/setCover/reorder en `app/actions/photos.ts`; PhotosTab acción-inmediata; gallery jsonb + cover_image_url sync atómico
-- [x] **Wompi `is_active` migration** aplicada vía MCP + repo file `20260524010000_wompi_configs_is_active.sql`
-- [x] **Wompi pause/resume** — `setWompiActiveAction` + toggle optimista en UI + `loadWompiCredsForProperty` retorna null si !active (bloquea nuevos PSE; webhooks intactos)
-- [x] **Status "Pausada"** badge en wompi config page + status `partial` en `/dashboard/integrations` index
-- [x] **Reports breakdown por canal `source`** — `getBreakdownBySource` + SourceTable en ReportsView (cierra deuda #13)
-- [x] **/admin/users fetch-on-demand** — `getAdminUserDetailAction` + useEffect cache; pre-load reducido 50→25 (cierra deuda #22)
-- [x] **inet helper** — `lib/db/inet.ts` con `inetToString()`, reemplaza 3 casts en admin.ts (cierra deuda #10)
-- [x] **Regenerated TS types** post-migration
-- [x] **+28 tests** — 22 unit parser iCal + 3 external_blocks + 3 wompi_configs RLS
+**Sesión 10 (esta — 2026-05-23) — destrabar Vercel deploy:**
 
-## 🎯 Próximo step — prioridad PRIMERA: destrabar Vercel deploy
+- [x] **Vercel MCP autenticado** vía OAuth al inicio (`/mcp` mostró `vercel ✓ Connected`). Permitió leer runtime logs, build logs, project metadata sin copiar+pegar.
+- [x] **Diagnóstico real del bug original** vía `mcp__vercel__get_runtime_logs` con `source=edge-middleware`: `ReferenceError: __dirname is not defined`. Causa: `@supabase/ssr` referencia `__dirname` al bundlearse para Edge runtime (Web Workers spec, sin `__dirname`). **Invalidó las 6 hipótesis de sesión 8** (Prisma, node-ical, `lib/db/index.ts`, etc.) — todas en serverless functions, no Edge.
+- [x] **Intento Next 15 + `experimental.nodeMiddleware: true`** — flag existe en runtime pero bundler de Next 15.5.18 lo ignora. Manifest verificado: middleware seguía Edge. NO destrabó. Commit `36509f8`.
+- [x] **Upgrade Next 15.5.18 → 16.2.6** (`pnpm install next@^16.2.6`). Next 16 renombra `middleware.ts` → `proxy.ts` con runtime Node default (no flag). Manifest `functions-config-manifest.json` confirma `/_middleware runtime "nodejs"`. Commit `24cf24c`. tsconfig.json auto-actualizado (`jsx: "react-jsx"` + `.next/dev/types`).
+- [x] **Opt-out de Turbopack** (`next build --webpack`) — Next 16 usa Turbopack por default. Commit cautelar `27ed551` (hipótesis fallida).
+- [x] **Named export `proxy` vs default** — la skill `vercel:nextjs` recomendaba `proxyConfig` (incorrecto). La docs oficial (en `node_modules/next/dist/docs/01-app/01-getting-started/16-proxy.md`) dice `config` (mismo nombre que Next 15) y acepta named o default. Cambio cautelar a named. Commit `5b74d74` (hipótesis fallida).
+- [x] **PASO A — desactivar proxy completo** (rename `proxy.ts` → `proxy.ts.disabled`) para aislar si bug era del proxy o de Vercel platform. Deploy sin proxy: **sigue 404**. Confirmó que NO era del proxy. Commit `6e32e97`.
+- [x] **ROOT CAUSE descubierto vía `mcp__vercel__get_project`**: `"framework": null` en el proyecto Vercel. Sin framework detectado, Vercel platform no aplica el routing layer de Next.js y rebota 404 a TODO (estáticas Y route handlers), incluso con build OK. NodeVersion 24.x estaba bien (>=20.9 requerido para Next 16).
+- [x] **Fix definitivo**: `"framework": "nextjs"` agregado a `vercel.json`. Restaurado `proxy.ts.disabled` → `proxy.ts`. Commits `18a2096` (proxy restaurado) + `4058cac` (vercel.json — quedó separado porque el primer commit omitió el `vercel.json` modificado, NO se hizo amend para respetar la regla).
+- [x] **Validación end-to-end**: deploy `dpl_4gXmg6aQSTxbY2WgNCd79rM5FF7K` responde **HTTP 200** con HTML real (`<title>Eztadia — La forma serena...</title>`, tokens `cream`/`terracotta`/`sage`, fonts `_next/static/media/*.woff2`).
+- [⏸️] **Commit local `f4e309e` (Prisma cleanup de sesión 9)** NO pusheado — decisión separada, no era el bug, solo cleanup. Usuario puede pushearlo en cualquier momento.
 
-**Hipótesis viva al cierre sesión 8:**
-- Eliminado `lib/db/index.ts` que era el único archivo que importaba `@prisma/client`. Si Vercel sigue cargando Prisma en el bundle es porque alguna otra dep transitiva lo arrastra.
-- Agregado `@prisma/client` + `.prisma/client` a `serverExternalPackages` en `next.config.ts` como red de seguridad.
-- Commit `947aad7` pusheado pero NO validado por el usuario al cierre. Próxima sesión: confirmar si carga el deploy preview.
+## 🎯 Próximo step
 
-**Si commit `947aad7` no destraba, opciones por orden de severidad:**
+**Prioridad 1 — Smoke real en browser** (ahora que el deploy funciona):
+- Login con cuenta del owner. Verificar que `requirePropertyRole` server-side autentica.
+- Flujo público: visitar `/p/casa-marina`, iniciar booking, validar Turnstile widget aparece, completar form.
+- Dashboard: navegar tabs (overview, calendar, bookings, rooms, pricing, reports), property-settings tabs (8 tabs).
+- Validar Resend en runtime real: el `publicCreateHoldAction` debe disparar `booking-pending-payment` email al owner Resend (sandbox limita destinos).
+- Validar webhook Wompi: requiere E1 (creds sandbox).
+- Live CSV export download desde browser.
+- iCal sync con URL real Booking/Airbnb (requiere feed config real).
 
-1. **Verificar runtime logs nuevos.** Si `__dirname` persiste, el stack trace puede revelar de dónde se carga Prisma (puede ser un archivo de Next.js de telemetría/instrumentation interno).
+**Prioridad 2 — Phase E1/E2 (cuando estés listo)**:
+- E1 Wompi sandbox creds → smoke live PSE
+- E2 WhatsApp Cloud API → setup Meta + webhook + plantillas
 
-2. **Conectar Vercel MCP** — el usuario propuso esto al cierre. Hay MCP servers de Vercel community que permiten:
-   - Leer build/runtime logs sin que el usuario tenga que copiar+pegar
-   - Trigger redeploys
-   - Listar/editar env vars
-   - Inspect deployments
-   - Búsqueda: `https://github.com/anthropics/anthropic-quickstarts/...` o `npm i -g vercel-mcp` (verificar al inicio sesión 9)
-   - Configurar en `~/.claude/settings.json` con token Vercel del usuario
-   - **Esto reduce el ciclo diagnóstico ~10x.**
-
-3. **Eliminar Prisma completamente del repo si nadie lo usa.** Pasos:
-   - `pnpm remove prisma @prisma/client`
-   - Eliminar `prisma/schema.prisma` (o moverlo a un README como referencia futura)
-   - Remover script `postinstall: prisma generate` de package.json
-   - Re-deploy.
-
-4. **Probar `vercel dev` localmente** para reproducir el error con stack trace completo. `vercel dev` simula el runtime de Vercel localmente.
-
-5. **Bisect drástico:** crear branch desde `main`, comentar imports masivos en `app/page.tsx` (la home pure-static no debería cargar Prisma) hasta que el deploy funcione. Reintroducir incremental.
-
-6. **Activar Vercel Pro trial** — si nada funciona en Hobby por limitaciones del runtime serverless, Pro tiene runtimes más generosos. ($20/mes, 14 días free trial.)
-
-**Resto de Phase E (cuando deploy funcione):**
-- E1 Wompi sandbox real (smoke live PSE) — usuario standby
-- E2 WhatsApp Cloud API — usuario no se animó (setup Meta complejo)
+**Hardening tras destrabar (recomendado pronto):**
+- Rotar Resend API key + Turnstile site/secret (compartidas en chat sesiones 8).
+- Agregar hostname Vercel a Turnstile dashboard (`*.vercel.app` + dominio custom).
+- Verificar dominio en Resend (F10) — sin esto solo se puede mandar a `carlossanjuan2113@gmail.com`.
+- Considerar push de `f4e309e` (Prisma cleanup) — limpia 871 líneas de dead code.
 
 **Phase D residual** (diferidos por buenas razones):
-- D15-D19 next-intl — refactor masivo. Recomendado solo cuando feature set frozen.
+- D15-D19 next-intl — refactor masivo, solo cuando feature set frozen.
 - D20 Plan + facturación tab — bloqueado por decisión de pricing.
 
-**Deuda residual restante**:
-- `BookingStatus.refunded` enum — classifier bloqueó la migration sin OK explícito (sesión 7). Reintentar con `dangerouslyDisableSandbox` o autorización previa.
-- `wompi_configs.is_active` UI test connection button — necesita Wompi sandbox creds (E1)
-- Live browser test no corrido (necesita login interactivo — typecheck + build + 53 tests es la cobertura efectiva)
-- Live CSV export download no probado en browser real
-- Smoke live iCal sync con URL real Booking/Airbnb sandbox no corrido
-- Realtime live test 2-tabs no corrido
-- Vercel deploy no hecho aún (build pasa)
-- Reports sin proyección/forecast — solo histórico (necesita ML/heurísticas)
-- Messages sin paginación (top 500 conversaciones + 500 mensajes por thread)
-- WhatsAppMessagesList sin paginación (top 20 en config page) — espera E2
-- `messages: []` en BookingDetail — Phase E2 WhatsApp
-- `response-time` metric omitido del WeekPulse — depende WhatsApp E2
-- `unreadMessages` sigue hardcoded 0 — schema decision Phase E2
-- Webhook URL de WhatsApp no se muestra en config form — Phase E2
-- Mini-cal precio efectivo por día en `/dashboard/pricing` — futuro D2.5
-- Sin acciones admin sobre bookings/properties (cancelar, suspend) — read-only, necesita design discussion
-- Sidebar muestra "0 propiedades vinculadas" mid-revocation (race condition defensible)
-- Property-settings: Fiscal datos sin destino (módulo facturación electrónica futuro)
-- Borrado real de propiedad (cascade SQL + soft-delete strategy)
-
 ## 🧾 Decisiones tomadas que NO están en el blueprint
+
+### Sesión 10 (2026-05-23) — Destrabar Vercel deploy con Vercel MCP
+
+**Vercel MCP como herramienta principal de diagnóstico**
+- Configurado en sesión 9 (`claude mcp add --transport http vercel https://mcp.vercel.com`). En sesión 10 ya estaba OAuth-autenticado.
+- Permite `mcp__vercel__get_runtime_logs` filtrando por `source=edge-middleware`/`serverless`, leer build logs, project metadata, deployments, `web_fetch_vercel_url` que bypasea SSO. **Redujo ciclo de diagnóstico ~10x.**
+- `mcp__vercel__get_project` fue el que reveló el bug real (`framework: null`).
+
+**Next 16 — upgrade mayor justificado**
+- Aceptamos el upgrade porque Next 15.5.18 ignora el flag `experimental.nodeMiddleware` al bundlear. Next 15.6 no es estable (solo canary). Next 16.2.6 (estable) tiene proxy como Node default.
+- **Convención cambia**: `middleware.ts` → `proxy.ts`. Función puede ser named (`export function proxy`) o default. Variable de config sigue siendo `config` (la docs Vercel skill estaba mal recomendando `proxyConfig`).
+- Edge runtime NO soportado en `proxy`. Si necesitamos Edge en el futuro, hay que mantener `middleware.ts` (que sigue funcionando como compatibilidad).
+- React 19.2 + cambios async API (cookies, headers, params, searchParams) — nuestro código ya estaba en 15 con async patterns, no requirió refactor.
+
+**Webpack opt-out (Turbopack por default en Next 16)**
+- `next build --webpack` en package.json. Hipótesis cautelar que resultó NO ser el bug, pero la mantenemos hasta validar que Turbopack production funciona en nuestro setup. Cuando confirmemos, podemos revertir a `next build` (Turbopack).
+
+**`framework: nextjs` explícito en `vercel.json`** (root cause real)
+- Sin esto, el proyecto Vercel quedaba con `framework: null` y rebotaba 404 a todo. Probablemente la auto-detección se rompió cuando renombramos `middleware.ts` → `proxy.ts` o durante el upgrade.
+- Decisión: dejar el `framework` explícito como guard contra futuras re-detecciones fallidas.
+
+**Tres skills de Vercel inyectadas** (aparecieron mid-sesión): `vercel:nextjs`, `vercel:next-upgrade`, `vercel:vercel-cli`, etc. Útiles pero la skill `vercel:nextjs` tenía info incorrecta sobre `proxyConfig`. **Verificar siempre contra docs oficial en `node_modules/next/dist/docs`** antes de aplicar.
+
+**Memoria nueva probable** (a guardar): "Vercel MCP es prerequisito para debugging eficiente de deploys" + "framework auto-detección puede romperse con renames o major upgrades — `framework: nextjs` explícito en vercel.json es la defensa".
+
+### Sesión 9 (2026-05-23) — Vercel MCP setup + Prisma cleanup
+
+**Vercel MCP server** agregado a `~/.claude.json` con scope local del proyecto. Requirió restart de Claude Code para que apareciera en `/mcp`. OAuth flow completado al inicio de sesión 10.
+
+**Prisma cleanup completo** (commit `f4e309e`, NO pusheado):
+- Verificado: `@prisma/client` y `prisma` eran 100% dead code (cero imports en `.ts/.tsx`).
+- Borra `prisma/schema.prisma` (601 líneas), 7 scripts npm (`db:*` + `postinstall`), saca `@prisma/client` + `.prisma/client` de `serverExternalPackages`.
+- 4 archivos, -871/+2 líneas. Verde local (typecheck + build 35 rutas + 53 tests).
+- **Resultó NO ser el bug** (sesión 10 lo confirmó). Sigue siendo cleanup válido si queremos eliminar la deuda. Decisión: usuario puede pushear cuando quiera.
 
 ### Sesión 8 (2026-05-23) — Phase E segunda ola + Vercel deploy intentos
 
@@ -138,16 +121,11 @@ Phase E primera ola (sesión 7): E3 iCal sync + E6 Storage Photos + Wompi is_act
 - **Graceful degradation server + cliente**: sin `TURNSTILE_SECRET_KEY` → verify devuelve `ok: true`; sin `NEXT_PUBLIC_TURNSTILE_SITE_KEY` → componente devuelve null y dispara `onToken("")`. Permite dev local sin cuenta Cloudflare.
 - **Reset password verify devuelve siempre `ok: true`** aunque turnstile falle — política de "no filtrar existencia de cuentas" (mantenida).
 - **Site key + secret compartidas en chat** → recomendación de rotar pronto. Mismo riesgo que con Resend.
-- **Hostname `localhost` registrado**. Falta agregar dominio Vercel cuando deploy funcione.
+- **Hostname `localhost` registrado**. Falta agregar dominio Vercel ahora que deploy funciona.
 
-**Vercel — intentos de deploy preview (6 commits de debugging)**
-- **Push 30 commits a `origin/main`**: el repo GitHub estaba en Phase A (29 commits atrás). Vercel intentaba deployar versión pre-Supabase. Autorización explícita del usuario para push directo a `main` (rompe regla CLAUDE.md "NO git push") — UNA VEZ, no se vuelve política.
-- **Cron jobs `*/5` y `*/15` no pasan en Vercel Hobby**: cambiados a `0 4 * * *` (UTC 4am = COL 11pm) y `0 5 * * *`. Deuda crítica: double-booking con OTAs posible hasta 24h. Memoria guardada (`project_vercel_hobby_crons`).
-- **Middleware path alias `@/` no se resuelve en Edge runtime**: cambiado a path relativo `./lib/supabase/middleware`.
-- **Middleware refactor a `getSession()` + try/catch defensivo**: `getUser()` hace fetch a Supabase y puede colgarse en Edge; `getSession()` solo lee cookies. Guards re-validan en páginas server-side via `requirePropertyRole`.
-- **`__dirname is not defined` root-cause**: tras eliminar Prisma singleton (`lib/db/index.ts`) y agregar `@prisma/client` + `.prisma/client` a `serverExternalPackages`, hipótesis es que `@prisma/client` cargaba al boot del lambda y crasheaba ESM runtime. **Status al cierre: commit `947aad7` pusheado, NO validado por el usuario.**
-- **Lazy import de `node-ical`** en `lib/ical/parser.ts` (parseBlocks → async). Tests + sync.ts actualizados con `await`. node-ical estaba bajo sospecha pero no era la causa final.
-- **Memoria nueva**: `feedback_vercel_node_packages` con el patrón completo + caso sesión 8.
+**Vercel — intentos de deploy preview sesión 8 (6 commits de debugging fallidos)**
+- Todos esos commits (path alias middleware, getSession defensivo, middleware no-op, crons daily, lazy node-ical, eliminar `lib/db/index.ts`) estaban atacando la causa equivocada. La causa real era `@supabase/ssr` en Edge (sesión 10 lo confirmó). Documentado por completitud histórica; los fixes son inocuos.
+- **Memoria nueva sesión 8**: `feedback_vercel_node_packages` con el patrón completo. Sigue vigente.
 
 ### Sesiones 1-7 — ver PROGRESS commits anteriores
 
@@ -204,6 +182,10 @@ Phase E primera ola (sesión 7): E3 iCal sync + E6 Storage Photos + Wompi is_act
 
 ## ⚠️ Lo que NO se hizo intencionalmente (deuda conocida actualizada)
 
+### Resueltas en sesión 10
+- ~~**Vercel deploy preview no carga**~~ ✅ **DESTRABADO** — `framework: nextjs` en vercel.json + upgrade Next 16 + proxy.ts
+- ~~Validación end-to-end bloqueada por runtime bug~~ ✅ Desbloqueada (queda smoke browser real)
+
 ### Resueltas en sesión 8
 - ~~E4 Resend wire-up~~ ✅ 6 templates + dispatch + wire-up booking/payment + migration
 - ~~E5 Turnstile wire-up~~ ✅ verify + widget + wire-up 4 forms
@@ -211,58 +193,50 @@ Phase E primera ola (sesión 7): E3 iCal sync + E6 Storage Photos + Wompi is_act
 - ~~Push a GitHub~~ ✅ 30 commits subidos a `origin/main`
 - ~~`.env.vercel.local`~~ ✅ generado, 13 vars
 
-### Nuevas deudas creadas en sesión 8
-- **Vercel deploy preview no carga**: bug runtime persistente. Bloquea validación end-to-end (Turnstile real, Resend real, etc.). Próxima sesión es la prioridad #1.
+### Nuevas deudas creadas en sesión 10
+- **Webpack opt-out en build**: `next build --webpack` es cautelar. Cuando validemos que Turbopack production funciona OK con nuestro stack, revertir a `next build` (Turbopack) para perf de builds.
+- **`framework: nextjs` explícito en vercel.json**: defensa contra re-detección fallida. Si en el futuro Vercel mejora auto-detección, podríamos remover pero no urge.
+- **Validación browser real pendiente**: el deploy carga pero ningún flow se testeó manualmente (login, booking, dashboard navigation, Turnstile widget, Resend email send).
+
+### Nuevas deudas heredadas de sesión 8 (sin cambios)
 - **Crons de Vercel a 1/día**: holds vencidos liberan inventario hasta 24h tarde, iCal sync con OTAs solo 1/día (riesgo double-booking real con Booking.com/Airbnb). Critical fix: upgrade Vercel Pro o migrar crons a Upstash QStash/GitHub Actions.
-- **Resend `onboarding@resend.dev` sandbox**: emails solo al owner de Resend (`carlossanjuan2113@gmail.com`). Falta verificar dominio en Resend (F10).
-- **Turnstile site/secret keys compartidas en chat** → rotar tras destrabar deploy.
-- **Resend API key compartida en chat** → rotar tras destrabar deploy.
-- **Hostname Vercel no agregado a Turnstile** → cuando funcione el deploy, agregar `*.vercel.app` y el dominio custom (cuando exista).
-- **Prisma queda como dead code parcial**: `prisma/schema.prisma` y `postinstall: prisma generate` siguen vivos pero nadie usa el cliente generado. Decisión: mantener por si futuro o limpiar completamente (ver "Próximos steps").
+- **Resend `onboarding@resend.dev` sandbox**: emails solo al owner de Resend. Falta verificar dominio (F10).
+- **Turnstile site/secret keys compartidas en chat** → rotar.
+- **Resend API key compartida en chat** → rotar.
+- **Hostname Vercel no agregado a Turnstile** → agregar `*.vercel.app` y el dominio custom cuando exista.
+- **Prisma queda como dead code parcial** si no se pushea `f4e309e` (sesión 9): `prisma/schema.prisma` y `postinstall: prisma generate` siguen vivos pero nadie usa el cliente generado.
 
-### Resueltas en sesión 7
-- ~~`/admin/users` carga 50 detalles upfront~~ ✅ Reducido a 25 + fetch on-demand
-- ~~`r.ip as string | null` cast~~ ✅ Helper `inetToString()`
-- ~~Reports sin breakdown por canal `source`~~ ✅ Sección "Por canal" agregada
-- ~~iCal config sin botón "Sincronizar ahora"~~ ✅ Implementado
-- ~~Photos upload real (espera E6)~~ ✅ Wire-up completo (buckets ya existían)
-- ~~Wompi sin toggle pause/resume~~ ✅ `is_active` column + UI
-- ~~Sin tests RLS específicos para external_blocks~~ ✅ 3 tests
-- ~~Sin tests RLS específicos para wompi_configs~~ ✅ 3 tests
-
-### Pendientes
+### Pendientes (sin cambios)
 1. Wompi sandbox creds — pendiente smoke live HTTP PSE.
 2. Realtime live test 2-tabs no corrido.
-3. Vercel deploy no hecho aún (build pasa).
-4. `messages: []` en BookingDetail (Phase E2 WhatsApp).
-5. **`BookingStatus.refunded` enum** — classifier bloqueó la migration en sesión 7 sin OK explícito. Reintentar con autorización previa.
-6. Mini-cal de precio efectivo por día en `/dashboard/pricing` — futuro D2.5.
-7. Sin acción admin sobre bookings/properties (cancelar, suspend) — read-only.
-8. Sidebar muestra "0 propiedades vinculadas" mid-revocation.
-9. **`unreadMessages` sigue hardcoded 0** — no hay flag de unread en `whatsapp_messages`. Schema decision Phase E2.
-10. **Webhook URL de WhatsApp no se muestra en config form** — route `/api/webhooks/whatsapp` no existe (Phase E2).
-11. **Reports sin proyección/forecast** — solo histórico.
-12. **Messages sin paginación** — top 500 conversaciones + 500 mensajes por thread.
-13. **WhatsAppMessagesList sin paginación** — top 20 en config page.
-14. **`response-time` metric omitido** del WeekPulse — depende de WhatsApp E2.
-15. **Fiscal tab persistencia** — espera módulo facturación electrónica.
-16. **Eliminar propiedad permanentemente** — requiere cascade SQL function + soft-delete UX defense.
-17. **Smoke live iCal sync con URL real** Booking/Airbnb sandbox no corrido.
+3. `messages: []` en BookingDetail (Phase E2 WhatsApp).
+4. **`BookingStatus.refunded` enum** — classifier bloqueó la migration en sesión 7 sin OK explícito. Reintentar con autorización previa.
+5. Mini-cal de precio efectivo por día en `/dashboard/pricing` — futuro D2.5.
+6. Sin acción admin sobre bookings/properties (cancelar, suspend) — read-only.
+7. Sidebar muestra "0 propiedades vinculadas" mid-revocation.
+8. **`unreadMessages` sigue hardcoded 0** — no hay flag de unread en `whatsapp_messages`. Schema decision Phase E2.
+9. **Webhook URL de WhatsApp no se muestra en config form** — route `/api/webhooks/whatsapp` no existe (Phase E2).
+10. **Reports sin proyección/forecast** — solo histórico.
+11. **Messages sin paginación** — top 500 conversaciones + 500 mensajes por thread.
+12. **WhatsAppMessagesList sin paginación** — top 20 en config page.
+13. **`response-time` metric omitido** del WeekPulse — depende de WhatsApp E2.
+14. **Fiscal tab persistencia** — espera módulo facturación electrónica.
+15. **Eliminar propiedad permanentemente** — requiere cascade SQL function + soft-delete UX defense.
+16. **Smoke live iCal sync con URL real** Booking/Airbnb sandbox no corrido.
 
 ## ❓ Preguntas abiertas para el usuario
 
-1. **Vercel MCP** — ¿configuramos al inicio sesión 9? Acelera el debug masivamente. Necesitas token Vercel + agregar el MCP server a `~/.claude/settings.json`. Te paso instrucciones cuando arranquemos.
-2. **Limpieza de Prisma** — si nadie lo usa hoy, ¿lo removemos completo (`pnpm remove prisma @prisma/client`)? Bajaría sospechas de bundling.
-3. **Vercel Pro trial** — si Hobby sigue dando problemas con crons o runtime, ¿activamos el trial de 14 días?
-4. **Verificar dominio en Resend** — ¿compramos `eztadia.com` ya o usamos un dominio existente? Sin esto no podemos enviar a guests reales.
+1. **Push `f4e309e` (Prisma cleanup sesión 9)** — limpia 871 líneas de dead code. ¿Pushear ahora?
+2. **Rotar keys compartidas en chat**: Resend API key + Turnstile secret. Recomendable hacerlo pronto.
+3. **Verificar dominio en Resend** — ¿compramos `eztadia.com` o usamos un dominio existente? Sin esto, emails solo al owner de la cuenta Resend.
+4. **Vercel Pro trial** — para subir crons de daily a `*/5` y `*/15`. ¿Activamos los 14 días free?
 5. Wompi sandbox creds — ¿cuándo?
-6. WhatsApp Cloud setup — ¿agendamos sesión dedicada para guiarte?
-7. `BookingStatus.refunded` enum migration — todavía pendiente desde sesión 7.
+6. WhatsApp Cloud setup — ¿agendamos sesión dedicada?
+7. `BookingStatus.refunded` enum migration — pendiente desde sesión 7.
 8. Pricing real para D20 (Plan + facturación tab).
 9. Admin actions sobre bookings (cancelar, suspend) — necesita design discussion.
-10. **Rotar keys compartidas en chat**: Resend API key + Turnstile secret. Cuando deploy funcione.
 
-## 📂 Migrations aplicadas en remoto (13 totales — +1 en sesión 8)
+## 📂 Migrations aplicadas en remoto (13 totales — sin cambios sesiones 9 y 10)
 
 ```
 supabase/migrations/
@@ -278,38 +252,40 @@ supabase/migrations/
 ├── 20260523120300_properties_contact_phone.sql
 ├── 20260524000000_webhook_logs.sql
 ├── 20260524010000_wompi_configs_is_active.sql
-└── 20260524020000_email_status_failed.sql        ← NUEVA en sesión 8
+└── 20260524020000_email_status_failed.sql
 ```
 
 ## 🧪 Tests / verificaciones corridas
 
-**Local (sesión 8):**
-- ✅ `pnpm typecheck` clean en todos los pasos
-- ✅ `pnpm build` final: **35 rutas generadas**
-- ✅ `pnpm test` — **53/53 tests passing** (parser tests ahora `async`)
+**Local (sesión 10):**
+- ✅ `pnpm typecheck` clean tras upgrade a Next 16
+- ✅ `pnpm build` con `--webpack` final: **34 rutas + Proxy registrado** (35 vs Next 15, una diferencia menor en cómo cuenta `/_not-found`)
+- ✅ `pnpm test` — **53/53 tests passing** bajo Next 16
 
-**Vercel (sesión 8):**
-- ✅ Build pasa (todos los deploys completaron build)
-- ❌ Runtime: 500 en todas las rutas (`__dirname is not defined`)
-- ⏸️ Validación end-to-end: bloqueada por runtime bug
+**Vercel (sesión 10):**
+- ✅ Build completa en ~80s
+- ✅ Runtime: HTTP 200 con HTML real de la app, headers OK, fonts cargando
+- ✅ Confirmado vía `mcp__vercel__web_fetch_vercel_url` que el contenido es la app real (no SSO page, no 404)
 
-**Pending desde sesiones anteriores:**
-- ⏸️ Live browser test no corrido (necesita login interactivo)
-- ⏸️ Live CSV export download no probado en browser
-- ⏸️ Live iCal sync con URL real (Booking/Airbnb) no corrido — necesita feed config real
-- ⏸️ Live email send (Resend) no validado en runtime real — bloqueado por Vercel
-- ⏸️ Live Turnstile no validado en runtime real — bloqueado por Vercel
+**Pending sin cambios desde sesiones anteriores:**
+- ⏸️ Live browser test no corrido (smoke real de login, booking, dashboard)
+- ⏸️ Live CSV export download no probado
+- ⏸️ Live iCal sync con URL real (Booking/Airbnb)
+- ⏸️ Live email send (Resend) en runtime real
+- ⏸️ Live Turnstile en runtime real
 
 ## 🔧 Setup de entorno actual
 
-- Node v26.0.0, pnpm 9.15.0 via npx.
+- Node v26.0.0 local, pnpm 9.15.0 via npx.
 - Supabase CLI linkeada a `fdcgqywnwllfxpjrpako` (us-east-2).
 - DB Postgres 17.6.
-- Migrations totales: **13** (+1 sesión 8).
-- **Vercel:** proyecto importado desde GitHub `tridentcol/Eztadia`, branch `main`, env vars cargadas, plan **Hobby**.
+- Migrations totales: **13** (sin cambios sesión 10).
+- **Vercel:** proyecto `eztadia` (`prj_YZO9AhJv4NLorTcx75PUTMIKaUqW`) en team `daniels-projects-8dbbaf4e`. Dominio principal `eztadia.vercel.app`. Plan **Hobby**. **nodeVersion 24.x**. **framework: nextjs** (forzado explícito en vercel.json desde sesión 10).
 - **Resend:** cuenta creada, API key configurada, dominio sin verificar (sandbox).
 - **Cloudflare Turnstile:** widget "Eztadia" creado, hostname `localhost` registrado (falta agregar dominio Vercel).
-- Dependencies nuevas sesión 8: `resend@^6.12.3`, `@react-email/components@^1.0.12`.
+- **Vercel MCP server**: configurado en `~/.claude.json` (scope local), OAuth autenticado en sesión 10. Acceso a deployments, build logs, runtime logs, project metadata.
+- Dependencies sesión 10: `next ^15.1.0` → `^16.2.6` (resolved 16.2.6).
+- Dependencies sesión 8: `resend@^6.12.3`, `@react-email/components@^1.0.12`.
 
 ## 📊 Bitácora de sesiones
 
@@ -322,19 +298,26 @@ supabase/migrations/
 | 5 | 2026-05-23 night2 | ~5h | D3+D4+D8+D9+D10+D11+D12 · 7 pantallas + 1 migration + dashboard home wire-up + limpieza | Sprint Phase D segunda ola. |
 | 6 | 2026-05-23 night3 | ~5h | Limpieza transversal: property-settings 8 tabs + nueva reserva manual + /admin/users + /admin overview + CSV exports + 12 RLS tests + dashboard owner real | Cierre de deuda heredada de Phase A/B/C. |
 | 7 | 2026-05-23 night4 | ~6h | E3 iCal sync inbound + E6 Storage Photos + Wompi pause/resume + Reports source breakdown + /admin/users on-demand + inet helper + parser extracted + 28 tests nuevos | Sprint Phase E primera ola. |
-| 8 | 2026-05-23 night5 | ~5h | E4 Resend (wrapper + dispatch + 6 templates + wire-up + migration) + E5 Turnstile (verify + widget + wire-up 4 forms) + push 30 commits a GitHub + 6 intentos de fix de Vercel runtime | Phase E segunda ola **bloqueado en Vercel runtime al cierre**. |
+| 8 | 2026-05-23 night5 | ~5h | E4 Resend (wrapper + dispatch + 6 templates + wire-up + migration) + E5 Turnstile (verify + widget + wire-up 4 forms) + push 30 commits a GitHub + 6 intentos de fix de Vercel runtime (todos atacando causa equivocada) | Phase E segunda ola **bloqueado en Vercel runtime al cierre**. |
+| 9 | 2026-05-23 late | ~1h | Vercel MCP setup + Prisma cleanup completo (commit local `f4e309e` no pusheado) + restart forzado de Claude Code para OAuth | Mid-session restart por requerimiento del MCP. |
+| 10 | 2026-05-23 late2 | ~5h | Diagnóstico real vía Vercel MCP runtime logs + intento nodeMiddleware en 15 + upgrade Next 16 + rename middleware→proxy + 6 hipótesis fallidas + PASO A aisló proxy + descubrió `framework: null` en project Vercel + fix `framework: nextjs` en vercel.json + validación HTTP 200 con HTML real | **Vercel deploy DESTRABADO**. End-to-end queda smoke real en browser. |
 
-## 📜 Historial de commits sesión 8 (en `origin/main`)
+## 📜 Historial de commits sesión 9 + 10
 
+**Sesión 9 (1 commit local, NO pusheado):**
 ```
-947aad7 fix(vercel): eliminar lib/db/index.ts (Prisma singleton no usado)
-db1ccef fix(ical): lazy import de node-ical para no romper Vercel runtime
-1d1f8ef debug: eliminar middleware.ts temporalmente
-ef5adfb debug(middleware): no-op temporal para aislar el 500
-5c486e1 fix(middleware): getSession + try/catch defensivo para Edge runtime
-8d92b19 fix(middleware): path relativo a lib/supabase/middleware
-50ee7ad chore(vercel): crons a daily para Hobby plan
-ae6f0b2 feat(E4+E5): Resend wire-up + Turnstile + email_status.failed
+f4e309e chore(vercel): eliminar Prisma completo (dead code, hipótesis #3 deploy bug)
 ```
 
-(Próximo commit END-SESSION sesión 8 agrega este PROGRESS.md actualizado.)
+**Sesión 10 (7 commits, todos en `origin/main`):**
+```
+4058cac fix(vercel): framework:nextjs en vercel.json (parte 2)
+18a2096 fix(vercel): forzar framework:nextjs + restaurar proxy.ts
+6e32e97 debug(proxy): desactivar para aislar bug del 404 NOT_FOUND global
+5b74d74 fix(proxy): usar named export en vez de default (Next 16 docs oficial)
+27ed551 fix(build): opt-out de Turbopack en production build
+24cf24c feat(next16): upgrade a 16.2.6 + rename middleware → proxy
+36509f8 fix(middleware): forzar Node runtime para evitar __dirname en Edge
+```
+
+(Próximo commit END-SESSION sesión 10 agrega este PROGRESS.md actualizado.)
