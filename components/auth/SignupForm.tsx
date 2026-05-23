@@ -9,6 +9,7 @@ import { FieldShell, TextField, PasswordField, Checkbox } from "./fields";
 import { IconMail, IconUser, IconChevronDown, FlagCO } from "./icons";
 import { PasswordStrength, computeStrength } from "./PasswordStrength";
 import { ErrorBanner } from "./Banner";
+import { Turnstile } from "./Turnstile";
 import { signUpAction } from "@/lib/auth/actions";
 
 const schema = z.object({
@@ -34,6 +35,7 @@ export function SignupForm() {
   const [accept, setAccept] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [sentToEmail, setSentToEmail] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string>("");
 
   const {
     register,
@@ -62,6 +64,7 @@ export function SignupForm() {
       password: values.password,
       phone: values.phone,
       phonePrefix: values.phonePrefix,
+      turnstileToken,
     });
     if (!result.ok) {
       setErrorMsg(result.error);
@@ -175,7 +178,7 @@ export function SignupForm() {
         {isSubmitting ? "Creando cuenta…" : "Crear mi cuenta"}
       </button>
 
-      <div className="cf-turnstile sr-only" data-sitekey="DEMO_SITE_KEY" data-size="invisible" aria-hidden />
+      <Turnstile onToken={setTurnstileToken} className="mt-5" />
     </form>
   );
 }

@@ -1161,7 +1161,7 @@ export type Database = {
         | "cancelled"
         | "no_show"
         | "completed"
-      EmailStatus: "sent" | "delivered" | "bounced" | "complained"
+      EmailStatus: "sent" | "delivered" | "bounced" | "complained" | "failed"
       HoldStatus: "active" | "consumed" | "expired" | "cancelled"
       ICalDirection: "inbound" | "outbound"
       LoginEventType:
@@ -1316,7 +1316,7 @@ export const Constants = {
         "no_show",
         "completed",
       ],
-      EmailStatus: ["sent", "delivered", "bounced", "complained"],
+      EmailStatus: ["sent", "delivered", "bounced", "complained", "failed"],
       HoldStatus: ["active", "consumed", "expired", "cancelled"],
       ICalDirection: ["inbound", "outbound"],
       LoginEventType: [

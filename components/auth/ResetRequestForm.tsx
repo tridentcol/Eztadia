@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { FieldShell, TextField } from "./fields";
 import { IconMail, IconPaperPlane, IconChevronLeft } from "./icons";
+import { Turnstile } from "./Turnstile";
 import { resetPasswordRequestAction } from "@/lib/auth/actions";
 
 const schema = z.object({
@@ -17,6 +18,7 @@ type Values = z.infer<typeof schema>;
 
 export function ResetRequestForm() {
   const [sent, setSent] = useState<{ email: string } | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string>("");
 
   const {
     register,
@@ -28,7 +30,10 @@ export function ResetRequestForm() {
   });
 
   async function onSubmit(values: Values) {
-    await resetPasswordRequestAction({ email: values.email });
+    await resetPasswordRequestAction({
+      email: values.email,
+      turnstileToken,
+    });
     // Siempre marcamos enviado — no filtramos existencia de cuentas.
     setSent({ email: values.email });
   }
@@ -83,6 +88,8 @@ export function ResetRequestForm() {
       >
         {isSubmitting ? "Enviando…" : "Enviar link"}
       </button>
+
+      <Turnstile onToken={setTurnstileToken} className="mt-5" />
     </form>
   );
 }

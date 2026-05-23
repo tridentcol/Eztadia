@@ -9,6 +9,7 @@ import { z } from "zod";
 import { FieldShell, TextField, PasswordField, Checkbox } from "./fields";
 import { IconMail } from "./icons";
 import { ErrorBanner } from "./Banner";
+import { Turnstile } from "./Turnstile";
 import { signInAction } from "@/lib/auth/actions";
 
 const schema = z.object({
@@ -24,6 +25,7 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [remember, setRemember] = useState(true);
+  const [turnstileToken, setTurnstileToken] = useState<string>("");
 
   const {
     register,
@@ -41,6 +43,7 @@ export function LoginForm() {
       email: values.email,
       password: values.password,
       redirectTo,
+      turnstileToken,
     });
     // signInAction llama redirect() en exito — solo llegamos aqui en error.
     if (!result.ok) setErrorMsg(result.error);
@@ -120,8 +123,7 @@ export function LoginForm() {
         Recibe un magic link
       </button>
 
-      {/* Cloudflare Turnstile invisible */}
-      <div className="cf-turnstile sr-only" data-sitekey="DEMO_SITE_KEY" data-size="invisible" aria-hidden />
+      <Turnstile onToken={setTurnstileToken} className="mt-5" />
     </form>
   );
 }

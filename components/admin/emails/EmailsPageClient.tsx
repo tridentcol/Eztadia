@@ -14,6 +14,7 @@ const STATUS_FILTERS: { value: Status | "all"; label: string }[] = [
   { value: "delivered", label: "Entregado" },
   { value: "bounced", label: "Rebotado" },
   { value: "complained", label: "Spam reportado" },
+  { value: "failed", label: "Fallido" },
 ];
 
 const STATUS_TONE: Record<Status, string> = {
@@ -21,6 +22,7 @@ const STATUS_TONE: Record<Status, string> = {
   delivered: "bg-sage-tint text-sage border-[rgba(92,117,103,0.18)]",
   bounced: "bg-[rgba(168,72,60,0.10)] text-danger border-[rgba(168,72,60,0.22)]",
   complained: "bg-[rgba(184,146,62,0.14)] text-gold-dark border-[rgba(184,146,62,0.22)]",
+  failed: "bg-[rgba(168,72,60,0.10)] text-danger border-[rgba(168,72,60,0.22)]",
 };
 
 const STATUS_LABEL: Record<Status, string> = {
@@ -28,6 +30,7 @@ const STATUS_LABEL: Record<Status, string> = {
   delivered: "Entregado",
   bounced: "Rebotado",
   complained: "Spam",
+  failed: "Fallido",
 };
 
 export function EmailsPageClient({

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -7,6 +8,7 @@ import { z } from "zod";
 import type { BookingHold, DocumentType } from "@/lib/booking-flow";
 import { DOCUMENT_LABEL } from "@/lib/booking-flow";
 import { publicCreateHoldAction } from "@/app/actions/public-booking";
+import { Turnstile } from "@/components/auth/Turnstile";
 import {
   IconLock,
   IconChevronDown,
@@ -58,6 +60,7 @@ export function BookingForm({
   context?: BookingFormContext;
 }) {
   const router = useRouter();
+  const [turnstileToken, setTurnstileToken] = useState<string>("");
   const {
     register,
     handleSubmit,
@@ -115,6 +118,7 @@ export function BookingForm({
       guestDocumentNumber: values.documentNumber,
       paymentMethod: paymentForAction,
       acceptTerms: true as const,
+      turnstileToken,
     };
 
     const res = await publicCreateHoldAction(payload);
@@ -313,13 +317,7 @@ export function BookingForm({
         Tu información viaja cifrada. No guardamos datos de pago.
       </p>
 
-      {/* Cloudflare Turnstile (invisible widget — markup placeholder) */}
-      <div
-        className="cf-turnstile sr-only"
-        data-sitekey="DEMO_SITE_KEY"
-        data-size="invisible"
-        aria-hidden
-      />
+      <Turnstile onToken={setTurnstileToken} className="mt-4" />
 
       <style jsx>{`
         :global(.form-input) {

@@ -120,6 +120,7 @@ enum EmailStatus {
   delivered
   bounced
   complained
+  failed
 }
 
 enum AuditActorType {

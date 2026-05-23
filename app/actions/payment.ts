@@ -6,6 +6,7 @@ import { confirmManualPayment } from "@/lib/db/mutations/payments";
 import { confirmBooking } from "@/lib/db/mutations/bookings";
 import { requirePropertyRole } from "@/lib/auth/session";
 import { logAudit } from "@/lib/audit";
+import { sendPaymentConfirmedEmail } from "@/lib/email/dispatch";
 import { run } from "./_helpers";
 
 export async function confirmManualPaymentAction(raw: unknown) {
@@ -31,6 +32,12 @@ export async function confirmManualPaymentAction(raw: unknown) {
       resourceId: input.paymentId,
       propertyId: payment.property_id,
       diff: { before: { status: payment.status }, after: { status: "approved" } },
+    });
+
+    // Email best-effort (no rompe el flow).
+    await sendPaymentConfirmedEmail({
+      paymentId: input.paymentId,
+      methodLabel: "Transferencia bancaria",
     });
 
     revalidatePath("/dashboard/bookings");

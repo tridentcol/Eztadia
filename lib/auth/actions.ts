@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { verifyTurnstile } from "@/lib/turnstile/verify";
 
 /**
  * Server actions de autenticacion.
@@ -22,6 +23,7 @@ const signInSchema = z.object({
   email: z.string().email("Email invalido."),
   password: z.string().min(1, "Falta tu contrasena."),
   redirectTo: z.string().optional(),
+  turnstileToken: z.string().optional(),
 });
 
 export type SignInResult = { ok: true } | { ok: false; error: string };
@@ -32,6 +34,11 @@ export async function signInAction(
   const parsed = signInSchema.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Datos invalidos." };
+  }
+
+  const ts = await verifyTurnstile(parsed.data.turnstileToken);
+  if (!ts.ok) {
+    return { ok: false, error: "No pudimos verificar que no eres un bot. Recarga la pagina." };
   }
 
   const supabase = await createClient();
@@ -65,6 +72,7 @@ const signUpSchema = z.object({
     }),
   phone: z.string().min(7, "Telefono incompleto."),
   phonePrefix: z.string().default("+57"),
+  turnstileToken: z.string().optional(),
 });
 
 export type SignUpResult =
@@ -77,6 +85,11 @@ export async function signUpAction(
   const parsed = signUpSchema.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Datos invalidos." };
+  }
+
+  const ts = await verifyTurnstile(parsed.data.turnstileToken);
+  if (!ts.ok) {
+    return { ok: false, error: "No pudimos verificar que no eres un bot. Recarga la pagina." };
   }
 
   const supabase = await createClient();
@@ -111,6 +124,7 @@ export async function signUpAction(
 
 const resetRequestSchema = z.object({
   email: z.string().email("Email invalido."),
+  turnstileToken: z.string().optional(),
 });
 
 export type ResetRequestResult = { ok: true };
@@ -121,6 +135,9 @@ export async function resetPasswordRequestAction(
 ): Promise<ResetRequestResult> {
   const parsed = resetRequestSchema.safeParse(input);
   if (!parsed.success) return { ok: true };
+
+  const ts = await verifyTurnstile(parsed.data.turnstileToken);
+  if (!ts.ok) return { ok: true };
 
   const supabase = await createClient();
   const origin = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";

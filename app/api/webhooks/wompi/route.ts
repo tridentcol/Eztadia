@@ -4,6 +4,10 @@ import { decrypt, verifyHmacSha256 } from "@/lib/crypto";
 import { logAudit } from "@/lib/audit";
 import { logWebhook, type WebhookLogStatus } from "@/lib/webhooks/log";
 import { confirmBooking } from "@/lib/db/mutations/bookings";
+import {
+  sendPaymentConfirmedEmail,
+  sendPaymentRejectedEmail,
+} from "@/lib/email/dispatch";
 import type { Database } from "@/lib/supabase/database.types";
 
 type PaymentUpdate = Database["public"]["Tables"]["payments"]["Update"];
@@ -226,6 +230,12 @@ export async function POST(request: NextRequest) {
     } catch {
       // No bloqueamos el webhook — booking puede confirmarse manualmente.
     }
+    await sendPaymentConfirmedEmail({
+      paymentId: payment.id,
+      methodLabel: tx.payment_method_type ?? "PSE",
+    });
+  } else if (newStatus === "declined") {
+    await sendPaymentRejectedEmail({ paymentId: payment.id });
   }
 
   await logAudit({

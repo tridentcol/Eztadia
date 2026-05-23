@@ -80,6 +80,7 @@ export const publicBookingSubmitSchema = z
     guestDocumentNumber: z.string().max(40).optional(),
     paymentMethod: z.enum(["pse", "manual_transfer"]),
     acceptTerms: z.literal(true, { errorMap: () => ({ message: "Debes aceptar terminos." }) }),
+    turnstileToken: z.string().optional(),
   })
   .refine((v) => v.checkIn < v.checkOut, {
     path: ["checkOut"],
