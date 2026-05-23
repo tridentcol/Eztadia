@@ -48,6 +48,26 @@ function shortCodeFromId(id: string, prefix = "HOLD"): string {
 }
 
 /**
+ * Construye `whatsapp` (display) + `helpUrl` (wa.me link) desde
+ * properties.contact_phone. Si la columna esta vacia, devuelve strings
+ * vacios y "#" — los componentes renderizan sin romperse.
+ */
+function contactFromProperty(property: PropertyRow): {
+  whatsapp: string;
+  helpUrl: string;
+} {
+  const raw = property.contact_phone?.trim();
+  if (!raw) return { whatsapp: "", helpUrl: "#" };
+  // Limpia para wa.me: solo digitos (sin +, espacios, guiones)
+  const digits = raw.replace(/[^\d]/g, "");
+  if (digits.length < 7) return { whatsapp: raw, helpUrl: "#" };
+  return {
+    whatsapp: raw,
+    helpUrl: `https://wa.me/${digits}`,
+  };
+}
+
+/**
  * Construye un BookingHold "borrador" desde query params + datos reales de DB.
  * Se usa en /p/[slug]/booking/new ANTES de crear el hold real — para mostrar
  * el SummaryCard correcto mientras el guest llena sus datos.
@@ -65,6 +85,7 @@ export function buildDraftHold(args: {
   totalCents: number;
 }): BookingHold {
   const nights = nightsBetweenIso(args.checkIn, args.checkOut);
+  const contact = contactFromProperty(args.property);
   return {
     id: "_draft",
     code: "PENDIENTE",
@@ -73,8 +94,8 @@ export function buildDraftHold(args: {
       name: args.property.name,
       city: args.property.city ?? "",
       photo: photoFromProperty(args.property),
-      whatsapp: "",
-      helpUrl: "#",
+      whatsapp: contact.whatsapp,
+      helpUrl: contact.helpUrl,
     },
     room: {
       typeName: args.roomType.name_es,
@@ -109,6 +130,7 @@ export function buildHoldFromRow(args: {
   children?: number;
 }): BookingHold {
   const nights = nightsBetweenIso(args.hold.check_in, args.hold.check_out);
+  const contact = contactFromProperty(args.property);
   return {
     id: args.hold.id,
     code: shortCodeFromId(args.hold.id, "HOLD"),
@@ -117,8 +139,8 @@ export function buildHoldFromRow(args: {
       name: args.property.name,
       city: args.property.city ?? "",
       photo: photoFromProperty(args.property),
-      whatsapp: "",
-      helpUrl: "#",
+      whatsapp: contact.whatsapp,
+      helpUrl: contact.helpUrl,
     },
     room: {
       typeName: args.roomType.name_es,

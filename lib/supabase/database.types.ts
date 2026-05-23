@@ -638,6 +638,7 @@ export type Database = {
           check_in_time: string
           check_out_time: string
           city: string | null
+          contact_phone: string | null
           country: string
           cover_image_url: string | null
           created_at: string
@@ -663,6 +664,7 @@ export type Database = {
           check_in_time?: string
           check_out_time?: string
           city?: string | null
+          contact_phone?: string | null
           country?: string
           cover_image_url?: string | null
           created_at?: string
@@ -688,6 +690,7 @@ export type Database = {
           check_in_time?: string
           check_out_time?: string
           city?: string | null
+          contact_phone?: string | null
           country?: string
           cover_image_url?: string | null
           created_at?: string
