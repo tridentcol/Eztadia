@@ -41,6 +41,7 @@ export function SignupForm() {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<Values>({
     resolver: zodResolver(schema),
@@ -154,7 +155,14 @@ export function SignupForm() {
         </div>
       </FieldShell>
 
-      <Checkbox checked={accept} onChange={setAccept} invalid={!!errors.acceptTerms}>
+      <Checkbox
+        checked={accept}
+        onChange={(v) => {
+          setAccept(v);
+          setValue("acceptTerms", v as true, { shouldValidate: true });
+        }}
+        invalid={!!errors.acceptTerms}
+      >
         Acepto los{" "}
         <a href="#terms" className="underline underline-offset-[3px] decoration-sage decoration-1 hover:text-sage">
           términos y condiciones
@@ -165,7 +173,6 @@ export function SignupForm() {
         </a>
         .
       </Checkbox>
-      <input type="hidden" {...register("acceptTerms")} value={accept ? "true" : ""} />
       {errors.acceptTerms?.message && (
         <p className="ml-7 mt-1.5 text-xs text-danger">{errors.acceptTerms.message}</p>
       )}
