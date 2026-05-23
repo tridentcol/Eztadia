@@ -8,6 +8,8 @@ import { z } from "zod";
 import { FieldShell, TextField, PasswordField, Checkbox } from "./fields";
 import { IconMail, IconUser, IconChevronDown, FlagCO } from "./icons";
 import { PasswordStrength, computeStrength } from "./PasswordStrength";
+import { ErrorBanner } from "./Banner";
+import { signUpAction } from "@/lib/auth/actions";
 
 const schema = z.object({
   fullName: z.string().min(3, "Tu nombre completo, por favor."),
@@ -30,6 +32,8 @@ type Values = z.infer<typeof schema>;
 export function SignupForm() {
   const router = useRouter();
   const [accept, setAccept] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [sentToEmail, setSentToEmail] = useState<string | null>(null);
 
   const {
     register,
@@ -50,12 +54,44 @@ export function SignupForm() {
 
   const password = watch("password") ?? "";
 
-  async function onSubmit(_values: Values) {
-    router.push("/dashboard");
+  async function onSubmit(values: Values) {
+    setErrorMsg(null);
+    const result = await signUpAction({
+      fullName: values.fullName,
+      email: values.email,
+      password: values.password,
+      phone: values.phone,
+      phonePrefix: values.phonePrefix,
+    });
+    if (!result.ok) {
+      setErrorMsg(result.error);
+      return;
+    }
+    if (result.needsEmailConfirm) {
+      setSentToEmail(values.email);
+      return;
+    }
+    router.push("/onboarding");
+  }
+
+  if (sentToEmail) {
+    return (
+      <div className="text-center">
+        <h2 className="font-serif italic font-medium text-[clamp(24px,3vw,28px)] text-ink m-0 mb-3 tracking-[-0.025em]">
+          Revisa tu correo.
+        </h2>
+        <p className="text-sm leading-[1.55] text-ink-soft max-w-[42ch] mx-auto m-0">
+          Te enviamos un link de verificacion a <strong className="font-medium">{sentToEmail}</strong>.
+          Confirma para entrar a tu cuenta.
+        </p>
+      </div>
+    );
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate>
+      {errorMsg && <ErrorBanner>{errorMsg}</ErrorBanner>}
+
       <FieldShell label="Nombre completo" error={errors.fullName?.message}>
         <TextField
           {...register("fullName")}

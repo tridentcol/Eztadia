@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { FieldShell, TextField, PasswordField, Checkbox } from "./fields";
 import { IconMail } from "./icons";
 import { ErrorBanner } from "./Banner";
+import { signInAction } from "@/lib/auth/actions";
 
 const schema = z.object({
   email: z.string().email("Email inválido."),
@@ -20,7 +21,8 @@ type Values = z.infer<typeof schema>;
 
 export function LoginForm() {
   const router = useRouter();
-  const [genericError, setGenericError] = useState(false);
+  const searchParams = useSearchParams();
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [remember, setRemember] = useState(true);
 
   const {
@@ -33,21 +35,22 @@ export function LoginForm() {
   });
 
   async function onSubmit(values: Values) {
-    // Demo: any password "incorrect" triggers the generic error banner.
-    // In production: POST to /api/auth/login.
-    if (values.password === "incorrect") {
-      setGenericError(true);
-      return;
-    }
-    setGenericError(false);
-    router.push("/dashboard");
+    setErrorMsg(null);
+    const redirectTo = searchParams.get("redirect") ?? "/dashboard";
+    const result = await signInAction({
+      email: values.email,
+      password: values.password,
+      redirectTo,
+    });
+    // signInAction llama redirect() en exito — solo llegamos aqui en error.
+    if (!result.ok) setErrorMsg(result.error);
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate>
-      {genericError && (
+      {errorMsg && (
         <ErrorBanner>
-          Esa combinación no funcionó. Inténtalo de nuevo o{" "}
+          {errorMsg}{" "}
           <Link
             href="/reset-password"
             className="text-sage underline underline-offset-[3px] decoration-1"
@@ -109,7 +112,9 @@ export function LoginForm() {
       <button
         type="button"
         onClick={() => router.push("/login?magic=1")}
-        className="w-full h-12 rounded-[14px] bg-paper border border-rule-strong text-ink hover:bg-linen hover:border-ink-muted transition-colors inline-flex items-center justify-center gap-2 text-sm font-medium"
+        disabled
+        title="Magic link estara disponible en una proxima version"
+        className="w-full h-12 rounded-[14px] bg-paper border border-rule-strong text-ink hover:bg-linen hover:border-ink-muted transition-colors inline-flex items-center justify-center gap-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <IconMail className="w-[14px] h-[14px]" />
         Recibe un magic link

@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { FieldShell, TextField } from "./fields";
 import { IconMail, IconPaperPlane, IconChevronLeft } from "./icons";
+import { resetPasswordRequestAction } from "@/lib/auth/actions";
 
 const schema = z.object({
   email: z.string().email("Email inválido."),
@@ -27,8 +28,8 @@ export function ResetRequestForm() {
   });
 
   async function onSubmit(values: Values) {
-    // In production: POST to /api/auth/reset-request — always return success
-    // (don't leak existence of accounts).
+    await resetPasswordRequestAction({ email: values.email });
+    // Siempre marcamos enviado — no filtramos existencia de cuentas.
     setSent({ email: values.email });
   }
 

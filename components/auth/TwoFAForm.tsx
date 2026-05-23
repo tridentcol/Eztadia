@@ -7,6 +7,7 @@ import { OTPInput } from "./OTPInput";
 import { FieldShell, TextField } from "./fields";
 import { IconLock } from "./icons";
 import { ErrorBanner } from "./Banner";
+import { verifyMfaAction } from "@/lib/auth/actions";
 
 export function TwoFAForm({ initialBackup = false }: { initialBackup?: boolean }) {
   const router = useRouter();
@@ -25,13 +26,20 @@ export function TwoFAForm({ initialBackup = false }: { initialBackup?: boolean }
         setSubmitting(false);
         return;
       }
-      // Demo: any code accepted.
+      const result = await verifyMfaAction({ code });
+      if (!result.ok) {
+        setError(result.error);
+        setSubmitting(false);
+        return;
+      }
     } else {
       if (backupCode.replace(/[^A-Za-z0-9]/g, "").length < 10) {
         setError("Código de respaldo incompleto.");
         setSubmitting(false);
         return;
       }
+      // TODO(B8): backup codes flow — requiere lib propia (Supabase MFA
+      // no provee backup codes out of the box; usaremos custom storage).
     }
     router.push("/dashboard");
   }

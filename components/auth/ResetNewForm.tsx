@@ -1,11 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { FieldShell, PasswordField } from "./fields";
 import { PasswordStrength, computeStrength } from "./PasswordStrength";
+import { ErrorBanner } from "./Banner";
+import { resetPasswordCompleteAction } from "@/lib/auth/actions";
 
 const schema = z
   .object({
@@ -25,7 +28,9 @@ const schema = z
 type Values = z.infer<typeof schema>;
 
 export function ResetNewForm({ token }: { token: string }) {
+  void token; // El token vive en la cookie de sesion creada por /auth/callback
   const router = useRouter();
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
@@ -38,14 +43,23 @@ export function ResetNewForm({ token }: { token: string }) {
 
   const password = watch("password") ?? "";
 
-  async function onSubmit(_values: Values) {
-    // In production: POST to /api/auth/reset-confirm with token + new password.
-    void token;
+  async function onSubmit(values: Values) {
+    setErrorMsg(null);
+    const result = await resetPasswordCompleteAction({
+      password: values.password,
+      confirm: values.confirm,
+    });
+    if (!result.ok) {
+      setErrorMsg(result.error);
+      return;
+    }
     router.push("/login?reset=ok");
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate>
+      {errorMsg && <ErrorBanner>{errorMsg}</ErrorBanner>}
+
       <FieldShell
         label="Nueva contraseña"
         error={errors.password?.message}

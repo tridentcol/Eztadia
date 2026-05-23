@@ -20,6 +20,8 @@
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
     "@prisma/client": "6.19.3",
+    "@supabase/ssr": "^0.10.3",
+    "@supabase/supabase-js": "^2.106.1",
     "@tanstack/react-table": "^8.20.5",
     "next": "^15.1.0",
     "react": "^19.0.0",
