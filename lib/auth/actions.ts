@@ -38,6 +38,7 @@ export async function signInAction(
 
   const ts = await verifyTurnstile(parsed.data.turnstileToken);
   if (!ts.ok) {
+    console.error(`turnstile_failed action=signIn reason=${ts.reason ?? "unknown"}`);
     return { ok: false, error: "No pudimos verificar que no eres un bot. Recarga la pagina." };
   }
 
@@ -89,6 +90,7 @@ export async function signUpAction(
 
   const ts = await verifyTurnstile(parsed.data.turnstileToken);
   if (!ts.ok) {
+    console.error(`turnstile_failed action=signUp reason=${ts.reason ?? "unknown"}`);
     return { ok: false, error: "No pudimos verificar que no eres un bot. Recarga la pagina." };
   }
 
@@ -137,7 +139,10 @@ export async function resetPasswordRequestAction(
   if (!parsed.success) return { ok: true };
 
   const ts = await verifyTurnstile(parsed.data.turnstileToken);
-  if (!ts.ok) return { ok: true };
+  if (!ts.ok) {
+    console.error(`turnstile_failed action=resetPasswordRequest reason=${ts.reason ?? "unknown"}`);
+    return { ok: true };
+  }
 
   const supabase = await createClient();
   const origin = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";

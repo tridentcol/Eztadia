@@ -61,6 +61,7 @@ export function BookingForm({
 }) {
   const router = useRouter();
   const [turnstileToken, setTurnstileToken] = useState<string>("");
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
   const {
     register,
     handleSubmit,
@@ -124,6 +125,8 @@ export function BookingForm({
     const res = await publicCreateHoldAction(payload);
     if (!res.ok) {
       setError("root", { message: res.error });
+      setTurnstileToken("");
+      setTurnstileResetKey((k) => k + 1);
       return;
     }
     router.push(`/p/${hold.property.slug}/booking/${res.data.holdId}/pay`);
@@ -317,7 +320,7 @@ export function BookingForm({
         Tu información viaja cifrada. No guardamos datos de pago.
       </p>
 
-      <Turnstile onToken={setTurnstileToken} className="mt-4" />
+      <Turnstile key={turnstileResetKey} onToken={setTurnstileToken} className="mt-4" />
 
       <style jsx>{`
         :global(.form-input) {

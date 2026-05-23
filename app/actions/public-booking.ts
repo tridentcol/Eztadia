@@ -39,6 +39,7 @@ export async function publicCreateHoldAction(raw: unknown) {
   return run(publicBookingSubmitSchema, raw, async (input) => {
     const ts = await verifyTurnstile(input.turnstileToken);
     if (!ts.ok) {
+      console.error(`turnstile_failed action=publicCreateHold reason=${ts.reason ?? "unknown"}`);
       throw new ValidationError(
         "No pudimos verificar que no eres un bot. Recarga la pagina.",
       );

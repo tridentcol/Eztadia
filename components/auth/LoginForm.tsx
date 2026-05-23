@@ -26,6 +26,7 @@ export function LoginForm() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [remember, setRemember] = useState(true);
   const [turnstileToken, setTurnstileToken] = useState<string>("");
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
 
   const {
     register,
@@ -46,7 +47,11 @@ export function LoginForm() {
       turnstileToken,
     });
     // signInAction llama redirect() en exito — solo llegamos aqui en error.
-    if (!result.ok) setErrorMsg(result.error);
+    if (!result.ok) {
+      setErrorMsg(result.error);
+      setTurnstileToken("");
+      setTurnstileResetKey((k) => k + 1);
+    }
   }
 
   return (
@@ -123,7 +128,7 @@ export function LoginForm() {
         Recibe un magic link
       </button>
 
-      <Turnstile onToken={setTurnstileToken} className="mt-5" />
+      <Turnstile key={turnstileResetKey} onToken={setTurnstileToken} className="mt-5" />
     </form>
   );
 }

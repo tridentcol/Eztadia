@@ -36,6 +36,7 @@ export function SignupForm() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [sentToEmail, setSentToEmail] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string>("");
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
 
   const {
     register,
@@ -69,6 +70,8 @@ export function SignupForm() {
     });
     if (!result.ok) {
       setErrorMsg(result.error);
+      setTurnstileToken("");
+      setTurnstileResetKey((k) => k + 1);
       return;
     }
     if (result.needsEmailConfirm) {
@@ -185,7 +188,7 @@ export function SignupForm() {
         {isSubmitting ? "Creando cuenta…" : "Crear mi cuenta"}
       </button>
 
-      <Turnstile onToken={setTurnstileToken} className="mt-5" />
+      <Turnstile key={turnstileResetKey} onToken={setTurnstileToken} className="mt-5" />
     </form>
   );
 }
