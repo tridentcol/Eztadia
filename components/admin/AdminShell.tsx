@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, type ReactNode, type JSX } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {

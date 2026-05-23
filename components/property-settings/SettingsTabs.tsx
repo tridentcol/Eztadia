@@ -1,5 +1,6 @@
 "use client";
 
+import type { JSX } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { SETTINGS_TABS, type SettingsTabKey } from "@/lib/property-settings";

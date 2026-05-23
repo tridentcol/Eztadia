@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import {
   AuthSplitLayout,
@@ -35,7 +36,9 @@ export default function LoginPage() {
         subtitle="Entra a gestionar tus propiedades."
       />
       <div className="mt-9">
-        <LoginForm />
+        <Suspense fallback={null}>
+          <LoginForm />
+        </Suspense>
       </div>
     </AuthSplitLayout>
   );

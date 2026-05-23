@@ -1,4 +1,4 @@
-import type { SVGProps } from "react";
+import type { SVGProps, JSX } from "react";
 import type { Amenity } from "@/lib/properties";
 
 type IconProps = SVGProps<SVGSVGElement>;

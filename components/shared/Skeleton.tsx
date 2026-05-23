@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, JSX } from "react";
 
 /** Single shimmer block. */
 export function SkeletonBar({
