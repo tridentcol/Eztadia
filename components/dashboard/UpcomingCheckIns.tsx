@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { IconArrowRight } from "./icons";
 import type { CheckIn } from "@/lib/dashboard";
