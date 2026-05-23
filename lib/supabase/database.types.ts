@@ -95,7 +95,11 @@ export type Database = {
           check_out: string
           created_at: string
           expires_at: string
+          guest_country: string
+          guest_document_number: string | null
+          guest_document_type: string | null
           guest_email: string
+          guest_full_name: string
           guest_phone: string
           id: string
           payment_method: Database["public"]["Enums"]["PaymentMethod"]
@@ -110,7 +114,11 @@ export type Database = {
           check_out: string
           created_at?: string
           expires_at: string
+          guest_country?: string
+          guest_document_number?: string | null
+          guest_document_type?: string | null
           guest_email: string
+          guest_full_name?: string
           guest_phone: string
           id?: string
           payment_method: Database["public"]["Enums"]["PaymentMethod"]
@@ -125,7 +133,11 @@ export type Database = {
           check_out?: string
           created_at?: string
           expires_at?: string
+          guest_country?: string
+          guest_document_number?: string | null
+          guest_document_type?: string | null
           guest_email?: string
+          guest_full_name?: string
           guest_phone?: string
           id?: string
           payment_method?: Database["public"]["Enums"]["PaymentMethod"]
@@ -1070,7 +1082,11 @@ export type Database = {
         Args: {
           p_check_in: string
           p_check_out: string
+          p_guest_country?: string
+          p_guest_document_number?: string
+          p_guest_document_type?: string
           p_guest_email: string
+          p_guest_full_name: string
           p_guest_phone: string
           p_payment_method: string
           p_property_id: string

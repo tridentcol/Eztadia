@@ -27,6 +27,9 @@ export async function createHoldAction(raw: unknown) {
     const { holdId } = await createBookingHold({
       ...input,
       ttlMinutes: input.ttlMinutes ?? (input.paymentMethod === "pse" ? 15 : 1440),
+      // Dashboard "Nueva reserva manual" todavia no captura nombre del guest
+      // en el flow staff — usa placeholder hasta que esa UI llegue (Phase D).
+      guestFullName: "Reserva manual",
     });
     await logAudit({
       action: "booking_hold.created",

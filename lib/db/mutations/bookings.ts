@@ -35,6 +35,10 @@ export async function createBookingHold(
     totalCents: number;
     paymentMethod: PaymentMethod;
     ttlMinutes: number;
+    guestFullName: string;
+    guestDocumentType?: string | null;
+    guestDocumentNumber?: string | null;
+    guestCountry?: string | null;
   },
   opts: { asAdmin?: boolean } = {},
 ): Promise<{ holdId: string }> {
@@ -50,6 +54,10 @@ export async function createBookingHold(
     p_total_cents: args.totalCents,
     p_payment_method: args.paymentMethod,
     p_ttl_minutes: args.ttlMinutes,
+    p_guest_full_name: args.guestFullName,
+    p_guest_document_type: args.guestDocumentType ?? undefined,
+    p_guest_document_number: args.guestDocumentNumber ?? undefined,
+    p_guest_country: args.guestCountry ?? "CO",
   });
 
   if (error) {

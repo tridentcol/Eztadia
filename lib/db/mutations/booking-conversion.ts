@@ -26,17 +26,6 @@ export class HoldNotActiveError extends AppError {
  */
 export async function convertHoldToBookingAndCreatePayment(args: {
   holdId: string;
-  /** Datos del guest que vinieron del form en /booking/new — son fields
-   * del booking que el hold no tiene (full_name, document, etc). Para esta
-   * iteracion de C4, los rellenamos con valores derivados (full_name='Guest'
-   * cuando no se haya capturado todavia). El form ya envia esto en C3 pero
-   * no se persiste — TODO: persistir guest_full_name/document en hold o en
-   * tabla aparte.
-   */
-  guestFullName?: string;
-  guestDocumentType?: string;
-  guestDocumentNumber?: string;
-  guestCountry?: string;
 }): Promise<{
   booking: BookingRow;
   payment: PaymentRow;
@@ -77,7 +66,8 @@ export async function convertHoldToBookingAndCreatePayment(args: {
     throw new HoldNotActiveError(hold.status);
   }
 
-  // 3) Crea booking
+  // 3) Crea booking — usa datos del hold (post-migration 20260523120100
+  // booking_holds tiene guest_full_name + document + country).
   const { data: booking, error: bookErr } = await admin
     .from("bookings")
     .insert({
@@ -87,12 +77,12 @@ export async function convertHoldToBookingAndCreatePayment(args: {
       check_out: hold.check_out,
       adults: 1,
       children: 0,
-      guest_full_name: args.guestFullName ?? "Guest pendiente",
+      guest_full_name: hold.guest_full_name,
       guest_email: hold.guest_email,
       guest_phone: hold.guest_phone,
-      guest_document_type: args.guestDocumentType ?? null,
-      guest_document_number: args.guestDocumentNumber ?? null,
-      guest_country: args.guestCountry ?? "CO",
+      guest_document_type: hold.guest_document_type,
+      guest_document_number: hold.guest_document_number,
+      guest_country: hold.guest_country,
       total_cents: hold.total_cents,
       status: "pending_payment",
       payment_method: hold.payment_method,

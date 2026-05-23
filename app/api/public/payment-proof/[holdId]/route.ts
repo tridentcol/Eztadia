@@ -52,13 +52,9 @@ export async function POST(
     return NextResponse.json({ error: "too_large", maxBytes: MAX_SIZE }, { status: 413 });
   }
 
-  // 1) Convierte hold → booking + payment (idempotente)
-  const conv = await convertHoldToBookingAndCreatePayment({
-    holdId,
-    // Datos del guest no se persisten todavia en hold; el form en /booking/new
-    // los envia pero los descartamos antes de crear el hold. TODO C+:
-    // persistir en una tabla aparte para que el booking final los tenga.
-  });
+  // 1) Convierte hold → booking + payment (idempotente; los datos guest
+  // ya vienen persistidos en el hold desde la migration 20260523120100).
+  const conv = await convertHoldToBookingAndCreatePayment({ holdId });
 
   // 2) Upload archivo
   const admin = createAdminClient();

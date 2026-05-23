@@ -53,6 +53,9 @@ export async function publicCreateHoldAction(raw: unknown) {
         totalCents,
         paymentMethod: input.paymentMethod,
         ttlMinutes: ttl,
+        guestFullName: input.guestFullName,
+        guestDocumentType: input.guestDocumentType,
+        guestDocumentNumber: input.guestDocumentNumber,
       },
       { asAdmin: true },
     );

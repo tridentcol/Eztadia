@@ -52,7 +52,7 @@ export async function getCalendarData(args: {
       .eq("property_id", args.propertyId)
       .lt("check_in", monthEnd)
       .gt("check_out", monthStart)
-      .not("status", "in", "(cancelled,no_show,refunded)"),
+      .not("status", "in", "(cancelled,no_show)"),
     supabase
       .from("external_blocks")
       .select("*, rooms(id, number)")
