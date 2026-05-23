@@ -5,7 +5,8 @@ import { updateSession } from "./lib/supabase/middleware";
 // La convención reemplaza al middleware.ts de Next 15, que corría en Edge
 // y crasheaba con @supabase/ssr (__dirname is not defined).
 
-export default async function proxy(request: NextRequest) {
+// Named export `proxy` requerido en Next 16+ (no `export default`).
+export async function proxy(request: NextRequest) {
   return await updateSession(request);
 }
 
