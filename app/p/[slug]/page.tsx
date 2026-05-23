@@ -1,3 +1,7 @@
+// TODO(B6 incremental): wire a lib/db/queries/property.getPropertyBySlug
+// + adaptador a la shape que esperan los componentes (faq, photos rich, etc.).
+// Por ahora /p/[slug] sigue mostrando las propiedades demo de lib/properties.ts.
+// El flow publico de booking sí dispara mutations reales contra la DB.
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getAllPropertySlugs, getProperty } from "@/lib/properties";

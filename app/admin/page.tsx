@@ -1,3 +1,5 @@
+// TODO(B6 incremental): wire kpis a lib/db/queries/admin.getGlobalStats.
+// Revenue/Events/TopProperties siguen demo hasta que tengamos data real.
 import type { Metadata } from "next";
 import {
   getGlobalKpis,

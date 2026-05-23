@@ -1,3 +1,8 @@
+// TODO(B6 incremental): este modulo sigue siendo demo data para
+// AttentionList, WeekPulse, UpcomingCheckIns. Migrar a lib/db/queries cuando
+// haya bookings/payments reales para mostrar. Por ahora dashboard/page.tsx
+// solo sobrescribe owner+property con data real; el resto es demo.
+
 export type AttentionItem =
   | {
       kind: "payment-pending";

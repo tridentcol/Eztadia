@@ -1,22 +1,41 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useOnboardingStore } from "@/lib/onboarding-store";
+import { useOnboardingStore, slugify } from "@/lib/onboarding-store";
 import { HeroCurveLarge } from "./icons";
+import { createPropertyOnboardingAction } from "@/app/actions/property";
 
 export function WelcomeFinal({ ownerFirstName = "Carlos" }: { ownerFirstName?: string }) {
   const router = useRouter();
-  const propertyName = useOnboardingStore((s) => s.property.name) || "tu propiedad";
+  const org = useOnboardingStore((s) => s.org);
+  const property = useOnboardingStore((s) => s.property);
   const reset = useOnboardingStore((s) => s.reset);
+  const propertyName = property.name || "tu propiedad";
+  const submittedRef = useRef(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
-    const t = window.setTimeout(() => {
+    if (submittedRef.current) return;
+    submittedRef.current = true;
+
+    (async () => {
+      const result = await createPropertyOnboardingAction({
+        organizationName: org.name || "Mi organización",
+        name: property.name,
+        slug: property.slug || slugify(property.name),
+        city: property.city || undefined,
+      });
+      // createPropertyOnboardingAction llama redirect() en exito.
+      if (!result.ok) {
+        setSubmitError(result.error);
+        return;
+      }
+      // Fallback: si redirect no llego (server action en client), forzamos.
       reset();
       router.push("/dashboard");
-    }, 1800);
-    return () => window.clearTimeout(t);
-  }, [router, reset]);
+    })();
+  }, [org.name, property, reset, router]);
 
   return (
     <div className="min-h-[calc(100vh-72px)] flex flex-col items-center justify-center text-center px-8 py-20">
@@ -31,6 +50,11 @@ export function WelcomeFinal({ ownerFirstName = "Carlos" }: { ownerFirstName?: s
         </em>{" "}
         está creada. Te llevamos a tu dashboard.
       </p>
+      {submitError && (
+        <p className="mt-6 text-sm text-danger max-w-[44ch]" role="alert">
+          {submitError}
+        </p>
+      )}
 
       <style>{`
         .welcome-draw path {
