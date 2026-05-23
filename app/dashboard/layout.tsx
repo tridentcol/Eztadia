@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getOwnerSnapshot } from "@/lib/dashboard";
+import type { OwnerSnapshot } from "@/lib/dashboard";
 import {
   getCurrentProfile,
   getActivePropertyId,
@@ -7,6 +7,15 @@ import {
 } from "@/lib/auth/session";
 import { getProperty } from "@/lib/db/queries/property";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+
+const PLACEHOLDER_PROPERTY_PHOTO = "/placeholder.svg";
+
+function initialsFrom(name: string | null, email: string): string {
+  const src = (name && name.trim()) || email.split("@")[0] || "?";
+  const parts = src.trim().split(/\s+/);
+  if (parts.length >= 2) return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase();
+  return src.slice(0, 2).toUpperCase();
+}
 
 export default async function DashboardLayout({
   children,
@@ -21,25 +30,43 @@ export default async function DashboardLayout({
     listAccessibleProperties(),
   ]);
 
-  // Demo snapshot sigue proveyendo owner/attention/pulse/upcoming/unreadMessages
-  // (esos viven en lib/dashboard.ts y aun no estan wired a backend).
-  // Sobrescribimos snapshot.property con la activa real, y pasamos availableProperties
-  // separado para el switcher.
-  const snapshot = getOwnerSnapshot();
-
+  // El layout solo necesita owner + property + unreadMessages. Atención,
+  // pulse, upcoming los provee la page que los muestra (dashboard home).
+  let propertyShell: OwnerSnapshot["property"] = {
+    slug: "",
+    name: "Sin propiedad",
+    city: "",
+    photo: PLACEHOLDER_PROPERTY_PHOTO,
+  };
   if (activeId) {
     try {
       const p = await getProperty(activeId);
-      snapshot.property = {
+      propertyShell = {
         slug: p.slug,
         name: p.name,
         city: p.city ?? "",
-        photo: snapshot.property.photo, // gallery aun no migrado; demo sigue
+        photo: p.cover_image_url ?? PLACEHOLDER_PROPERTY_PHOTO,
       };
     } catch {
-      // Si por alguna razon no se puede leer, deja el demo y sigue.
+      // Si no se puede leer, dejamos el shell por default.
     }
   }
+
+  const firstName = profile.full_name?.split(" ")[0] ?? profile.email.split("@")[0] ?? "tú";
+
+  const snapshot: OwnerSnapshot = {
+    owner: {
+      firstName,
+      fullName: profile.full_name ?? "",
+      email: profile.email,
+      initials: initialsFrom(profile.full_name, profile.email),
+    },
+    property: propertyShell,
+    attention: [],
+    pulse: [],
+    upcoming: [],
+    unreadMessages: 0,
+  };
 
   return (
     <DashboardShell

@@ -6,13 +6,17 @@ import {
   confirmBookingSchema,
   createHoldSchema,
   assignRoomSchema,
+  createManualBookingSchema,
 } from "@/lib/validation/booking";
 import {
   cancelBooking,
   confirmBooking,
   createBookingHold,
+  createManualBooking,
   assignRoom,
 } from "@/lib/db/mutations/bookings";
+import { checkAvailability } from "@/lib/db/queries/availability";
+import { NoAvailabilityError } from "@/lib/errors";
 import { requirePropertyRole } from "@/lib/auth/session";
 import { logAudit } from "@/lib/audit";
 import { run } from "./_helpers";
@@ -94,6 +98,52 @@ export async function confirmBookingAction(raw: unknown) {
     revalidatePath("/dashboard/bookings");
     revalidatePath("/dashboard/calendar");
     return { booking: updated };
+  });
+}
+
+export async function createManualBookingAction(raw: unknown) {
+  return run(createManualBookingSchema, raw, async (input) => {
+    await requirePropertyRole(input.propertyId, "reception");
+
+    // Chequeo de disponibilidad antes de insertar — no doble-bookeamos.
+    const avail = await checkAvailability({
+      propertyId: input.propertyId,
+      roomTypeId: input.roomTypeId,
+      checkIn: input.checkIn,
+      checkOut: input.checkOut,
+    });
+    if (avail.available_rooms <= 0) throw new NoAvailabilityError();
+
+    const booking = await createManualBooking({
+      propertyId: input.propertyId,
+      roomTypeId: input.roomTypeId,
+      roomId: input.roomId,
+      checkIn: input.checkIn,
+      checkOut: input.checkOut,
+      adults: input.adults,
+      children: input.children,
+      guestFullName: input.guestFullName,
+      guestEmail: input.guestEmail,
+      guestPhone: input.guestPhone,
+      guestDocumentType: input.guestDocumentType,
+      guestDocumentNumber: input.guestDocumentNumber,
+      totalCents: input.totalCents,
+      paymentMethod: input.paymentMethod,
+      notes: input.notes,
+    });
+
+    await logAudit({
+      action: "booking.created_manual",
+      resourceType: "booking",
+      resourceId: booking.id,
+      propertyId: input.propertyId,
+      diff: { input: { ...input, guestEmail: "[redacted]", guestPhone: "[redacted]" } },
+    });
+
+    revalidatePath("/dashboard/bookings");
+    revalidatePath("/dashboard/calendar");
+    revalidatePath("/dashboard");
+    return { booking };
   });
 }
 

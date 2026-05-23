@@ -1,13 +1,13 @@
-// TODO(B6 incremental): wire kpis a lib/db/queries/admin.getGlobalStats.
-// Revenue/Events/TopProperties siguen demo hasta que tengamos data real.
 import type { Metadata } from "next";
+import { requireSuperAdmin } from "@/lib/auth/session";
+import { getAdminOverview } from "@/lib/db/queries/admin";
 import {
-  getGlobalKpis,
-  getRevenueSnapshot,
-  getRecentEvents,
-  getTopProperties,
-  getAttentionProperties,
-} from "@/lib/admin";
+  toGlobalKpis,
+  toRevenueSnapshot,
+  toSystemEvents,
+  toTopProperties,
+  toAttentionProperties,
+} from "@/lib/admin/adapter";
 import { GlobalKpis } from "@/components/admin/overview/GlobalKpis";
 import { RevenueChart } from "@/components/admin/overview/RevenueChart";
 import { EventsFeed } from "@/components/admin/overview/EventsFeed";
@@ -17,12 +17,19 @@ export const metadata: Metadata = {
   title: "Admin · Resumen — Eztadia",
 };
 
-export default function AdminOverviewPage() {
-  const kpis = getGlobalKpis();
-  const revenue = getRevenueSnapshot();
-  const events = getRecentEvents();
-  const top = getTopProperties();
-  const attention = getAttentionProperties();
+export default async function AdminOverviewPage() {
+  await requireSuperAdmin();
+  const overview = await getAdminOverview();
+  const kpis = toGlobalKpis(overview);
+  const revenue = toRevenueSnapshot(overview);
+  const events = toSystemEvents(overview);
+  const top = toTopProperties(overview);
+  const attention = toAttentionProperties(overview);
+
+  const now = new Date();
+  const monthLabel = now
+    .toLocaleDateString("es-CO", { month: "long", year: "numeric" })
+    .replace(/^./, (c) => c.toUpperCase());
 
   return (
     <main
@@ -37,8 +44,7 @@ export default function AdminOverviewPage() {
           Eztadia en <em className="italic">números</em>.
         </h1>
         <p className="text-sm text-ink-muted m-0 max-w-[56ch]">
-          Mayo <span className="oldstyle">2026</span> · Datos actualizados hace{" "}
-          <span className="oldstyle">3</span> min
+          {monthLabel} · Datos en vivo
         </p>
       </header>
 

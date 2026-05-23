@@ -6,6 +6,7 @@ import {
 } from "@/lib/auth/session";
 import { getProperty } from "@/lib/db/queries/property";
 import { listBookings } from "@/lib/db/queries/bookings";
+import { listRoomTypes } from "@/lib/db/queries/rooms";
 import {
   getBookingAuditLogs,
   getLatestBookingPayment,
@@ -14,6 +15,7 @@ import {
 import { buildBookingRow, buildBookingDetail } from "@/lib/bookings/adapter";
 import { PropertyTabs } from "@/components/calendar/PropertyTabs";
 import { BookingsPageClient } from "@/components/bookings/BookingsPageClient";
+import { NewBookingTrigger } from "@/components/bookings/NewBookingTrigger";
 import type { BookingDetail } from "@/lib/bookings";
 
 export const metadata: Metadata = {
@@ -40,8 +42,16 @@ export default async function BookingsPage() {
 
   const property = await getProperty(propertyId);
 
-  const allRows = await listBookings(propertyId, { limit: 200 });
+  const [allRows, roomTypes] = await Promise.all([
+    listBookings(propertyId, { limit: 200 }),
+    listRoomTypes(propertyId),
+  ]);
   const rows = allRows.map(buildBookingRow);
+  const roomTypeOptions = roomTypes.map((rt) => ({
+    id: rt.id,
+    name: rt.name_es,
+    basePriceCents: rt.base_price_cents,
+  }));
 
   // Detail por booking — cargamos payment + audit en paralelo
   const details: Record<string, BookingDetail> = {};
@@ -91,46 +101,7 @@ export default async function BookingsPage() {
               <span className="text-ink-soft font-medium oldstyle">{pending}</span> pendientes de pago
             </p>
           </div>
-          <div className="inline-flex gap-2.5">
-            <button
-              type="button"
-              className="inline-flex items-center justify-center gap-2 h-10 px-[18px] rounded-xl text-sm font-medium text-sage border border-sage bg-transparent hover:bg-sage-tint transition-colors"
-            >
-              <svg
-                className="w-[15px] h-[15px]"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={1.5}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden
-              >
-                <path d="M12 4v12" />
-                <path d="m7 11 5 5 5-5" />
-                <path d="M5 20h14" />
-              </svg>
-              Exportar
-            </button>
-            <button
-              type="button"
-              className="inline-flex items-center justify-center gap-2 h-10 px-[18px] rounded-xl text-sm font-medium text-cream bg-terracotta hover:bg-clay transition-colors"
-            >
-              <svg
-                className="w-[15px] h-[15px]"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={1.6}
-                strokeLinecap="round"
-                aria-hidden
-              >
-                <path d="M5 12h14" />
-                <path d="M12 5v14" />
-              </svg>
-              Nueva reserva manual
-            </button>
-          </div>
+          <NewBookingTrigger propertyId={propertyId} roomTypes={roomTypeOptions} />
         </header>
 
         <BookingsPageClient rows={rows} details={details} />

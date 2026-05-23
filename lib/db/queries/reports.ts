@@ -285,3 +285,92 @@ function isoUtcDate(d: Date): string {
     d.getUTCDate(),
   ).padStart(2, "0")}`;
 }
+
+export type ReportBookingExport = {
+  code: string;
+  status: BookingRow["status"];
+  source: BookingRow["source"];
+  checkIn: string;
+  checkOut: string;
+  nights: number;
+  guestFullName: string;
+  guestEmail: string;
+  guestPhone: string;
+  guestCountry: string;
+  adults: number;
+  children: number;
+  totalCents: number;
+  paymentMethod: BookingRow["payment_method"];
+  roomTypeName: string;
+  roomNumber: string | null;
+  createdAt: string;
+};
+
+/**
+ * Lista bookings del período con joins para CSV export. Mismo filtro que
+ * `getReportMetrics` — atribución por `check_in` cae en `[from, to)`,
+ * estados `confirmed + completed`.
+ */
+export async function getReportBookingsForExport(
+  propertyId: string,
+  from: string,
+  to: string,
+): Promise<ReportBookingExport[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("bookings")
+    .select(
+      `code, status, source, check_in, check_out, nights,
+       guest_full_name, guest_email, guest_phone, guest_country,
+       adults, children, total_cents, payment_method, created_at,
+       room_type:room_types(name_es),
+       room:rooms(number)`,
+    )
+    .eq("property_id", propertyId)
+    .in("status", REALIZED_STATUSES)
+    .gte("check_in", from)
+    .lt("check_in", to)
+    .order("check_in", { ascending: true });
+
+  if (error) throw mapDbError(error);
+
+  type Row = {
+    code: string;
+    status: BookingRow["status"];
+    source: BookingRow["source"];
+    check_in: string;
+    check_out: string;
+    nights: number | null;
+    guest_full_name: string;
+    guest_email: string;
+    guest_phone: string;
+    guest_country: string;
+    adults: number;
+    children: number;
+    total_cents: number;
+    payment_method: BookingRow["payment_method"];
+    created_at: string;
+    room_type: { name_es: string } | null;
+    room: { number: string } | null;
+  };
+
+  return ((data ?? []) as unknown as Row[]).map((r) => ({
+    code: r.code,
+    status: r.status,
+    source: r.source,
+    checkIn: r.check_in,
+    checkOut: r.check_out,
+    nights: r.nights ?? 0,
+    guestFullName: r.guest_full_name,
+    guestEmail: r.guest_email,
+    guestPhone: r.guest_phone,
+    guestCountry: r.guest_country,
+    adults: r.adults,
+    children: r.children,
+    totalCents: r.total_cents,
+    paymentMethod: r.payment_method,
+    roomTypeName: r.room_type?.name_es ?? "—",
+    roomNumber: r.room?.number ?? null,
+    createdAt: r.created_at,
+  }));
+}

@@ -125,6 +125,61 @@ export async function confirmBooking(args: {
 }
 
 /**
+ * Crea un booking manual directo (sin pasar por hold). status=`confirmed`,
+ * source=`manual`. El caller debe haber chequeado disponibilidad antes via
+ * `check_availability`. RLS exige member con role >= reception.
+ */
+export async function createManualBooking(args: {
+  propertyId: string;
+  roomTypeId: string;
+  roomId?: string;
+  checkIn: string;
+  checkOut: string;
+  adults: number;
+  children: number;
+  guestFullName: string;
+  guestEmail: string;
+  guestPhone: string;
+  guestDocumentType?: string | null;
+  guestDocumentNumber?: string | null;
+  totalCents: number;
+  paymentMethod: PaymentMethod;
+  notes?: string | null;
+}): Promise<BookingRow> {
+  const supabase = await createClient();
+
+  const insert: Database["public"]["Tables"]["bookings"]["Insert"] = {
+    property_id: args.propertyId,
+    room_type_id: args.roomTypeId,
+    room_id: args.roomId ?? null,
+    check_in: args.checkIn,
+    check_out: args.checkOut,
+    adults: args.adults,
+    children: args.children,
+    guest_full_name: args.guestFullName,
+    guest_email: args.guestEmail,
+    guest_phone: args.guestPhone,
+    guest_document_type: args.guestDocumentType ?? null,
+    guest_document_number: args.guestDocumentNumber ?? null,
+    total_cents: args.totalCents,
+    payment_method: args.paymentMethod,
+    status: "confirmed",
+    source: "manual",
+    notes: args.notes ?? null,
+  };
+
+  const { data, error } = await supabase
+    .from("bookings")
+    .insert(insert)
+    .select()
+    .maybeSingle();
+
+  if (error) throw mapDbError(error);
+  if (!data) throw new NotFoundError("Reserva");
+  return data;
+}
+
+/**
  * Asigna una room a un booking existente. Falla si la room ya esta tomada
  * por otra booking que solape.
  */

@@ -1,22 +1,34 @@
 import type { Metadata } from "next";
+import type { AdminUserDetail } from "@/lib/admin";
 import {
-  getAdminUsers,
-  getAdminUserDetail,
-  type AdminUserDetail,
-} from "@/lib/admin";
+  listAdminUsersFull,
+  getAdminUserDetailFull,
+} from "@/lib/db/queries/admin";
+import { toAdminUserRow, toAdminUserDetail } from "@/lib/admin/adapter";
+import { requireSuperAdmin } from "@/lib/auth/session";
 import { UsersPageClient } from "@/components/admin/users/UsersPageClient";
 
 export const metadata: Metadata = {
   title: "Admin · Usuarios — Eztadia",
 };
 
-export default function AdminUsersPage() {
-  const rows = getAdminUsers();
-  const details = rows.reduce<Record<string, AdminUserDetail>>((acc, r) => {
-    const d = getAdminUserDetail(r.id);
-    if (d) acc[r.id] = d;
-    return acc;
-  }, {});
+export default async function AdminUsersPage() {
+  const me = await requireSuperAdmin();
+  const fullRows = await listAdminUsersFull({ limit: 200 });
+  const rows = fullRows.map((r) => toAdminUserRow(r, me.id));
+
+  // Pre-cargar detalles para los primeros 50 — el drawer abre instantáneo.
+  // Para más, el drawer haría fetch on-demand; por ahora cabe en una página.
+  const detailEntries = await Promise.all(
+    fullRows.slice(0, 50).map(async (r) => {
+      const full = await getAdminUserDetailFull(r.id);
+      return full ? ([r.id, toAdminUserDetail(full, me.id)] as const) : null;
+    }),
+  );
+  const details: Record<string, AdminUserDetail> = {};
+  for (const entry of detailEntries) {
+    if (entry) details[entry[0]] = entry[1];
+  }
 
   return (
     <main

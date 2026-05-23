@@ -9,9 +9,11 @@ import {
   getRevenueByMonth,
   getBreakdownByRoomType,
   getBreakdownByPaymentMethod,
+  getReportBookingsForExport,
 } from "@/lib/db/queries/reports";
 import { PropertyTabs } from "@/components/calendar/PropertyTabs";
 import { ReportsView, type PeriodPreset } from "@/components/reports/ReportsView";
+import { ExportCsvButton } from "@/components/reports/ExportCsvButton";
 
 export const metadata: Metadata = {
   title: "Reportes — Eztadia",
@@ -75,11 +77,12 @@ export default async function ReportsPage({
   const preset = resolvePreset(sp.p);
   const { from, to } = resolveRange(preset);
 
-  const [metrics, monthly, byRoomType, byPaymentMethod] = await Promise.all([
+  const [metrics, monthly, byRoomType, byPaymentMethod, exportBookings] = await Promise.all([
     getReportMetrics(propertyId, from, to),
     getRevenueByMonth(propertyId, 12),
     getBreakdownByRoomType(propertyId, from, to),
     getBreakdownByPaymentMethod(propertyId, from, to),
+    getReportBookingsForExport(propertyId, from, to),
   ]);
 
   return (
@@ -97,6 +100,7 @@ export default async function ReportsPage({
           monthly={monthly}
           byRoomType={byRoomType}
           byPaymentMethod={byPaymentMethod}
+          exportSlot={<ExportCsvButton bookings={exportBookings} from={from} to={to} />}
         />
       </main>
     </>

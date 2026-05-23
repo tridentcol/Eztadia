@@ -11,19 +11,60 @@ import {
   Divider,
 } from "../primitives";
 import { SaveBar } from "../SaveBar";
+import { useSettingsSave } from "../useSettingsSave";
+import { updatePropertyAction } from "@/app/actions/property";
+import { useRouter } from "next/navigation";
 
-export function AdvancedTab({ initial }: { initial: AdvancedValues }) {
+export function AdvancedTab({
+  propertyId,
+  initial,
+}: {
+  propertyId: string;
+  initial: AdvancedValues;
+}) {
   const form = useForm<AdvancedValues>({
     resolver: zodResolver(advancedSchema),
     defaultValues: initial,
   });
   const { watch, setValue } = form;
   const values = watch();
+  const router = useRouter();
+  const { save, saving, error } = useSettingsSave(propertyId);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deactivating, setDeactivating] = useState(false);
+  const [deactivateError, setDeactivateError] = useState<string | null>(null);
 
-  async function onSave(_v: AdvancedValues) {
-    await new Promise((r) => setTimeout(r, 250));
+  async function onSave(v: AdvancedValues) {
+    await save({
+      bookingPolicy: {
+        advanced: {
+          show_nightly_price: v.showNightlyPrice,
+          instant_bookings: v.instantBookings,
+          require_id_document: v.requireIdDocument,
+          hold_ttl_pse_minutes: v.holdTtlPseMinutes,
+          hold_ttl_manual_hours: v.holdTtlManualHours,
+        },
+      },
+    });
+  }
+
+  async function handleDeactivate() {
+    if (!confirm("¿Desactivar la propiedad? Su página pública dejará de ser accesible. Puedes reactivarla luego.")) {
+      return;
+    }
+    setDeactivating(true);
+    setDeactivateError(null);
+    try {
+      const result = await updatePropertyAction({ id: propertyId, isActive: false });
+      if (!result.ok) {
+        setDeactivateError(result.error ?? "No pudimos desactivar.");
+        return;
+      }
+      router.refresh();
+    } finally {
+      setDeactivating(false);
+    }
   }
 
   return (
@@ -109,9 +150,11 @@ export function AdvancedTab({ initial }: { initial: AdvancedValues }) {
         <div className="flex flex-wrap items-center gap-3.5">
           <button
             type="button"
-            className="inline-flex items-center gap-2 h-10 px-[18px] rounded-xl bg-transparent text-danger border border-danger text-sm font-medium hover:bg-[rgba(168,72,60,0.08)] transition-colors"
+            onClick={handleDeactivate}
+            disabled={deactivating}
+            className="inline-flex items-center gap-2 h-10 px-[18px] rounded-xl bg-transparent text-danger border border-danger text-sm font-medium hover:bg-[rgba(168,72,60,0.08)] transition-colors disabled:opacity-60"
           >
-            Desactivar propiedad
+            {deactivating ? "Desactivando…" : "Desactivar propiedad"}
           </button>
           <button
             type="button"
@@ -121,26 +164,30 @@ export function AdvancedTab({ initial }: { initial: AdvancedValues }) {
             Eliminar propiedad permanentemente
           </button>
         </div>
+        {deactivateError && (
+          <p role="alert" className="text-[13px] text-danger mt-3 mb-0">{deactivateError}</p>
+        )}
       </section>
 
       {showDeleteModal && (
         <DeletePropertyModal onCancel={() => setShowDeleteModal(false)} />
       )}
 
-      <SaveBar form={form} onSave={onSave} />
+      {error && (
+        <p role="alert" className="text-[13px] text-danger mt-4 mb-0">{error}</p>
+      )}
+
+      <SaveBar form={form} onSave={onSave} saving={saving} />
     </>
   );
 }
 
 function DeletePropertyModal({ onCancel }: { onCancel: () => void }) {
-  const [confirm, setConfirm] = useState("");
-  const canDelete = confirm === "ELIMINAR";
-
   return (
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Confirmar eliminación de propiedad"
+      aria-label="Eliminar propiedad"
       className="fixed inset-0 z-[100] flex items-center justify-center px-5"
     >
       <button
@@ -159,34 +206,38 @@ function DeletePropertyModal({ onCancel }: { onCancel: () => void }) {
           Acción irreversible
         </span>
         <h3 className="font-serif italic font-medium text-[24px] text-ink m-0 mb-3 tracking-[-0.02em]">
-          ¿Eliminar Casa Marina?
+          Eliminar permanentemente
         </h3>
-        <p className="text-sm text-ink-soft m-0 mb-5 leading-[1.55]">
-          Se eliminarán <strong className="text-ink-soft font-medium">12 habitaciones</strong>, todas las reservas, fotos, mensajes y configuración. Esta acción no se puede deshacer.
+        <p className="text-sm text-ink-soft m-0 mb-4 leading-[1.55]">
+          Eliminar borra reservas, fotos, mensajes y configuración de forma definitiva — preferimos hacerlo manualmente para evitar accidentes.
         </p>
-        <p className="text-[11px] font-medium tracking-[0.08em] uppercase text-ink-muted mb-2">
-          Escribe ELIMINAR para confirmar
+        <p className="text-sm text-ink-soft m-0 mb-6 leading-[1.55]">
+          Mientras tanto, <strong className="text-ink font-medium">Desactivar propiedad</strong> oculta la página pública sin perder datos.
         </p>
-        <input
-          value={confirm}
-          onChange={(e) => setConfirm(e.target.value.toUpperCase())}
-          autoFocus
-          className="w-full h-11 bg-paper border border-rule-strong rounded-[10px] px-3.5 text-[15px] text-ink outline-0 font-mono tracking-[0.08em] mb-6 transition-[border-color,box-shadow] focus:border-danger focus:shadow-[0_0_0_3px_rgba(168,72,60,0.18)]"
-        />
-        <div className="flex justify-end gap-2.5">
+        <div className="rounded-xl bg-linen border border-rule p-4 mb-6">
+          <p className="text-[12px] font-medium tracking-[0.08em] uppercase text-ink-muted m-0 mb-1">
+            Para eliminar definitivamente
+          </p>
+          <p className="text-sm text-ink m-0 leading-[1.5]">
+            Escríbenos por{" "}
+            <a
+              href="https://wa.me/573112223344"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sage underline underline-offset-[3px] decoration-1 decoration-[rgba(92,117,103,0.4)] hover:decoration-sage"
+            >
+              WhatsApp
+            </a>{" "}
+            y procesamos el borrado tras confirmar identidad.
+          </p>
+        </div>
+        <div className="flex justify-end">
           <button
             type="button"
             onClick={onCancel}
             className="h-10 px-[18px] rounded-xl bg-cream text-ink-soft border border-rule text-sm font-medium hover:bg-linen hover:text-ink transition-colors"
           >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            disabled={!canDelete}
-            className="h-10 px-[18px] rounded-xl bg-danger text-cream text-sm font-medium hover:bg-[#8E3C32] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            Eliminar propiedad
+            Cerrar
           </button>
         </div>
       </div>

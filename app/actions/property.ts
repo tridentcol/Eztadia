@@ -13,6 +13,7 @@ import {
   createProperty,
   updateProperty,
 } from "@/lib/db/mutations/properties";
+import { getBookingPolicy } from "@/lib/db/queries/property-settings";
 import { createClient } from "@/lib/supabase/server";
 import {
   requireProfile,
@@ -86,6 +87,15 @@ export async function updatePropertyAction(raw: unknown) {
     if (patch.maxStayNights !== undefined) dbPatch.max_stay_nights = patch.maxStayNights;
     if (patch.isActive !== undefined) dbPatch.is_active = patch.isActive;
     if (patch.contactPhone !== undefined) dbPatch.contact_phone = patch.contactPhone;
+    if (patch.country !== undefined) dbPatch.country = patch.country;
+    if (patch.timezone !== undefined) dbPatch.timezone = patch.timezone;
+
+    // booking_policy es jsonb compartido por varios tabs. Merge shallow
+    // por top-level key para no borrar lo que otro tab persistió.
+    if (patch.bookingPolicy !== undefined) {
+      const existing = await getBookingPolicy(id);
+      dbPatch.booking_policy = { ...existing, ...patch.bookingPolicy };
+    }
 
     const updated = await updateProperty(id, dbPatch);
     await logAudit({

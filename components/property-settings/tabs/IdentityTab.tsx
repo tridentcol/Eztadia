@@ -6,21 +6,32 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { identitySchema, type IdentityValues } from "@/lib/property-settings";
 import { FieldShell, SectionHeader, Textarea, Divider } from "../primitives";
 import { SaveBar } from "../SaveBar";
+import { useSettingsSave } from "../useSettingsSave";
 import { IconPlus } from "../icons";
 
-export function IdentityTab({ initial }: { initial: IdentityValues }) {
+export function IdentityTab({
+  propertyId,
+  initial,
+}: {
+  propertyId: string;
+  initial: IdentityValues;
+}) {
   const form = useForm<IdentityValues>({
     resolver: zodResolver(identitySchema),
     defaultValues: initial,
   });
   const { register, watch, formState } = form;
   const [lang, setLang] = useState<"es" | "en">("es");
+  const { save, saving, error } = useSettingsSave(propertyId);
 
   const desc = watch(lang === "es" ? "descriptionEs" : "descriptionEn") ?? "";
   const charCount = desc.length;
 
-  async function onSave(_v: IdentityValues) {
-    await new Promise((r) => setTimeout(r, 250));
+  async function onSave(v: IdentityValues) {
+    await save({
+      descriptionEs: v.descriptionEs || null,
+      descriptionEn: v.descriptionEn || null,
+    });
   }
 
   return (
@@ -103,7 +114,11 @@ export function IdentityTab({ initial }: { initial: IdentityValues }) {
         <span className="oldstyle">800–1.200</span>
       </p>
 
-      <SaveBar form={form} onSave={onSave} />
+      {error && (
+        <p role="alert" className="text-[13px] text-danger mt-4 mb-0">{error}</p>
+      )}
+
+      <SaveBar form={form} onSave={onSave} saving={saving} />
     </>
   );
 }

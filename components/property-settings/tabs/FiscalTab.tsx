@@ -1,23 +1,9 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { fiscalSchema, type FiscalValues } from "@/lib/property-settings";
+import type { FiscalValues } from "@/lib/property-settings";
 import { FieldShell, Input, Textarea, Select, SectionHeader } from "../primitives";
-import { SaveBar } from "../SaveBar";
 
-export function FiscalTab({ initial }: { initial: FiscalValues }) {
-  const form = useForm<FiscalValues>({
-    resolver: zodResolver(fiscalSchema),
-    defaultValues: initial,
-  });
-  const { register, formState } = form;
-  const { errors } = formState;
-
-  async function onSave(_v: FiscalValues) {
-    await new Promise((r) => setTimeout(r, 250));
-  }
-
+export function FiscalTab({ initial: _initial }: { initial: FiscalValues }) {
   return (
     <>
       <SectionHeader
@@ -26,27 +12,36 @@ export function FiscalTab({ initial }: { initial: FiscalValues }) {
         subtitle="Aparecen en facturas que emites a tus huéspedes y en recibos de Eztadia."
       />
 
-      <FieldShell label="Razón social" error={errors.legalName?.message}>
-        <Input {...register("legalName")} placeholder="Casa Marina S.A.S." />
-      </FieldShell>
+      <div
+        role="status"
+        className="rounded-xl bg-linen border border-rule px-4 py-3 mb-7 text-[13px] text-ink-soft leading-[1.55]"
+      >
+        <strong className="text-ink font-medium">Próximamente.</strong>{" "}
+        Estos campos serán parte del módulo de facturación electrónica que aún
+        no está activo. Por ahora son solo referencia visual y no se guardan.
+      </div>
 
-      <FieldShell label="NIT" error={errors.taxId?.message} helper="Incluye dígito de verificación. Ej: 900.123.456-7.">
-        <Input {...register("taxId")} placeholder="900.123.456-7" className="font-mono tracking-[-0.01em]" />
-      </FieldShell>
+      <fieldset disabled className="opacity-60 cursor-not-allowed">
+        <FieldShell label="Razón social">
+          <Input placeholder="Casa Marina S.A.S." />
+        </FieldShell>
 
-      <FieldShell label="Dirección fiscal" error={errors.fiscalAddress?.message}>
-        <Textarea {...register("fiscalAddress")} rows={3} placeholder="Calle, número, ciudad, país." />
-      </FieldShell>
+        <FieldShell label="NIT" helper="Incluye dígito de verificación. Ej: 900.123.456-7.">
+          <Input placeholder="900.123.456-7" className="font-mono tracking-[-0.01em]" />
+        </FieldShell>
 
-      <FieldShell label="Régimen tributario" error={errors.regime?.message}>
-        <Select {...register("regime")}>
-          <option value="comun">Régimen común</option>
-          <option value="simplificado">Régimen simplificado</option>
-          <option value="otro">Otro</option>
-        </Select>
-      </FieldShell>
+        <FieldShell label="Dirección fiscal">
+          <Textarea rows={3} placeholder="Calle, número, ciudad, país." />
+        </FieldShell>
 
-      <SaveBar form={form} onSave={onSave} />
+        <FieldShell label="Régimen tributario">
+          <Select defaultValue="comun">
+            <option value="comun">Régimen común</option>
+            <option value="simplificado">Régimen simplificado</option>
+            <option value="otro">Otro</option>
+          </Select>
+        </FieldShell>
+      </fieldset>
     </>
   );
 }

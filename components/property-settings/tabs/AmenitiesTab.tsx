@@ -9,15 +9,23 @@ import {
 } from "@/lib/property-settings";
 import { SectionHeader, ToggleChip } from "../primitives";
 import { SaveBar } from "../SaveBar";
+import { useSettingsSave } from "../useSettingsSave";
 import { IconCheckRing } from "../icons";
 
-export function AmenitiesTab({ initial }: { initial: AmenitiesValues }) {
+export function AmenitiesTab({
+  propertyId,
+  initial,
+}: {
+  propertyId: string;
+  initial: AmenitiesValues;
+}) {
   const form = useForm<AmenitiesValues>({
     resolver: zodResolver(amenitiesSchema),
     defaultValues: initial,
   });
   const { watch, setValue } = form;
   const selected = new Set(watch("selected"));
+  const { save, saving, error } = useSettingsSave(propertyId);
 
   function toggle(key: string) {
     const next = new Set(selected);
@@ -26,8 +34,8 @@ export function AmenitiesTab({ initial }: { initial: AmenitiesValues }) {
     setValue("selected", Array.from(next), { shouldDirty: true });
   }
 
-  async function onSave(_v: AmenitiesValues) {
-    await new Promise((r) => setTimeout(r, 250));
+  async function onSave(v: AmenitiesValues) {
+    await save({ amenities: v.selected });
   }
 
   return (
@@ -69,7 +77,11 @@ export function AmenitiesTab({ initial }: { initial: AmenitiesValues }) {
         </section>
       ))}
 
-      <SaveBar form={form} onSave={onSave} />
+      {error && (
+        <p role="alert" className="text-[13px] text-danger mt-4 mb-0">{error}</p>
+      )}
+
+      <SaveBar form={form} onSave={onSave} saving={saving} />
     </>
   );
 }

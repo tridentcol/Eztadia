@@ -37,6 +37,16 @@ export function PhotosTab({ initial }: { initial: GalleryPhoto[] }) {
         subtitle="Sube hasta 30 fotos. La primera es la portada. Arrastra para reordenar."
       />
 
+      <div
+        role="status"
+        className="rounded-xl bg-linen border border-rule px-4 py-3 mb-6 text-[13px] text-ink-soft leading-[1.55]"
+      >
+        <strong className="text-ink font-medium">Próximamente.</strong>{" "}
+        La subida real de fotos llega cuando habilitemos almacenamiento de
+        archivos. Por ahora puedes preparar tu galería pero los cambios no se
+        guardan.
+      </div>
+
       <div className="flex items-baseline justify-between mb-4 gap-3 flex-wrap">
         <span className="text-[13px] font-medium text-ink-muted">
           <span className="text-ink-soft font-medium oldstyle">{photos.length}</span> de{" "}

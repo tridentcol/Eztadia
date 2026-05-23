@@ -75,6 +75,7 @@ export function ReportsView({
   monthly,
   byRoomType,
   byPaymentMethod,
+  exportSlot,
 }: {
   preset: PeriodPreset;
   from: string;
@@ -83,6 +84,7 @@ export function ReportsView({
   monthly: MonthlyRevenuePoint[];
   byRoomType: RoomTypeBreakdownRow[];
   byPaymentMethod: PaymentMethodBreakdownRow[];
+  exportSlot?: React.ReactNode;
 }) {
   const periodLabel = formatPeriodLabel(from, to);
 
@@ -103,29 +105,32 @@ export function ReportsView({
         </div>
       </header>
 
-      <nav
-        aria-label="Período de reporte"
-        className="flex flex-wrap gap-2 mb-10"
-      >
-        {PRESETS.map((p) => {
-          const active = p.id === preset;
-          return (
-            <Link
-              key={p.id}
-              href={`/dashboard/reports?p=${p.id}`}
-              aria-current={active ? "page" : undefined}
-              className={[
-                "inline-block text-[12.5px] px-3.5 py-1.5 rounded-full border transition-colors",
-                active
-                  ? "bg-sage-tint border-sage-tint text-sage font-medium"
-                  : "bg-paper border-rule text-ink-soft hover:text-ink hover:border-ink-muted",
-              ].join(" ")}
-            >
-              {p.label}
-            </Link>
-          );
-        })}
-      </nav>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-10">
+        <nav
+          aria-label="Período de reporte"
+          className="flex flex-wrap gap-2"
+        >
+          {PRESETS.map((p) => {
+            const active = p.id === preset;
+            return (
+              <Link
+                key={p.id}
+                href={`/dashboard/reports?p=${p.id}`}
+                aria-current={active ? "page" : undefined}
+                className={[
+                  "inline-block text-[12.5px] px-3.5 py-1.5 rounded-full border transition-colors",
+                  active
+                    ? "bg-sage-tint border-sage-tint text-sage font-medium"
+                    : "bg-paper border-rule text-ink-soft hover:text-ink hover:border-ink-muted",
+                ].join(" ")}
+              >
+                {p.label}
+              </Link>
+            );
+          })}
+        </nav>
+        {exportSlot}
+      </div>
 
       {metrics.activeRooms === 0 ? (
         <NoRoomsState />

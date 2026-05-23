@@ -75,6 +75,462 @@ export async function listAdminUsers(opts: {
   return data ?? [];
 }
 
+/* ─── OVERVIEW (admin home) ─── */
+
+export type AdminOverview = {
+  kpis: {
+    users: {
+      total: number;
+      newThisMonth: number;
+      byRole: Record<string, number>;
+    };
+    properties: {
+      total: number;
+      newThisMonth: number;
+      active: number;
+      inactive: number;
+    };
+    bookings: {
+      total: number;
+      thisMonth: number;
+      prevMonth: number;
+      byStatus: Record<string, number>;
+    };
+  };
+  revenue: {
+    monthLabel: string;
+    totalCents: number;
+    averagePerBookingCents: number;
+    bestDay: { date: string; cents: number } | null;
+    days: { day: number; cents: number; isToday: boolean; isFuture: boolean }[];
+  };
+  recentEvents: AdminAuditLogRow[];
+  topProperties: {
+    id: string;
+    name: string;
+    slug: string;
+    bookingsCount: number;
+    revenueCents: number;
+  }[];
+  attentionProperties: {
+    id: string;
+    name: string;
+    slug: string;
+    reason: string;
+  }[];
+};
+
+function monthBoundsUtc(d: Date) {
+  const y = d.getUTCFullYear();
+  const m = d.getUTCMonth();
+  const start = new Date(Date.UTC(y, m, 1));
+  const end = new Date(Date.UTC(y, m + 1, 1));
+  return { start, end };
+}
+
+/**
+ * Carga TODO el shape de /admin overview en un solo entrypoint. Una sola
+ * round-trip de hits a Postgres (todas las queries van en paralelo).
+ */
+export async function getAdminOverview(): Promise<AdminOverview> {
+  await requireSuperAdmin();
+  const admin = createAdminClient();
+  const now = new Date();
+  const { start: monthStart, end: monthEnd } = monthBoundsUtc(now);
+  const prevMonth = new Date(monthStart.getTime() - 86_400_000);
+  const { start: prevStart, end: prevEnd } = monthBoundsUtc(prevMonth);
+  const [
+    profilesAllR,
+    profilesMonthR,
+    profilesByRoleR,
+    propsAllR,
+    propsActiveR,
+    propsMonthR,
+    bookingsAllR,
+    bookingsMonthR,
+    bookingsPrevR,
+    bookingsByStatusR,
+    revenueR,
+    auditR,
+    topR,
+    inactivePropsR,
+  ] = await Promise.all([
+    admin.from("profiles").select("id", { count: "exact", head: true }),
+    admin
+      .from("profiles")
+      .select("id", { count: "exact", head: true })
+      .gte("created_at", monthStart.toISOString()),
+    admin.from("profiles").select("role"),
+    admin.from("properties").select("id", { count: "exact", head: true }),
+    admin
+      .from("properties")
+      .select("id", { count: "exact", head: true })
+      .eq("is_active", true),
+    admin
+      .from("properties")
+      .select("id", { count: "exact", head: true })
+      .gte("created_at", monthStart.toISOString()),
+    admin.from("bookings").select("id", { count: "exact", head: true }),
+    admin
+      .from("bookings")
+      .select("id", { count: "exact", head: true })
+      .gte("created_at", monthStart.toISOString()),
+    admin
+      .from("bookings")
+      .select("id", { count: "exact", head: true })
+      .gte("created_at", prevStart.toISOString())
+      .lt("created_at", prevEnd.toISOString()),
+    admin.from("bookings").select("status"),
+    admin
+      .from("bookings")
+      .select("created_at, total_cents, status, property_id")
+      .gte("created_at", monthStart.toISOString())
+      .lt("created_at", monthEnd.toISOString())
+      .in("status", ["confirmed", "completed"]),
+    listAdminAuditLogs({ limit: 12 }),
+    admin
+      .from("bookings")
+      .select("property_id, total_cents, status, properties(id, name, slug)")
+      .gte("created_at", monthStart.toISOString())
+      .lt("created_at", monthEnd.toISOString())
+      .in("status", ["confirmed", "completed"]),
+    admin
+      .from("properties")
+      .select("id, name, slug, is_active, created_at"),
+  ]);
+
+  if (profilesByRoleR.error) throw mapDbError(profilesByRoleR.error);
+  if (bookingsByStatusR.error) throw mapDbError(bookingsByStatusR.error);
+  if (revenueR.error) throw mapDbError(revenueR.error);
+  if (topR.error) throw mapDbError(topR.error);
+  if (inactivePropsR.error) throw mapDbError(inactivePropsR.error);
+
+  const byRole: Record<string, number> = {};
+  for (const r of profilesByRoleR.data ?? []) byRole[r.role] = (byRole[r.role] ?? 0) + 1;
+
+  const byStatus: Record<string, number> = {};
+  for (const r of bookingsByStatusR.data ?? []) byStatus[r.status] = (byStatus[r.status] ?? 0) + 1;
+
+  // Revenue por día del mes actual
+  const daysInMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0)).getUTCDate();
+  const todayDay = now.getUTCDate();
+  const dayCents = new Array<number>(daysInMonth).fill(0);
+  let totalCents = 0;
+  let bookingsCount = 0;
+  for (const b of revenueR.data ?? []) {
+    const d = new Date(b.created_at);
+    if (d.getUTCFullYear() !== now.getUTCFullYear() || d.getUTCMonth() !== now.getUTCMonth()) continue;
+    const idx = d.getUTCDate() - 1;
+    const cents = b.total_cents ?? 0;
+    dayCents[idx] = (dayCents[idx] ?? 0) + cents;
+    totalCents += cents;
+    bookingsCount++;
+  }
+  const days = dayCents.map((cents, i) => ({
+    day: i + 1,
+    cents,
+    isToday: i + 1 === todayDay,
+    isFuture: i + 1 > todayDay,
+  }));
+  const bestIdx = days.reduce((bi, cur, i, arr) => (cur.cents > (arr[bi]?.cents ?? 0) ? i : bi), 0);
+  const best = days[bestIdx];
+  const bestDay = best && best.cents > 0
+    ? {
+        date: `${best.day} ${now.toLocaleDateString("es-CO", { month: "short" })}`,
+        cents: best.cents,
+      }
+    : null;
+
+  // Top properties (agregado client-side desde el query revenueR/topR — usamos topR
+  // que ya trae el JOIN a properties).
+  type TopRow = {
+    property_id: string;
+    total_cents: number;
+    status: string;
+    properties: { id: string; name: string; slug: string } | null;
+  };
+  const propAgg = new Map<
+    string,
+    { name: string; slug: string; bookings: number; cents: number }
+  >();
+  for (const raw of topR.data ?? []) {
+    const r = raw as unknown as TopRow;
+    if (!r.properties) continue;
+    const entry = propAgg.get(r.property_id) ?? {
+      name: r.properties.name,
+      slug: r.properties.slug,
+      bookings: 0,
+      cents: 0,
+    };
+    entry.bookings++;
+    entry.cents += r.total_cents ?? 0;
+    propAgg.set(r.property_id, entry);
+  }
+  const topProperties = Array.from(propAgg.entries())
+    .map(([id, v]) => ({ id, name: v.name, slug: v.slug, bookingsCount: v.bookings, revenueCents: v.cents }))
+    .sort((a, b) => b.revenueCents - a.revenueCents)
+    .slice(0, 5);
+
+  // Attention: inactive recientes + propiedades sin bookings este mes
+  const allProps = (inactivePropsR.data ?? []) as { id: string; name: string; slug: string; is_active: boolean; created_at: string }[];
+  const propsWithBookings = new Set(propAgg.keys());
+  const attentionProperties: AdminOverview["attentionProperties"] = [];
+  for (const p of allProps) {
+    if (!p.is_active) {
+      attentionProperties.push({ id: p.id, name: p.name, slug: p.slug, reason: "Desactivada" });
+    } else if (!propsWithBookings.has(p.id)) {
+      // Solo flag si la propiedad lleva al menos 14 días creada (evita ruido en onboarding).
+      const ageMs = Date.now() - new Date(p.created_at).getTime();
+      if (ageMs > 14 * 86_400_000) {
+        attentionProperties.push({ id: p.id, name: p.name, slug: p.slug, reason: "Sin reservas este mes" });
+      }
+    }
+  }
+  attentionProperties.splice(5);
+
+  const avgCents = bookingsCount > 0 ? Math.round(totalCents / bookingsCount) : 0;
+  const monthLabel = now.toLocaleDateString("es-CO", { month: "long", year: "numeric" });
+
+  return {
+    kpis: {
+      users: {
+        total: profilesAllR.count ?? 0,
+        newThisMonth: profilesMonthR.count ?? 0,
+        byRole,
+      },
+      properties: {
+        total: propsAllR.count ?? 0,
+        newThisMonth: propsMonthR.count ?? 0,
+        active: propsActiveR.count ?? 0,
+        inactive: (propsAllR.count ?? 0) - (propsActiveR.count ?? 0),
+      },
+      bookings: {
+        total: bookingsAllR.count ?? 0,
+        thisMonth: bookingsMonthR.count ?? 0,
+        prevMonth: bookingsPrevR.count ?? 0,
+        byStatus,
+      },
+    },
+    revenue: {
+      monthLabel: monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1),
+      totalCents,
+      averagePerBookingCents: avgCents,
+      bestDay,
+      days,
+    },
+    recentEvents: auditR,
+    topProperties,
+    attentionProperties,
+  };
+}
+
+/* ─── USERS (admin, enriched) ─── */
+
+export type AdminUserPropertyLink = {
+  id: string;
+  name: string;
+  slug: string;
+  role: Database["public"]["Enums"]["PropertyUserRole"];
+};
+
+export type AdminUserViewRow = {
+  id: string;
+  email: string;
+  fullName: string | null;
+  phone: string | null;
+  role: Database["public"]["Enums"]["UserRole"];
+  createdAt: string;
+  properties: AdminUserPropertyLink[];
+  /** Última invitación aceptada — proxy de "miembro activo de alguna prop". */
+  acceptedAt: string | null;
+  /** Último login_event timestamp, si lo hay. */
+  lastLoginAt: string | null;
+};
+
+/**
+ * Lista users del sistema enriquecidos con sus property_users + properties +
+ * último login. Cross-tenant via admin client (super_admin scope).
+ */
+export async function listAdminUsersFull(opts: {
+  limit?: number;
+  search?: string;
+} = {}): Promise<AdminUserViewRow[]> {
+  await requireSuperAdmin();
+  const admin = createAdminClient();
+
+  let q = admin
+    .from("profiles")
+    .select("id, email, full_name, phone, role, created_at");
+
+  if (opts.search) {
+    const s = opts.search.replace(/[%_]/g, (m) => "\\" + m);
+    q = q.or(`email.ilike.%${s}%,full_name.ilike.%${s}%`);
+  }
+  q = q.order("created_at", { ascending: false }).limit(opts.limit ?? 200);
+
+  const { data, error } = await q;
+  if (error) throw mapDbError(error);
+  const profiles = data ?? [];
+  if (profiles.length === 0) return [];
+
+  const userIds = profiles.map((p) => p.id);
+
+  // Property memberships + property names (1 query each, JOIN via property_users).
+  const [linksR, loginsR] = await Promise.all([
+    admin
+      .from("property_users")
+      .select("user_id, role, invitation_accepted_at, properties(id, name, slug)")
+      .in("user_id", userIds),
+    admin
+      .from("login_events")
+      .select("user_id, created_at")
+      .in("user_id", userIds)
+      .eq("event_type", "login_success")
+      .order("created_at", { ascending: false })
+      .limit(1000),
+  ]);
+
+  if (linksR.error) throw mapDbError(linksR.error);
+  if (loginsR.error) throw mapDbError(loginsR.error);
+
+  type LinkRow = {
+    user_id: string;
+    role: Database["public"]["Enums"]["PropertyUserRole"];
+    invitation_accepted_at: string | null;
+    properties: { id: string; name: string; slug: string } | null;
+  };
+
+  const linksByUser = new Map<string, LinkRow[]>();
+  for (const raw of linksR.data ?? []) {
+    const row = raw as unknown as LinkRow;
+    const arr = linksByUser.get(row.user_id) ?? [];
+    arr.push(row);
+    linksByUser.set(row.user_id, arr);
+  }
+
+  // login_events ordenados desc — primer hit por user es el último login.
+  const lastLoginByUser = new Map<string, string>();
+  for (const ev of loginsR.data ?? []) {
+    if (!ev.user_id) continue;
+    if (!lastLoginByUser.has(ev.user_id)) {
+      lastLoginByUser.set(ev.user_id, ev.created_at);
+    }
+  }
+
+  return profiles.map((p) => {
+    const links = linksByUser.get(p.id) ?? [];
+    const properties: AdminUserPropertyLink[] = links
+      .map((l) => (l.properties ? { ...l.properties, role: l.role } : null))
+      .filter((v): v is AdminUserPropertyLink => v !== null);
+    const acceptedAt =
+      links
+        .map((l) => l.invitation_accepted_at)
+        .filter((v): v is string => v !== null)
+        .sort()
+        .pop() ?? null;
+
+    return {
+      id: p.id,
+      email: p.email,
+      fullName: p.full_name,
+      phone: p.phone,
+      role: p.role,
+      createdAt: p.created_at,
+      properties,
+      acceptedAt,
+      lastLoginAt: lastLoginByUser.get(p.id) ?? null,
+    };
+  });
+}
+
+export type AdminUserDetailFull = AdminUserViewRow & {
+  recentLogins: {
+    eventType: Database["public"]["Enums"]["LoginEventType"];
+    ip: string | null;
+    userAgent: string | null;
+    country: string | null;
+    createdAt: string;
+  }[];
+};
+
+/**
+ * Detalle profundo de un user para super_admin. Mismo shape que la row +
+ * últimos 10 login_events (todos los tipos: success/failed/reset/2fa).
+ */
+export async function getAdminUserDetailFull(
+  userId: string,
+): Promise<AdminUserDetailFull | null> {
+  await requireSuperAdmin();
+  const admin = createAdminClient();
+
+  const profR = await admin
+    .from("profiles")
+    .select("id, email, full_name, phone, role, created_at")
+    .eq("id", userId)
+    .maybeSingle();
+  if (profR.error) throw mapDbError(profR.error);
+  if (!profR.data) return null;
+  const p = profR.data;
+
+  const [linksR, loginsR] = await Promise.all([
+    admin
+      .from("property_users")
+      .select("role, invitation_accepted_at, properties(id, name, slug)")
+      .eq("user_id", userId),
+    admin
+      .from("login_events")
+      .select("event_type, ip, user_agent, country, created_at")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(10),
+  ]);
+
+  if (linksR.error) throw mapDbError(linksR.error);
+  if (loginsR.error) throw mapDbError(loginsR.error);
+
+  type LinkRow = {
+    role: Database["public"]["Enums"]["PropertyUserRole"];
+    invitation_accepted_at: string | null;
+    properties: { id: string; name: string; slug: string } | null;
+  };
+
+  const links = (linksR.data ?? []) as unknown as LinkRow[];
+  const properties: AdminUserPropertyLink[] = links
+    .map((l) => (l.properties ? { ...l.properties, role: l.role } : null))
+    .filter((v): v is AdminUserPropertyLink => v !== null);
+
+  const acceptedAt =
+    links
+      .map((l) => l.invitation_accepted_at)
+      .filter((v): v is string => v !== null)
+      .sort()
+      .pop() ?? null;
+
+  // Último login_success entre los 10 más recientes (puede no estar — si pedimos
+  // más amplio cae al adapter para mostrar "nunca").
+  const lastLoginAt =
+    (loginsR.data ?? []).find((ev) => ev.event_type === "login_success")?.created_at ?? null;
+
+  return {
+    id: p.id,
+    email: p.email,
+    fullName: p.full_name,
+    phone: p.phone,
+    role: p.role,
+    createdAt: p.created_at,
+    properties,
+    acceptedAt,
+    lastLoginAt,
+    recentLogins: (loginsR.data ?? []).map((ev) => ({
+      eventType: ev.event_type,
+      ip: ev.ip as string | null,
+      userAgent: ev.user_agent,
+      country: ev.country,
+      createdAt: ev.created_at,
+    })),
+  };
+}
+
 /* ─── PROPERTIES (admin) ─── */
 
 export type AdminPropertyRow = {
@@ -497,6 +953,7 @@ export async function listAdminAuditLogs(opts: {
   propertyId?: string;
   from?: string;         // ISO timestamp created_at >=
   to?: string;           // ISO timestamp created_at <=
+  cursor?: string;       // ISO timestamp — paginate via created_at < cursor
   limit?: number;
 } = {}): Promise<AdminAuditLogRow[]> {
   await requireSuperAdmin();
@@ -517,6 +974,7 @@ export async function listAdminAuditLogs(opts: {
   if (opts.propertyId) q = q.eq("property_id", opts.propertyId);
   if (opts.from) q = q.gte("created_at", opts.from);
   if (opts.to) q = q.lte("created_at", opts.to);
+  if (opts.cursor) q = q.lt("created_at", opts.cursor);
 
   q = q.order("created_at", { ascending: false }).limit(opts.limit ?? 200);
 

@@ -98,6 +98,14 @@ beforeAll(async () => {
 
 afterAll(async () => {
   // Cleanup: borrar propiedades antes que orgs/users (FKs).
+  await admin.from("whatsapp_messages").delete().eq("property_id", propA.id);
+  await admin.from("whatsapp_messages").delete().eq("property_id", propB.id);
+  await admin.from("whatsapp_configs").delete().eq("property_id", propA.id);
+  await admin.from("whatsapp_configs").delete().eq("property_id", propB.id);
+  await admin.from("ical_feeds").delete().eq("property_id", propA.id);
+  await admin.from("ical_feeds").delete().eq("property_id", propB.id);
+  await admin.from("email_logs").delete().eq("property_id", propA.id);
+  await admin.from("email_logs").delete().eq("property_id", propB.id);
   await admin.from("bookings").delete().eq("property_id", propA.id);
   await admin.from("bookings").delete().eq("property_id", propB.id);
   await admin.from("property_users").delete().eq("property_id", propA.id);
@@ -277,6 +285,231 @@ describe("RLS isolation · webhook_logs", () => {
       .from("webhook_logs")
       .insert({ provider: "wompi", status: "received", property_id: propA.id });
     // RLS bloquea: PostgREST devuelve un error o 0 filas. Aceptamos cualquiera.
+    expect(error).not.toBeNull();
+  });
+});
+
+describe("RLS isolation · whatsapp_configs", () => {
+  beforeAll(async () => {
+    // wa configs son owner-only — service_role los crea
+    await admin.from("whatsapp_configs").insert([
+      { property_id: propA.id, phone_number_id: "PA-phone", is_active: true },
+      { property_id: propB.id, phone_number_id: "PB-phone", is_active: true },
+    ]);
+  });
+
+  it("user A sees his whatsapp_config", async () => {
+    const { data } = await userA.client
+      .from("whatsapp_configs")
+      .select("property_id, phone_number_id")
+      .eq("property_id", propA.id)
+      .maybeSingle();
+    expect(data?.phone_number_id).toBe("PA-phone");
+  });
+
+  it("user A does NOT see user B's whatsapp_config", async () => {
+    const { data } = await userA.client
+      .from("whatsapp_configs")
+      .select("property_id")
+      .eq("property_id", propB.id)
+      .maybeSingle();
+    expect(data).toBeNull();
+  });
+
+  it("user A cannot UPDATE user B's whatsapp_config", async () => {
+    const { data, error } = await userA.client
+      .from("whatsapp_configs")
+      .update({ phone_number_id: "hijacked" })
+      .eq("property_id", propB.id)
+      .select();
+    expect(error).toBeNull();
+    expect(data?.length ?? 0).toBe(0);
+  });
+});
+
+describe("RLS isolation · whatsapp_messages", () => {
+  let msgA: { id: string };
+  let msgB: { id: string };
+
+  beforeAll(async () => {
+    const { data: a } = await admin
+      .from("whatsapp_messages")
+      .insert({
+        property_id: propA.id,
+        direction: "outbound",
+        to_phone: "+573001111111",
+        from_phone: "+573009999999",
+        body: "Hola A",
+        status: "sent",
+      })
+      .select()
+      .single();
+    const { data: b } = await admin
+      .from("whatsapp_messages")
+      .insert({
+        property_id: propB.id,
+        direction: "outbound",
+        to_phone: "+573002222222",
+        from_phone: "+573009999999",
+        body: "Hola B",
+        status: "sent",
+      })
+      .select()
+      .single();
+    msgA = { id: a!.id };
+    msgB = { id: b!.id };
+  });
+
+  it("user A sees his own message", async () => {
+    const { data } = await userA.client
+      .from("whatsapp_messages")
+      .select("id, body")
+      .eq("id", msgA.id)
+      .maybeSingle();
+    expect(data?.body).toBe("Hola A");
+  });
+
+  it("user A does NOT see user B's message", async () => {
+    const { data } = await userA.client
+      .from("whatsapp_messages")
+      .select("id")
+      .eq("id", msgB.id)
+      .maybeSingle();
+    expect(data).toBeNull();
+  });
+
+  it("user A cannot INSERT a message into user B's property", async () => {
+    const { error } = await userA.client
+      .from("whatsapp_messages")
+      .insert({
+        property_id: propB.id,
+        direction: "outbound",
+        to_phone: "+573001234567",
+        from_phone: "+573009999999",
+        body: "spoof",
+        status: "sent",
+      });
+    expect(error).not.toBeNull();
+  });
+});
+
+describe("RLS isolation · ical_feeds", () => {
+  let feedA: { id: string };
+  let feedB: { id: string };
+
+  beforeAll(async () => {
+    const { data: a } = await admin
+      .from("ical_feeds")
+      .insert({
+        property_id: propA.id,
+        name: "Booking.com",
+        direction: "inbound",
+        url: "https://example.com/A.ics",
+      })
+      .select()
+      .single();
+    const { data: b } = await admin
+      .from("ical_feeds")
+      .insert({
+        property_id: propB.id,
+        name: "Airbnb",
+        direction: "inbound",
+        url: "https://example.com/B.ics",
+      })
+      .select()
+      .single();
+    feedA = { id: a!.id };
+    feedB = { id: b!.id };
+  });
+
+  it("user A sees his own ical_feed", async () => {
+    const { data } = await userA.client
+      .from("ical_feeds")
+      .select("id, name")
+      .eq("id", feedA.id)
+      .maybeSingle();
+    expect(data?.name).toBe("Booking.com");
+  });
+
+  it("user A does NOT see user B's ical_feed", async () => {
+    const { data } = await userA.client
+      .from("ical_feeds")
+      .select("id")
+      .eq("id", feedB.id)
+      .maybeSingle();
+    expect(data).toBeNull();
+  });
+
+  it("user A cannot DELETE user B's ical_feed", async () => {
+    const { data, error } = await userA.client
+      .from("ical_feeds")
+      .delete()
+      .eq("id", feedB.id)
+      .select();
+    expect(error).toBeNull();
+    expect(data?.length ?? 0).toBe(0);
+  });
+});
+
+describe("RLS isolation · email_logs", () => {
+  let emailA: { id: string };
+  let emailB: { id: string };
+
+  beforeAll(async () => {
+    const { data: a } = await admin
+      .from("email_logs")
+      .insert({
+        property_id: propA.id,
+        to_email: "guest-a@example.com",
+        template: "booking_confirmed",
+        subject: "Reserva confirmada A",
+        status: "sent",
+      })
+      .select()
+      .single();
+    const { data: b } = await admin
+      .from("email_logs")
+      .insert({
+        property_id: propB.id,
+        to_email: "guest-b@example.com",
+        template: "booking_confirmed",
+        subject: "Reserva confirmada B",
+        status: "sent",
+      })
+      .select()
+      .single();
+    emailA = { id: a!.id };
+    emailB = { id: b!.id };
+  });
+
+  it("user A sees his own email_log", async () => {
+    const { data } = await userA.client
+      .from("email_logs")
+      .select("id, subject")
+      .eq("id", emailA.id)
+      .maybeSingle();
+    expect(data?.subject).toBe("Reserva confirmada A");
+  });
+
+  it("user A does NOT see user B's email_log", async () => {
+    const { data } = await userA.client
+      .from("email_logs")
+      .select("id")
+      .eq("id", emailB.id)
+      .maybeSingle();
+    expect(data).toBeNull();
+  });
+
+  it("user A cannot INSERT email_logs (no write policy — service_role only)", async () => {
+    const { error } = await userA.client
+      .from("email_logs")
+      .insert({
+        property_id: propA.id,
+        to_email: "spoof@example.com",
+        template: "booking_confirmed",
+        subject: "spoof",
+        status: "sent",
+      });
     expect(error).not.toBeNull();
   });
 });

@@ -11,8 +11,15 @@ import {
   Divider,
 } from "../primitives";
 import { SaveBar } from "../SaveBar";
+import { useSettingsSave } from "../useSettingsSave";
 
-export function SchedulesTab({ initial }: { initial: SchedulesValues }) {
+export function SchedulesTab({
+  propertyId,
+  initial,
+}: {
+  propertyId: string;
+  initial: SchedulesValues;
+}) {
   const form = useForm<SchedulesValues>({
     resolver: zodResolver(schedulesSchema),
     defaultValues: initial,
@@ -20,9 +27,21 @@ export function SchedulesTab({ initial }: { initial: SchedulesValues }) {
   const { register, watch, setValue, formState } = form;
   const { errors } = formState;
   const values = watch();
+  const { save, saving, error } = useSettingsSave(propertyId);
 
-  async function onSave(_v: SchedulesValues) {
-    await new Promise((r) => setTimeout(r, 250));
+  async function onSave(v: SchedulesValues) {
+    await save({
+      checkInTime: v.checkIn,
+      checkOutTime: v.checkOut,
+      minStayNights: v.minStay,
+      maxStayNights: v.maxStayUnlimited ? null : (v.maxStay ?? null),
+      bookingPolicy: {
+        schedules: {
+          early_check_in: v.earlyCheckIn,
+          late_check_out: v.lateCheckOut,
+        },
+      },
+    });
   }
 
   return (
@@ -128,7 +147,11 @@ export function SchedulesTab({ initial }: { initial: SchedulesValues }) {
         />
       )}
 
-      <SaveBar form={form} onSave={onSave} />
+      {error && (
+        <p role="alert" className="text-[13px] text-danger mt-4 mb-0">{error}</p>
+      )}
+
+      <SaveBar form={form} onSave={onSave} saving={saving} />
     </>
   );
 }

@@ -12,12 +12,15 @@ import {
   Divider,
 } from "../primitives";
 import { SaveBar } from "../SaveBar";
+import { useSettingsSave } from "../useSettingsSave";
 import { IconHelpCircle } from "../icons";
 
 export function GeneralTab({
+  propertyId,
   initial,
   totalRooms,
 }: {
+  propertyId: string;
   initial: GeneralValues;
   totalRooms: number;
 }) {
@@ -27,10 +30,16 @@ export function GeneralTab({
   });
   const { register, formState } = form;
   const { errors } = formState;
+  const { save, saving, error } = useSettingsSave(propertyId);
 
-  async function onSave(_values: GeneralValues) {
-    // In production: POST to /api/properties/:id (general partial).
-    await new Promise((r) => setTimeout(r, 250));
+  async function onSave(values: GeneralValues) {
+    await save({
+      name: values.name,
+      address: values.address,
+      city: values.city,
+      country: values.country,
+      timezone: values.timezone,
+    });
   }
 
   return (
@@ -130,7 +139,16 @@ export function GeneralTab({
         </Select>
       </FieldShell>
 
-      <SaveBar form={form} onSave={onSave} />
+      {error && (
+        <p
+          role="alert"
+          className="text-[13px] text-danger mt-4 mb-0"
+        >
+          {error}
+        </p>
+      )}
+
+      <SaveBar form={form} onSave={onSave} saving={saving} />
     </>
   );
 }

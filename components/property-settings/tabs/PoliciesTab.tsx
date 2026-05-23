@@ -14,6 +14,7 @@ import {
   Divider,
 } from "../primitives";
 import { SaveBar } from "../SaveBar";
+import { useSettingsSave } from "../useSettingsSave";
 import { IconCheckRing, IconLockRing } from "../icons";
 
 const CANCELLATION_OPTIONS = [
@@ -37,7 +38,13 @@ const CANCELLATION_OPTIONS = [
   },
 ];
 
-export function PoliciesTab({ initial }: { initial: PoliciesValues }) {
+export function PoliciesTab({
+  propertyId,
+  initial,
+}: {
+  propertyId: string;
+  initial: PoliciesValues;
+}) {
   const form = useForm<PoliciesValues>({
     resolver: zodResolver(policiesSchema),
     defaultValues: initial,
@@ -45,9 +52,30 @@ export function PoliciesTab({ initial }: { initial: PoliciesValues }) {
   const { register, watch, setValue, control, formState } = form;
   const { errors } = formState;
   const values = watch();
+  const { save, saving, error } = useSettingsSave(propertyId);
 
-  async function onSave(_v: PoliciesValues) {
-    await new Promise((r) => setTimeout(r, 250));
+  async function onSave(v: PoliciesValues) {
+    await save({
+      bookingPolicy: {
+        cancellation: v.cancellation,
+        pets: {
+          allowed: v.pets,
+          ...(v.petsFee !== undefined ? { fee_cents: v.petsFee } : {}),
+          ...(v.petsRules ? { rules: v.petsRules } : {}),
+        },
+        children: {
+          allowed: v.children,
+          ...(v.childrenFreeAge !== undefined
+            ? { free_age_max: v.childrenFreeAge }
+            : {}),
+        },
+        smoking: {
+          allowed: v.smoking,
+          ...(v.smokingAreas ? { areas: v.smokingAreas } : {}),
+        },
+        events: { allowed: v.events },
+      },
+    });
   }
 
   return (
@@ -199,7 +227,11 @@ export function PoliciesTab({ initial }: { initial: PoliciesValues }) {
         onChange={(v) => setValue("events", v, { shouldDirty: true })}
       />
 
-      <SaveBar form={form} onSave={onSave} />
+      {error && (
+        <p role="alert" className="text-[13px] text-danger mt-4 mb-0">{error}</p>
+      )}
+
+      <SaveBar form={form} onSave={onSave} saving={saving} />
     </>
   );
 }

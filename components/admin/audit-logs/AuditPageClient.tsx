@@ -1,8 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 import type { AdminAuditLogRow } from "@/lib/db/queries/admin";
 import type { Database } from "@/lib/supabase/database.types";
+import {
+  loadMoreAuditLogsAction,
+  exportAuditLogsAction,
+} from "@/app/actions/admin";
+import { downloadCsv } from "@/lib/csv";
 import { IconSearch } from "../icons";
 import { AuditTimeline } from "./AuditTimeline";
 import { AuditDetailDrawer } from "./AuditDetailDrawer";
@@ -16,17 +21,61 @@ const ACTOR_FILTERS: { value: ActorType | "all"; label: string }[] = [
   { value: "webhook", label: "Webhook" },
 ];
 
+const PAGE_SIZE = 200;
+
 export function AuditPageClient({
-  rows,
+  rows: initialRows,
   resourceTypes,
 }: {
   rows: AdminAuditLogRow[];
   resourceTypes: string[];
 }) {
+  const [rows, setRows] = useState(initialRows);
   const [query, setQuery] = useState("");
   const [actorFilter, setActorFilter] = useState<ActorType | "all">("all");
   const [resourceFilter, setResourceFilter] = useState<string | "all">("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(initialRows.length >= PAGE_SIZE);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const [loadingMore, startLoadMore] = useTransition();
+  const [exporting, startExport] = useTransition();
+
+  async function handleLoadMore() {
+    const cursor = rows[rows.length - 1]?.createdAt;
+    if (!cursor) return;
+    setLoadError(null);
+    startLoadMore(async () => {
+      const result = await loadMoreAuditLogsAction({ cursor, limit: PAGE_SIZE });
+      if (!result.ok) {
+        setLoadError(result.error);
+        return;
+      }
+      const next = result.data.rows;
+      if (next.length === 0) {
+        setHasMore(false);
+        return;
+      }
+      setRows((prev) => [...prev, ...next]);
+      if (next.length < PAGE_SIZE) setHasMore(false);
+    });
+  }
+
+  async function handleExport() {
+    setExportError(null);
+    startExport(async () => {
+      const result = await exportAuditLogsAction();
+      if (!result.ok) {
+        setExportError(result.error);
+        return;
+      }
+      const date = new Date().toISOString().slice(0, 10);
+      downloadCsv(`audit-logs-${date}.csv`, result.data.csv);
+      if (result.data.truncated) {
+        setExportError(`Export truncado a ${result.data.count} filas (hard cap).`);
+      }
+    });
+  }
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -126,6 +175,49 @@ export function AuditPageClient({
         selectedId={selectedId}
         onRowClick={(id) => setSelectedId(id)}
       />
+
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="text-[12px] text-ink-muted">
+          Mostrando <span className="oldstyle">{filtered.length}</span> de{" "}
+          <span className="oldstyle">{rows.length}</span> cargadas
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleExport}
+            disabled={exporting || rows.length === 0}
+            className="inline-flex items-center gap-2 h-9 px-3.5 rounded-xl text-[13px] font-medium text-sage border border-sage bg-transparent hover:bg-sage-tint disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <svg className="w-[14px] h-[14px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M12 4v12" />
+              <path d="m7 11 5 5 5-5" />
+              <path d="M5 20h14" />
+            </svg>
+            {exporting ? "Exportando…" : "Exportar CSV"}
+          </button>
+          {hasMore && (
+            <button
+              type="button"
+              onClick={handleLoadMore}
+              disabled={loadingMore}
+              className="inline-flex items-center gap-2 h-9 px-3.5 rounded-xl text-[13px] font-medium text-ink-soft border border-rule bg-cream hover:bg-linen hover:text-ink hover:border-rule-strong disabled:opacity-50 transition-colors"
+            >
+              {loadingMore ? "Cargando…" : "Cargar 200 más"}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {loadError && (
+        <p role="alert" className="text-[13px] text-danger mt-3 mb-0">
+          {loadError}
+        </p>
+      )}
+      {exportError && (
+        <p role="alert" className="text-[13px] text-warning mt-3 mb-0">
+          {exportError}
+        </p>
+      )}
 
       <AuditDetailDrawer
         log={log}

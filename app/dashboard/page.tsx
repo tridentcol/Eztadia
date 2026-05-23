@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getOwnerSnapshot } from "@/lib/dashboard";
+import type { OwnerSnapshot } from "@/lib/dashboard";
 import {
   getCurrentProfile,
   getActivePropertyId,
@@ -20,6 +20,15 @@ export const metadata: Metadata = {
   title: "Resumen — Eztadia",
 };
 
+function initialsFrom(name: string | null, email: string): string {
+  const src = (name && name.trim()) || email.split("@")[0] || "?";
+  const parts = src.trim().split(/\s+/);
+  if (parts.length >= 2) return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase();
+  return src.slice(0, 2).toUpperCase();
+}
+
+const PLACEHOLDER_PROPERTY_PHOTO = "/placeholder.svg";
+
 export default async function DashboardHome() {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
@@ -34,33 +43,26 @@ export default async function DashboardHome() {
     getUpcomingCheckInsDashboard(propertyId),
   ]);
 
-  // Demo siempre vivo solo para owner+property fallbacks de shape. El resto
-  // viene de DB.
-  const demoSnapshot = getOwnerSnapshot();
-  const snapshot = {
-    ...demoSnapshot,
+  const firstName = profile.full_name?.split(" ")[0] ?? profile.email.split("@")[0] ?? "tú";
+
+  const snapshot: OwnerSnapshot = {
     owner: {
-      ...demoSnapshot.owner,
-      firstName: profile.full_name?.split(" ")[0] ?? "tu",
+      firstName,
       fullName: profile.full_name ?? "",
       email: profile.email,
-      initials: (profile.full_name ?? profile.email)
-        .split(" ")
-        .map((p) => p[0])
-        .slice(0, 2)
-        .join("")
-        .toUpperCase(),
+      initials: initialsFrom(profile.full_name, profile.email),
     },
     property: {
-      ...demoSnapshot.property,
       slug: property.slug,
       name: property.name,
       city: property.city ?? "",
+      photo: property.cover_image_url ?? PLACEHOLDER_PROPERTY_PHOTO,
     },
     pulse,
     attention,
     upcoming,
-    // unreadMessages sigue demo hasta Phase E2 (no hay flag de unread).
+    // Sin flag de unread en whatsapp_messages todavía — schema decision Phase E2.
+    unreadMessages: 0,
   };
 
   const now = new Date();

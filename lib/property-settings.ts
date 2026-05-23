@@ -157,7 +157,7 @@ export const advancedSchema = z.object({
 });
 export type AdvancedValues = z.infer<typeof advancedSchema>;
 
-/* ─── DEMO PROPERTY SETTINGS ─── */
+/* ─── PROPERTY SETTINGS SHAPE ─── */
 
 export type PropertySettings = {
   general: GeneralValues;
@@ -169,75 +169,3 @@ export type PropertySettings = {
   advanced: AdvancedValues;
   photos: { id: string; url: string; alt: string }[];
 };
-
-export function getPropertySettings(): PropertySettings {
-  return {
-    general: {
-      name: "Casa Marina",
-      type: "hotel",
-      address: "Calle del Curato 38-99",
-      city: "Cartagena",
-      country: "Colombia",
-      timezone: "America/Bogota",
-    },
-    identity: {
-      descriptionEs:
-        "Casa colonial restaurada en el corazón del centro histórico, a 3 minutos caminando de Plaza Santo Domingo. Doce habitaciones distribuidas en dos pisos alrededor de un patio interior con buganvilla. Desayuno servido en el patio. Recepción 24 horas atendida por nuestro equipo.",
-      descriptionEn:
-        "Restored colonial house in the heart of Cartagena's historic center, three minutes walking from Santo Domingo Square. Twelve rooms on two floors around an interior courtyard with bougainvillea. Breakfast served in the courtyard. 24-hour reception staffed by our team.",
-    },
-    amenities: {
-      selected: [
-        "wifi-fiber",
-        "ac",
-        "pool",
-        "patio",
-        "breakfast",
-        "reception-24",
-        "laundry",
-      ],
-    },
-    policies: {
-      cancellation: "moderate",
-      pets: true,
-      petsFee: 50000,
-      petsRules: "Hasta 2 mascotas por habitación. Pequeñas o medianas.",
-      children: true,
-      childrenFreeAge: 6,
-      smoking: false,
-      smokingAreas: "",
-      events: false,
-    },
-    schedules: {
-      checkIn: "15:00",
-      checkOut: "12:00",
-      earlyCheckIn: true,
-      lateCheckOut: true,
-      minStay: 2,
-      maxStayUnlimited: true,
-    },
-    fiscal: {
-      legalName: "Casa Marina S.A.S.",
-      taxId: "900.123.456-7",
-      fiscalAddress: "Calle del Curato 38-99, Cartagena, Colombia",
-      regime: "comun",
-    },
-    advanced: {
-      showNightlyPrice: true,
-      instantBookings: true,
-      requireIdDocument: true,
-      holdTtlPseMinutes: 15,
-      holdTtlManualHours: 24,
-    },
-    photos: [
-      { id: "p1", url: "https://images.unsplash.com/photo-1545158535-c3f7168c28b6?auto=format&fit=crop&w=900&q=80", alt: "Patio con buganvilla" },
-      { id: "p2", url: "https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=900&q=80", alt: "Habitación con linos blancos" },
-      { id: "p3", url: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=900&q=80", alt: "Rincón tropical" },
-      { id: "p4", url: "https://images.unsplash.com/photo-1554995207-c18c203602cb?auto=format&fit=crop&w=900&q=80", alt: "Café del desayuno" },
-      { id: "p5", url: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=900&q=80", alt: "Balcones de la fachada" },
-      { id: "p6", url: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=900&q=80", alt: "Habitación techos altos" },
-      { id: "p7", url: "https://images.unsplash.com/photo-1564540583246-934409427776?auto=format&fit=crop&w=900&q=80", alt: "Puerta colonial" },
-      { id: "p8", url: "https://images.unsplash.com/photo-1455587734955-081b22074882?auto=format&fit=crop&w=900&q=80", alt: "Sala común" },
-    ],
-  };
-}
