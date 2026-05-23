@@ -38,32 +38,32 @@ END:VEVENT
 END:VCALENDAR`;
 
 describe("parseBlocks", () => {
-  it("parses all-day VEVENTs with VALUE=DATE", () => {
-    const blocks = parseBlocks(SAMPLE_ICS);
+  it("parses all-day VEVENTs with VALUE=DATE", async () => {
+    const blocks = await parseBlocks(SAMPLE_ICS);
     // 3 VEVENTs en el feed, 1 cancelado → 2 bloques esperados.
     expect(blocks).toHaveLength(2);
   });
 
-  it("filters out CANCELLED events", () => {
-    const blocks = parseBlocks(SAMPLE_ICS);
+  it("filters out CANCELLED events", async () => {
+    const blocks = await parseBlocks(SAMPLE_ICS);
     expect(blocks.find((b) => b.uid.includes("cancelled"))).toBeUndefined();
   });
 
-  it("returns dates as YYYY-MM-DD (UTC)", () => {
-    const blocks = parseBlocks(SAMPLE_ICS);
+  it("returns dates as YYYY-MM-DD (UTC)", async () => {
+    const blocks = await parseBlocks(SAMPLE_ICS);
     const booking = blocks.find((b) => b.uid === "booking-001@booking");
     expect(booking).toBeDefined();
     expect(booking!.start).toBe("2026-06-01");
     expect(booking!.end).toBe("2026-06-04");
   });
 
-  it("preserves summary text", () => {
-    const blocks = parseBlocks(SAMPLE_ICS);
+  it("preserves summary text", async () => {
+    const blocks = await parseBlocks(SAMPLE_ICS);
     const booking = blocks.find((b) => b.uid === "booking-001@booking");
     expect(booking!.summary).toBe("CLOSED - Not available");
   });
 
-  it("deduplicates by UID — last entry wins", () => {
+  it("deduplicates by UID — last entry wins", async () => {
     const dupe = `BEGIN:VCALENDAR
 VERSION:2.0
 BEGIN:VEVENT
@@ -79,13 +79,13 @@ DTSTART;VALUE=DATE:20260201
 DTEND;VALUE=DATE:20260203
 END:VEVENT
 END:VCALENDAR`;
-    const blocks = parseBlocks(dupe);
+    const blocks = await parseBlocks(dupe);
     expect(blocks).toHaveLength(1);
     expect(blocks[0].start).toBe("2026-02-01");
     expect(blocks[0].summary).toBe("Segunda");
   });
 
-  it("skips events without UID or start", () => {
+  it("skips events without UID or start", async () => {
     const broken = `BEGIN:VCALENDAR
 VERSION:2.0
 BEGIN:VEVENT
@@ -94,11 +94,11 @@ DTSTART;VALUE=DATE:20260301
 DTEND;VALUE=DATE:20260302
 END:VEVENT
 END:VCALENDAR`;
-    const blocks = parseBlocks(broken);
+    const blocks = await parseBlocks(broken);
     expect(blocks).toHaveLength(0);
   });
 
-  it("skips events where end <= start", () => {
+  it("skips events where end <= start", async () => {
     const invalid = `BEGIN:VCALENDAR
 VERSION:2.0
 BEGIN:VEVENT
@@ -107,11 +107,11 @@ DTSTART;VALUE=DATE:20260101
 DTEND;VALUE=DATE:20260101
 END:VEVENT
 END:VCALENDAR`;
-    const blocks = parseBlocks(invalid);
+    const blocks = await parseBlocks(invalid);
     expect(blocks).toHaveLength(0);
   });
 
-  it("defaults end to start+1 day when DTEND missing", () => {
+  it("defaults end to start+1 day when DTEND missing", async () => {
     const noEnd = `BEGIN:VCALENDAR
 VERSION:2.0
 BEGIN:VEVENT
@@ -120,13 +120,13 @@ DTSTART;VALUE=DATE:20260415
 SUMMARY:Sin DTEND
 END:VEVENT
 END:VCALENDAR`;
-    const blocks = parseBlocks(noEnd);
+    const blocks = await parseBlocks(noEnd);
     expect(blocks).toHaveLength(1);
     expect(blocks[0].start).toBe("2026-04-15");
     expect(blocks[0].end).toBe("2026-04-16");
   });
 
-  it("ignores non-VEVENT components (VTODO, VTIMEZONE)", () => {
+  it("ignores non-VEVENT components (VTODO, VTIMEZONE)", async () => {
     const mixed = `BEGIN:VCALENDAR
 VERSION:2.0
 BEGIN:VTIMEZONE
@@ -142,16 +142,16 @@ DTSTART;VALUE=DATE:20260501
 DTEND;VALUE=DATE:20260502
 END:VEVENT
 END:VCALENDAR`;
-    const blocks = parseBlocks(mixed);
+    const blocks = await parseBlocks(mixed);
     expect(blocks).toHaveLength(1);
     expect(blocks[0].uid).toBe("ev@x");
   });
 
-  it("returns empty array on calendar with no events", () => {
+  it("returns empty array on calendar with no events", async () => {
     const empty = `BEGIN:VCALENDAR
 VERSION:2.0
 END:VCALENDAR`;
-    expect(parseBlocks(empty)).toHaveLength(0);
+    expect(await parseBlocks(empty)).toHaveLength(0);
   });
 });
 

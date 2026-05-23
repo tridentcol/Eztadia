@@ -1,9 +1,13 @@
-import * as ical from "node-ical";
 import type { CalendarComponent, VEvent } from "node-ical";
 
 /**
  * Parser puro de iCalendar → bloques de fechas. Sin side effects.
  * Extraído de sync.ts para permitir unit tests sin DB/Storage.
+ *
+ * IMPORTANTE: `node-ical` se importa dinamicamente dentro de parseBlocks.
+ * Top-level import ejecuta __dirname al cargar el modulo, lo cual rompe
+ * el boot de los lambdas en Vercel runtime (ESM, sin __dirname). Lazy
+ * import asegura que solo se carga cuando alguien parsea un feed.
  */
 
 export type ParsedBlock = {
@@ -24,7 +28,8 @@ export type ParsedBlock = {
  * permite reemplazos parciales, pero para bloqueos basta con el más
  * reciente del cuerpo).
  */
-export function parseBlocks(text: string): ParsedBlock[] {
+export async function parseBlocks(text: string): Promise<ParsedBlock[]> {
+  const ical = await import("node-ical");
   const parsed = ical.sync.parseICS(text);
   const out: ParsedBlock[] = [];
   const seen = new Set<string>();

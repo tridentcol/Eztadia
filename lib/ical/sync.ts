@@ -59,7 +59,7 @@ export async function syncIcalFeed(feedId: string): Promise<SyncOutcome> {
 
   try {
     const text = await fetchIcal(feed.url);
-    const blocks = parseBlocks(text);
+    const blocks = await parseBlocks(text);
 
     const uids = blocks.map((b) => b.uid);
 
