@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { formatCOP } from "@/lib/format";
@@ -12,8 +13,41 @@ import { IconCopy, IconArrowRight } from "./icons";
 import { IconWhatsApp } from "@/components/dashboard/icons";
 
 export function PaySectionManual({ hold }: { hold: BookingHold }) {
+  const router = useRouter();
   const bank: BankAccount = CASA_MARINA_BANK;
-  const [hasFile, setHasFile] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const hasFile = !!file;
+
+  async function submitProof() {
+    if (!file) return;
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch(`/api/public/payment-proof/${hold.id}`, {
+        method: "POST",
+        body: fd,
+      });
+      const data = (await res.json()) as { ok?: boolean; error?: string; message?: string };
+      if (!res.ok || !data.ok) {
+        setUploadError(
+          data.message ??
+            (data.error === "too_large"
+              ? "El archivo supera el limite de 10 MB."
+              : "No pudimos subir el comprobante. Intenta de nuevo."),
+        );
+        return;
+      }
+      router.push(`/p/${hold.property.slug}/booking/${hold.id}/status`);
+    } catch {
+      setUploadError("Hubo un problema de conexion. Intenta de nuevo.");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function copyAll() {
     const text = [
@@ -91,16 +125,25 @@ export function PaySectionManual({ hold }: { hold: BookingHold }) {
         </button>
       </section>
 
-      <Dropzone onFile={(f) => setHasFile(!!f)} />
+      <Dropzone onFile={(f) => setFile(f)} />
 
       <button
         type="button"
-        disabled={!hasFile}
+        disabled={!hasFile || uploading}
+        onClick={submitProof}
         className="mt-[18px] w-full h-14 rounded-[14px] bg-sage text-cream text-[15px] font-medium inline-flex items-center justify-center gap-2 hover:bg-[#4F6759] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
-        Enviar comprobante
-        {hasFile && <IconArrowRight className="w-3.5 h-3.5" />}
+        {uploading ? "Subiendo…" : "Enviar comprobante"}
+        {hasFile && !uploading && <IconArrowRight className="w-3.5 h-3.5" />}
       </button>
+      {uploadError && (
+        <p
+          role="alert"
+          className="mt-3 text-xs text-danger border border-danger/30 bg-danger/5 rounded-md px-3 py-2"
+        >
+          {uploadError}
+        </p>
+      )}
 
       <p className="mt-[18px] text-center text-[13px] text-ink-soft max-w-[44ch] mx-auto leading-[1.55]">
         Confirmaremos tu reserva en menos de 24 horas. Recibirás un WhatsApp y un email cuando esté lista. Mientras, mantenemos tu habitación reservada.

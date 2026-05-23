@@ -1,15 +1,28 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import {
+  getCurrentProfile,
+  getFirstAccessibleProperty,
+} from "@/lib/auth/session";
+import { getWompiConfigForUI } from "@/lib/db/mutations/wompi";
 import { PropertyTabs } from "@/components/calendar/PropertyTabs";
 import { WompiConfigForm } from "@/components/integrations/WompiConfigForm";
-import { getIntegrations } from "@/lib/integrations";
 
 export const metadata: Metadata = {
-  title: "Wompi · Configuración — Casa Marina",
+  title: "Wompi · Configuración — Eztadia",
 };
 
-export default function WompiConfigPage() {
-  const data = getIntegrations().wompi;
+export default async function WompiConfigPage() {
+  const profile = await getCurrentProfile();
+  if (!profile) redirect("/login");
+
+  const propertyId = await getFirstAccessibleProperty();
+  if (!propertyId) redirect("/onboarding");
+
+  const cfg = await getWompiConfigForUI(propertyId);
+  const isConnected = !!(cfg?.public_key && cfg.hasPrivateKey);
+  const webhookUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/api/webhooks/wompi`;
 
   return (
     <>
@@ -39,7 +52,7 @@ export default function WompiConfigPage() {
               <h1 className="font-serif italic font-medium text-[28px] text-ink m-0 tracking-[-0.02em]">
                 Configuración
               </h1>
-              {data.status === "connected" && (
+              {isConnected && (
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-medium uppercase tracking-[0.08em] bg-sage-tint text-sage border border-[rgba(92,117,103,0.18)]">
                   <span aria-hidden className="w-1.5 h-1.5 rounded-full bg-sage" />
                   Conectada
@@ -52,7 +65,20 @@ export default function WompiConfigPage() {
           </div>
         </header>
 
-        <WompiConfigForm />
+        <WompiConfigForm
+          propertyId={propertyId}
+          initial={
+            cfg
+              ? {
+                  publicKey: cfg.public_key ?? "",
+                  isTestMode: cfg.is_test_mode,
+                  hasPrivateKey: cfg.hasPrivateKey,
+                  hasEventsSecret: cfg.hasEventsSecret,
+                }
+              : null
+          }
+          webhookUrl={webhookUrl}
+        />
       </main>
     </>
   );

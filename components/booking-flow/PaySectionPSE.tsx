@@ -3,7 +3,7 @@ import Link from "next/link";
 import { formatCOP } from "@/lib/format";
 import type { BookingHold } from "@/lib/booking-flow";
 import { Countdown } from "./Countdown";
-import { PSEBadge } from "./icons";
+import { PSEButton } from "./PSEButton";
 import { IconWhatsApp } from "@/components/dashboard/icons";
 
 export function PaySectionPSE({ hold }: { hold: BookingHold }) {
@@ -51,13 +51,7 @@ export function PaySectionPSE({ hold }: { hold: BookingHold }) {
         </span>
       </div>
 
-      <button
-        type="button"
-        className="w-full h-16 bg-sage text-cream rounded-[16px] mt-10 inline-flex items-center justify-center gap-3 font-serif font-medium text-[19px] tracking-[-0.01em] hover:bg-[#4F6759] transition-colors"
-      >
-        <PSEBadge variant="white" />
-        Pagar ahora con PSE
-      </button>
+      <PSEButton holdId={hold.id} slug={hold.property.slug} />
 
       <p className="mt-[18px] text-center text-[13px] text-ink-muted max-w-[44ch] mx-auto leading-[1.55]">
         Serás redirigido a <strong className="text-ink-soft font-medium">Wompi</strong>, el sistema de pago seguro autorizado en Colombia. Tu reserva se confirma automáticamente al completar el pago.

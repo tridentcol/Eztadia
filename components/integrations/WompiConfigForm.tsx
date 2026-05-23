@@ -10,6 +10,10 @@ import {
 } from "@/components/property-settings/primitives";
 import { SaveBar } from "@/components/property-settings/SaveBar";
 import { IconEye, IconEyeSlash } from "@/components/auth/icons";
+import {
+  saveWompiConfigAction,
+  removeWompiConfigAction,
+} from "@/app/actions/wompi";
 
 const schema = z.object({
   environment: z.enum(["sandbox", "production"]),
@@ -20,36 +24,90 @@ const schema = z.object({
 
 type Values = z.infer<typeof schema>;
 
-const DEMO_DEFAULTS: Values = {
-  environment: "production",
-  publicKey: "pub_prod_kKj2N8Mq3RsT4uVw5xYz",
-  privateKey: "prv_prod_aBcDeFgHiJkLmNoPqRsTuVwXyZ",
-  eventsSecret: "evt_prod_3sCr3tWh00ksH1y8",
+export type WompiConfigInitial = {
+  publicKey: string;
+  isTestMode: boolean;
+  hasPrivateKey: boolean;
+  hasEventsSecret: boolean;
 };
 
-export function WompiConfigForm() {
+export function WompiConfigForm({
+  propertyId,
+  initial,
+  webhookUrl,
+}: {
+  propertyId: string;
+  initial: WompiConfigInitial | null;
+  webhookUrl: string;
+}) {
+  // Private key + events secret no se descifran al servidor (only en server-side
+  // route handlers). En la UI los mostramos como placeholder "•••• guardado" si
+  // ya hay valor; el usuario los re-tipea para cambiar.
   const form = useForm<Values>({
     resolver: zodResolver(schema),
-    defaultValues: DEMO_DEFAULTS,
+    defaultValues: {
+      environment: initial?.isTestMode ? "sandbox" : "production",
+      publicKey: initial?.publicKey ?? "",
+      privateKey: "",
+      eventsSecret: "",
+    },
   });
-  const { register, control, formState } = form;
+  const { register, control, formState, setError } = form;
   const { errors } = formState;
+  const [saving, setSaving] = useState(false);
+  const [saveBanner, setSaveBanner] = useState<string | null>(null);
+  const [removing, setRemoving] = useState(false);
 
-  const [testState, setTestState] = useState<
-    | { kind: "idle" }
-    | { kind: "loading" }
-    | { kind: "success"; latencyMs: number }
-    | { kind: "error"; message: string }
-  >({ kind: "success", latencyMs: 187 });
-
-  async function testConnection() {
-    setTestState({ kind: "loading" });
-    await new Promise((r) => setTimeout(r, 500));
-    setTestState({ kind: "success", latencyMs: 187 });
+  async function onSave(v: Values) {
+    setSaving(true);
+    setSaveBanner(null);
+    try {
+      // Si el user dejo private/events vacios y ya hay valores guardados,
+      // no podemos enviarlos (Zod requiere min 8). Forzamos a que vuelva
+      // a pegarlos cuando guardan.
+      if (!v.privateKey || !v.eventsSecret) {
+        setError("privateKey", {
+          message: !v.privateKey ? "Pega de nuevo la private key para guardar." : undefined,
+        });
+        setError("eventsSecret", {
+          message: !v.eventsSecret ? "Pega de nuevo el events secret para guardar." : undefined,
+        });
+        return;
+      }
+      const res = await saveWompiConfigAction({
+        propertyId,
+        publicKey: v.publicKey,
+        privateKey: v.privateKey,
+        eventsSecret: v.eventsSecret,
+        isTestMode: v.environment === "sandbox",
+      });
+      if (!res.ok) {
+        setSaveBanner(res.error);
+        return;
+      }
+      setSaveBanner("Guardado.");
+      // Limpia campos secretos para no dejarlos en memoria del DOM
+      form.reset({ ...v, privateKey: "", eventsSecret: "" });
+    } finally {
+      setSaving(false);
+    }
   }
 
-  async function onSave(_v: Values) {
-    await new Promise((r) => setTimeout(r, 250));
+  async function onRemove() {
+    if (!confirm("¿Eliminar la configuracion de Wompi? El flow PSE dejara de funcionar.")) return;
+    setRemoving(true);
+    setSaveBanner(null);
+    try {
+      const res = await removeWompiConfigAction({ propertyId });
+      if (!res.ok) {
+        setSaveBanner(res.error);
+        return;
+      }
+      setSaveBanner("Eliminada.");
+      form.reset({ environment: "production", publicKey: "", privateKey: "", eventsSecret: "" });
+    } finally {
+      setRemoving(false);
+    }
   }
 
   return (
@@ -90,69 +148,50 @@ export function WompiConfigForm() {
             {...register("publicKey")}
             className="font-mono text-[14px] tracking-[-0.01em]"
             autoComplete="off"
+            placeholder="pub_prod_…"
           />
         </FieldShell>
 
         <SecretInput
           label="Private key"
           error={errors.privateKey?.message}
+          placeholder={initial?.hasPrivateKey ? "•••• guardado (re-pegar para cambiar)" : "prv_prod_…"}
           {...register("privateKey")}
         />
         <SecretInput
           label="Events secret"
           subtitle="para webhooks"
           error={errors.eventsSecret?.message}
+          placeholder={initial?.hasEventsSecret ? "•••• guardado (re-pegar para cambiar)" : "evt_prod_…"}
           {...register("eventsSecret")}
         />
 
-        <button
-          type="button"
-          onClick={testConnection}
-          disabled={testState.kind === "loading"}
-          className="mt-1 inline-flex items-center gap-2 h-10 px-[18px] rounded-xl bg-transparent text-sage border border-sage text-sm font-medium hover:bg-sage-tint disabled:opacity-60 transition-colors"
-        >
-          <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-            <path d="M22 4 12 14.01l-3-3" />
-          </svg>
-          {testState.kind === "loading" ? "Probando…" : "Probar conexión"}
-        </button>
+        {initial && (
+          <button
+            type="button"
+            onClick={onRemove}
+            disabled={removing}
+            className="mt-4 inline-flex items-center gap-2 h-9 px-3.5 rounded-[10px] bg-transparent text-danger border border-danger/40 text-[13px] font-medium hover:bg-danger/5 disabled:opacity-60 transition-colors"
+          >
+            {removing ? "Eliminando…" : "Eliminar configuración"}
+          </button>
+        )}
 
-        {testState.kind === "success" && (
+        {saveBanner && (
           <div
             role="status"
             className="flex gap-2.5 px-4 py-3 rounded-[10px] mt-3 text-sm leading-[1.45] text-ink bg-sage-tint border-l-[3px] border-sage"
           >
-            <svg className="w-4 h-4 text-sage shrink-0 mt-[2px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-              <circle cx={12} cy={12} r={9} />
-              <path d="M9 12l2 2 4-4" />
-            </svg>
-            <span>
-              Conexión exitosa. Wompi respondió en{" "}
-              <span className="oldstyle">{testState.latencyMs}</span> ms.
-            </span>
-          </div>
-        )}
-        {testState.kind === "error" && (
-          <div
-            role="alert"
-            className="flex gap-2.5 px-4 py-3 rounded-[10px] mt-3 text-sm leading-[1.45] text-ink bg-[rgba(199,111,76,0.12)] border-l-[3px] border-clay"
-          >
-            <svg className="w-4 h-4 text-clay shrink-0 mt-[2px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
-              <circle cx={12} cy={12} r={10} />
-              <path d="M12 8v4" />
-              <path d="M12 16h.01" />
-            </svg>
-            <span>{testState.message}</span>
+            {saveBanner}
           </div>
         )}
       </section>
 
       <section className="mt-9">
-        <WebhookInfoBlock />
+        <WebhookInfoBlock url={webhookUrl} />
       </section>
 
-      <SaveBar form={form} onSave={onSave} />
+      <SaveBar form={form} onSave={onSave} saving={saving} />
     </>
   );
 }
@@ -232,9 +271,8 @@ const SecretInput = forwardRef<HTMLInputElement, SecretProps>(function SecretInp
   );
 });
 
-function WebhookInfoBlock() {
+function WebhookInfoBlock({ url }: { url: string }) {
   const [copied, setCopied] = useState(false);
-  const url = "https://eztadia.com/api/webhooks/wompi/casa-marina";
   async function copy() {
     try {
       await navigator.clipboard.writeText(url);
