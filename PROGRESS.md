@@ -1,158 +1,174 @@
 # Eztadia — Progress Log
 
-> Última actualización: 2026-05-23 por sesión Claude Code #5 (Phase D segunda ola — D3+D4+D8+D9+D10+D11+D12 + limpieza de deuda)
-> Branch: `main`  ·  Último commit (pre-sesión 5): `2a4c4a1`
-> Phase activa: **D · Pantallas restantes + multi-property + i18n** — D1-D13 ✅ (excepto D14 que se decidió como cookie+helper, NO refactor URLs)
+> Última actualización: 2026-05-23 por sesión Claude Code #6 (Limpieza de deuda crítica + admin pages + CSV exports + RLS coverage)
+> Branch: `main`  ·  Último commit (pre-sesión 6): `4a36475`
+> Phase activa: **Phase D cerrada en sesión 5.** Sesión 6 = limpieza transversal de deuda heredada.
 
 ## 📍 Estado actual
 
-**Phase:** D · Pantallas restantes + multi-property + i18n.
-**Último step completado:** D10 `/admin/webhooks` + webhook_logs migration.
-**Phase D coverage:** todo lo que se puede sin bloqueos. Quedan **D15-D19 (next-intl)** y **D20 (plan/facturación)** — ambos diferidos deliberadamente.
+**Phase:** D cerrada (en lo implementable sin bloqueos externos). Phase E disponible.
+**Último step completado:** Limpieza de deuda crítica + admin pages wire-up + CSV exports + RLS coverage adicional.
+**Coverage:** typecheck ✅ · build ✅ (31 rutas) · tests ✅ **25/25** (era 13).
 
-**Bloqueado por:** Nada hard-blocks. Wompi sandbox creds sigue pendiente para smoke live PSE. Vercel preview deploy pendiente.
+**Bloqueado por:** Nada hard-blocks. Wompi sandbox creds y Vercel deploy siguen pendientes.
 
 ## ✅ Steps completados
 
-Phase B (sesión 2): B1–B18 (ver historial PROGRESS sesión 2)
+Phase B (sesión 2): B1–B18
 Phase C (sesión 3): C1–C6 + hardening
 Phase D primera ola (sesión 4): D1, D2, D5, D6, D7, D13
+Phase D segunda ola (sesión 5): D3, D4, D8, D9, D10, D11, D12
 
-**Phase D segunda ola (sesión 5):**
-- [x] D4 `/dashboard/reports` — ocupación/ADR/RevPAR, bar chart SVG, breakdown room_type+payment_method
-- [x] D12 detalle integraciones — WhatsApp config (encrypted token + recent messages) + iCal feeds CRUD + outgoing secret rotation
-- [x] D9 `/admin/whatsapp` — log cross-tenant + filtros direction/status
-- [x] D8 `/admin/emails` — log cross-tenant + filtros status/template
-- [x] D11 `/admin/errors` — Sentry placeholder + privacy disclosure
-- [x] D3 `/dashboard/messages` — conversaciones agrupadas + thread con auto-scroll (envío diferido a E2)
-- [x] D10 `/admin/webhooks` — migration webhook_logs + helper logWebhook + Wompi instrumentado + admin page con drawer JSON detail + tests RLS
+**Sesión 6 — limpieza transversal:**
 
-**Limpieza de deuda heredada (sesión 5):**
-- [x] Dashboard home wired a queries reales (WeekPulse + AttentionList + UpcomingCheckIns)
-- [x] `contact_phone` backend ready en updatePropertySchema + updatePropertyAction
-- [x] Badge demo `3` quitado del sidebar admin /errores
-- [x] Link a /admin/webhooks restaurado tras crear página real
-- [x] `designs/package.json` ocioso eliminado (workspace huérfano)
-- [x] Verificado: pills demo vs DB enum — ambos paths funcionan via adapter, no es bug
+- [x] Property-settings 8 tabs wire-up real (Phase B6 redo pendiente)
+  - General/Identity/Amenities/Schedules/Policies/Advanced → `updatePropertyAction`
+  - Fiscal + Photos → disclaimer "Próximamente" honesto (sin SaveBar fake)
+  - Botón "Desactivar propiedad" wireado a `is_active`
+  - Modal "Eliminar" → "contáctanos por WhatsApp" (no fake delete)
+- [x] "Nueva reserva manual" con drawer + action real (createManualBookingAction)
+- [x] `/admin/users` wireado a query real cross-tenant (profiles + property_users + login_events + adapter)
+- [x] `/admin/page.tsx` overview wireado a DB real (getAdminOverview con 14 queries paralelas)
+- [x] CSV export utility (`lib/csv.ts` con RFC 4180 + BOM UTF-8 + download helper)
+- [x] Reports → botón Exportar CSV (descarga bookings del periodo)
+- [x] `/admin/audit-logs` → paginación cursor-based ("Cargar 200 más") + Exportar CSV (cap 10k)
+- [x] Tests RLS para whatsapp_configs, whatsapp_messages, ical_feeds, email_logs (12 tests nuevos)
+- [x] Dashboard owner real (cover_image_url de DB + initials calculados + placeholder.svg fallback)
+- [x] Limpieza de demo data muerta (DEMO_SNAPSHOT, getOwnerSnapshot, getAdminUsers, getRevenueSnapshot, getGlobalKpis, etc.)
 
 ## 🎯 Próximo step — opciones
 
-**Phase D residual** (todos diferidos por buenas razones):
-- **D15-D19 next-intl** — refactor masivo. Recomendado solo cuando feature set esté frozen. Mover `app/*` → `app/[locale]/*`, JSON messages, useTranslations en todo el copy.
-- **D20 Plan + facturación tab** — bloqueado por decisión de pricing real del usuario.
-
-**Phase E (External integrations reales)** está disponible:
+**Phase E (External integrations reales):**
 - E1 Wompi sandbox real (smoke live PSE) — needs sandbox creds
 - E2 WhatsApp Cloud API — needs Meta business setup
-- E3 iCal sync (node-ical parser + cron) — implementable sin creds externos (la infra de feed config ya está)
+- **E3 iCal sync (node-ical parser + cron)** — implementable sin creds externos (la infra de feed config ya está) ← RECOMENDADO
 - E4 Resend (email_logs ya está listo para recibir inserts)
 - E5 Turnstile en login/signup/booking
-- E6 Supabase Storage buckets
+- E6 Supabase Storage buckets (desbloquea Photos tab + payment proof uploads)
 
-**Deuda heredada concreta**:
-- Property-settings 8 tabs siguen demo (`onSave = setTimeout(250)`) — Phase B6 redo
-- "Nueva reserva manual" sin onClick en /dashboard/bookings
-- `unreadMessages` sigue demo (no flag de unread en schema)
+**Phase D residual** (diferidos por buenas razones):
+- D15-D19 next-intl — refactor masivo. Recomendado solo cuando feature set frozen.
+- D20 Plan + facturación tab — bloqueado por decisión de pricing.
+
+**Deuda residual menor**:
+- `/admin/users` carga 50 detalles upfront (>50 sería fetch on-demand)
+- Reports sin export CSV por canal `source` (Phase E3 traerá data más rica)
+- Messages sin paginación (top 500)
+- Property-settings: Photos upload real (Phase E6)
+- Property-settings: Fiscal datos sin destino (módulo facturación electrónica futuro)
+- Borrado real de propiedad (cascade SQL + soft-delete strategy)
+- `wompi_configs.is_active` column no existe (migration pequeña)
+- `refunded` no existe en BookingStatus enum (migration pequeña)
+- Mini-cal de precio efectivo por día en `/dashboard/pricing` (D2.5 futuro)
+- Sin acciones admin sobre bookings/properties (cancelar, suspend) — read-only
+- Sidebar muestra "0 propiedades vinculadas" mid-revocation (race condition defensible)
+- `unreadMessages` hardcoded 0 (necesita flag de unread en `whatsapp_messages` — Phase E2)
 
 ## 🧾 Decisiones tomadas que NO están en el blueprint
 
-### Sesiones 1-4 — ver PROGRESS commits anteriores
+### Sesiones 1-5 — ver PROGRESS commits anteriores
 
-### Sesión 5 (2026-05-23) — Phase D segunda ola + limpieza
+### Sesión 6 (2026-05-23) — Limpieza transversal
 
-**D4 — `/dashboard/reports`**
-- **Atribución por check-in date** (booking-date method), no stay-night pro-rateo. Estándar hotelero + queries simples. Documentado en footer "Convención:". Si se necesita stay-night después se reescribe en SQL con `generate_series`.
-- **Estados realizados = `confirmed` + `completed`**. `cancelled`/`no_show`/`pending_payment` excluidos.
-- **SVG bar chart inline** (no FullCalendar, no recharts) — viewBox 800×220, gold para mes actual, sage 100% para max revenue, sage 55% opacity para el resto. Tooltip via `<title>`.
-- **`nights` nullable handled** con `?? 0` — DB es nullable pero en prod es auto-generated.
-- **PeriodPicker = `<Link>`s server-rendered** — no useState. Cambia URL → re-render. Cero JS extra.
-- **Range half-open** `from <= check_in < to`. Label humano calcula `to-1d`.
-- 5 presets: this-month, last-month, last-30, last-90, ytd.
+**Property-settings wire-up**
+- **`booking_policy` jsonb shape estructurado** (cancellation/pets/children/smoking/events/schedules/advanced) pero schema con `.passthrough()` — agregar keys nuevas no requiere migration.
+- **Merge shallow del `booking_policy` se hace server-side** en `updatePropertyAction` (lee actual + mergea top-level keys + escribe). No depende del client. Más robusto.
+- **"Eliminar permanentemente" intencionalmente NO implementado** — requiere cascade SQL function + soft-delete UX defense. Modal ofrece "contáctanos por WhatsApp" como flow honesto.
+- **Photos + Fiscal con disclaimer "Próximamente"** en vez de SaveBar fake. Photos espera Storage (E6); Fiscal espera módulo facturación electrónica.
+- **`useSettingsSave()` hook común** para los 6 tabs wireados — `updatePropertyAction` + `router.refresh()` + error state.
 
-**D12 — detalle integraciones**
-- **WhatsApp solo-owner** (RLS `whatsapp_configs_owner_write`). iCal manager+. Tres niveles distintos por sensitividad.
-- **Access token preservation pattern**: si user no re-pega, no se sobrescribe. Mutation acepta `null` → skip encrypt + skip update de esa columna en upsert.
-- **iCal secret rotation requiere confirm dialog** — destructive UX, no silencioso (rota URLs ya pegadas en Booking/Airbnb).
-- **Outgoing URL viene de `properties.ical_export_secret`**, no de `ical_feeds`. `ical_feeds direction=outbound` son para casos custom (publicar a URL externa de tercero), opcional.
-- **`base64url` 18 bytes** para el secret — 24 chars URL-safe, ~108 bits entropía.
-- **Index cards mantienen demo data para feature copy**, solo `status` viene de DB. Wire-up profundo es deuda.
+**Nueva reserva manual**
+- **No pasa por holds** — staff ya cerró la confirmación. Crea booking directo con `status=confirmed, source=manual`.
+- **Check disponibilidad previo** via `check_availability` RPC para no doble-bookear.
+- **Total auto-sugerido** (`base_price_cents × nights`) pero editable. El staff puede sobrescribir si negoció descuento.
+- **Audit log redacta email + phone** (no se loggea PII en `diff`).
+- **Removí botón "Exportar" no-funcional** del header de bookings — era placeholder silencioso. Cuando se implemente export real, vuelve.
 
-**D8/D9/D11 — admin logs**
-- **Filtros client-side** (memoria) consistente con audit-logs. Cap 300 rows.
-- **Sin detail drawer** en WhatsApp/Emails — body cabe en row editorial.
-- **Errors page super-light** — no caché, no resumen 24h. Sentry es fuente de verdad; replicar UI = superficie de ataque.
-- **DSN check sin parsear** — solo "configurado/no" sin extraer org/project. Parseo de DSN brittle.
-- **Property links a `/p/{slug}`** — admin viewer quiere "es esta propiedad" rápido, no editarla.
+**/admin/users wire-up**
+- **Role inference**: `property_users.role` gana sobre `profiles.role` cuando hay link — refleja el rol *operativo*, no el flag global.
+- **Status `pending`/`active`**: derivado de `invitation_accepted_at`. "Suspended" diferido (no hay ban field — cuando agreguemos `auth.users.banned_until`, lo mapeamos).
+- **Last seen real** desde `login_events` (event_type=login_success más reciente).
+- **50 detalles pre-cargados** (cabe en una página normal). Para >50, fetch on-demand sería el next step.
+- **`formatRelativeEs()` helper** con escala minutos→horas→días→meses→años, "hace un momento" para <60s, "nunca" si null.
+- **Device parser de User-Agent** simple: Desktop/Mobile/Tablet + Chrome/Safari/Firefox/Edge. No queremos depender de UA library.
 
-**D3 — `/dashboard/messages`**
-- **Agrupamiento por counterpart phone**, no por (counterpart, booking) — un huésped que reserva varias veces ve UN solo hilo.
-- **`recentInbound = inbound en últimas 48h`** como proxy de unread. No hay flag de lectura en schema; suficiente para "atención merecida".
-- **Compose bar disabled visual** en vez de oculto — comunica feature futura.
-- **CSS-only mobile responsive** (hidden md:block) — URL es la fuente de verdad.
-- **`/^\+\d{8,15}$/` validation** en searchParam — defense-in-depth contra inyección en `.or()`.
-- **Cap 500 mensajes** total + 500 thread — suficiente para propiedad boutique.
+**/admin/page.tsx wire-up**
+- **`getAdminOverview()` single entrypoint** con 14 queries paralelas (counts + aggregates + audit + top + attention). Una sola round-trip de hits.
+- **Atribución revenue por `created_at`** del booking (no por check_in). Lectura natural de super_admin = "ingresos *registrados* este mes".
+- **Top properties**: agrupado client-side desde el query con JOIN. `confirmed + completed` solo. Top 5 por revenue desc.
+- **Attention threshold 14 días** grace para no flagear propiedades en onboarding como "sin reservas".
+- **Eventos del feed** vienen de `audit_logs` cross-tenant via admin client. Mapeados a `EventKind` por `resource_type` (booking→reserva, property→usuario, etc.) o `actor_type=webhook`.
+- **Trend bookings real** vs mes anterior (count delta + %). Si prev=0, fallback a "X este mes".
 
-**D10 — webhook_logs**
-- **`status` como TEXT no enum** — flexibilidad para agregar rechazos sin migration.
-- **payload guarda primer 200 chars del raw si no parsea** — debugging sin sobrecargar DB.
-- **Best-effort logging** — `logWebhook` tira y come error. Wompi reintenta si nuestra response no llega; preferimos responder rápido que persistir un log.
-- **HMAC tri-estado** — `signature_valid` es `null` si provider no firma o test mode. `true`/`false` cuando hubo verificación real.
-- **Defense in depth + member visibility** — owner/manager/reception ven sus propios webhooks (útil para debugging). Cross-tenant solo super_admin via admin client.
-- **`finish()` helper interno** en route handler — 8 exit paths, todos pasan por single point que escribe log + retorna NextResponse.
+**CSV exports**
+- **`lib/csv.ts` reusable**: `toCsv()` con RFC 4180 (quote+escape `"` cuando hay coma/quote/newline), CRLF terminators, BOM UTF-8 al inicio para que Excel detecte UTF-8 sin "Importar texto".
+- **Reports CSV** client-side: server pasa bookings pre-cargadas al `<ExportCsvButton/>`. Filename: `reportes-{from}_{to}.csv`. 17 columnas (incluye huésped/contacto/total/canal/método).
+- **Audit-logs CSV server-side**: Server Action `exportAuditLogsAction` retorna string CSV (cap 10k filas hard). Truncated flag en respuesta avisa al user si hubo cap.
+- **Paginación cursor-based** en audit-logs: cursor = `created_at < X`. Mantenemos filtros client-side (search/actor/resource) — el server query trae más data, los filtros UI siguen aplicándose sobre lo cargado.
 
-**Limpieza de deuda — decisiones**
-- **Week-to-date anclado a lunes** (no domingo) — convención hotelera + Colombia. `(getUTCDay() + 6) % 7` shift.
-- **Diff de ocupación en `pp` (puntos porcentuales)**, no porcentaje relativo — un 50%→60% es "↑ 10 pp", no "↑ 20%". Más honesto.
-- **Attention items: checkin-today antes que pending-payment** — orden lo prioriza visualmente.
-- **`hoursAway: 0` hardcodeado** porque no rastreamos hora real de check-in en `bookings` (solo property-level default).
-- **`contactPhone` backend ready sin tocar UI demo** — los 8 tabs de property-settings siguen `setTimeout(250)`, wire-up real es Phase B6 territory. Cuando se haga, contactPhone funciona out-of-the-box.
-- **Pills demo vs DB enum verificado, no unificado** — ambos paths funcionan via adapter; unificación = refactor cosmético sin forcing function.
+**Tests RLS adicionales (+12)**
+- **whatsapp_configs** (3 tests): SELECT propio, NO SELECT cross-tenant, NO UPDATE cross-tenant. Confirma policy `owner_write` + `owner_select`.
+- **whatsapp_messages** (3 tests): SELECT propio, NO SELECT cross, NO INSERT cross. Confirma `member_select` + `member_insert`.
+- **ical_feeds** (3 tests): SELECT propio, NO SELECT cross, NO DELETE cross. Confirma `member_select` + `manager_write`.
+- **email_logs** (3 tests): SELECT propio, NO SELECT cross, NO INSERT (no hay write policy — solo service_role). Confirma `member_select`.
+- Cleanup en `afterAll` incluye nuevas tablas (whatsapp_messages → whatsapp_configs → ical_feeds → email_logs → bookings → ...) en orden de FK.
 
-## ⚠️ Lo que NO se hizo intencionalmente (deuda conocida)
+**Dashboard owner real**
+- **`property.photo`** ahora viene de `properties.cover_image_url`. Si NULL → `/placeholder.svg` (ya existe en `public/`). Antes era Unsplash hardcoded.
+- **`owner.initials`** calculado de `full_name` o email. No demo.
+- **`unreadMessages: 0`** hasta que tengamos flag en `whatsapp_messages` (Phase E2 schema decision). Antes era `3` demo misleading.
+- **Layout pasa `attention/pulse/upcoming: []`** porque solo la home los muestra. El shell solo necesita owner + property + unreadMessages.
+- **Eliminados `DEMO_SNAPSHOT` + `getOwnerSnapshot()`** de `lib/dashboard.ts` — tipos y helpers (`greetingFor`, `subtitleFor`) se mantienen.
 
-### De sesiones anteriores
+**Limpieza de demo muerta**
+- `lib/admin.ts`: eliminadas funciones demo `getGlobalKpis`, `getRevenueSnapshot`, `getRecentEvents`, `getTopProperties`, `getAttentionProperties`, `getAdminUsers`, `getAdminUserDetail`, `DETAILS`. Quedan solo tipos + `ROLE_LABEL`/`STATUS_LABEL`.
+- `lib/property-settings.ts`: eliminado `getPropertySettings()` (no se usaba tras wire-up).
+- `lib/dashboard.ts`: eliminados `DEMO_SNAPSHOT` + `getOwnerSnapshot()`.
 
-1. ~~UI para capturar `properties.contact_phone`~~ → **Parcialmente resuelto:** schema + action backend ready. UI sigue bloqueada por property-settings demo wire-up.
-2. UI para "Nueva reserva manual" desde dashboard — botón sin onClick.
-3. Wompi sandbox creds — pendiente smoke live HTTP PSE.
-4. Realtime live test 2-tabs no corrido.
-5. Vercel deploy no hecho aún (build pasa).
-6. `messages: []` en BookingDetail (Phase E2 WhatsApp).
-7. `wompi_configs.is_active` column ausente.
-8. `refunded` no existe en BookingStatus enum.
-9. Mini-cal de precio efectivo por día en `/dashboard/pricing` — futuro D2.5.
-10. Sin acción admin sobre bookings/properties (cancelar, suspend) — read-only.
-11. ~~Dos sets de pills coexistiendo~~ → **Verificado, no es bug.** Ambos funcionan via adapter.
-12. 5 rutas dashboard dynamic (cookie multi-property en layout).
-13. `/admin/audit-logs` sin paginación (limit 300).
-14. `/admin/audit-logs` sin export CSV.
-15. Sidebar muestra "0 propiedades vinculadas" mid-revocation.
-16. `snapshot.owner/property` siguen demo (override parcial); ~~`pulse/attention/upcoming` demo~~ → **Resuelto en sesión 5.** `unreadMessages` sigue demo.
-17. Phase A `/admin/users` + `/admin/page.tsx` siguen demo data.
-18. PostgREST `inet` type mapea a `unknown`, cast `r.ip as string | null`.
+## ⚠️ Lo que NO se hizo intencionalmente (deuda conocida actualizada)
 
-### Nuevas de sesión 5
+### Resueltas en sesión 6
+- ~~Property-settings 8 tabs siguen demo~~ ✅ 6 wireados + 2 con disclaimer honesto
+- ~~"Nueva reserva manual" sin onClick~~ ✅ Drawer + action implementados
+- ~~Phase A `/admin/users` + `/admin/page.tsx` siguen demo data~~ ✅ Ambos wire-up real
+- ~~`snapshot.owner/property/photo` demo en dashboard~~ ✅ Real
+- ~~`/admin/audit-logs` sin paginación~~ ✅ Cursor-based "Cargar 200 más"
+- ~~`/admin/audit-logs` sin export CSV~~ ✅ Server Action con cap 10k
+- ~~Reports sin export CSV~~ ✅ Client-side download de bookings del periodo
+- ~~Sin tests RLS específicos para whatsapp_configs/ical_feeds/email_logs/whatsapp_messages~~ ✅ 12 tests nuevos
 
-19. **Property-settings 8 tabs siguen demo** (`onSave = setTimeout(250)` sin save real). Phase B6 redo necesario para que cualquier campo persista. `contactPhone` backend está ready, solo necesita UI honesta.
-20. **`unreadMessages` sigue demo** — no hay flag de unread en `whatsapp_messages`. Schema decision para Phase E2.
-21. **Webhook URL de WhatsApp no se muestra en config form** — route `/api/webhooks/whatsapp` no existe (Phase E2). Cuando se cree, agregar WebhookInfoBlock similar al de Wompi.
-22. **Reports sin export CSV** (útil para contabilidad).
-23. **Reports sin breakdown por canal `source`** (direct/booking_com/airbnb/manual) — agregar con Phase E3.
-24. **Reports sin proyección/forecast** — solo histórico.
-25. **Messages sin paginación** — top 500 conversaciones + 500 mensajes por thread.
-26. **iCal config sin botón "Sincronizar ahora"** — cron real es Phase E3.
-27. **Sin tests RLS específicos para whatsapp_configs/ical_feeds/email_logs/whatsapp_messages** — webhook_logs sí tiene test (sesión 5).
-28. **WhatsAppMessagesList sin paginación** — top 20 en config page. Admin /whatsapp ya cubre histórico completo.
-29. **`response-time` metric omitido** del WeekPulse — depende de WhatsApp E2 para medir gap inbound↔outbound.
+### Pendientes (sin cambios)
+1. Wompi sandbox creds — pendiente smoke live HTTP PSE.
+2. Realtime live test 2-tabs no corrido.
+3. Vercel deploy no hecho aún (build pasa).
+4. `messages: []` en BookingDetail (Phase E2 WhatsApp).
+5. `wompi_configs.is_active` column ausente.
+6. `refunded` no existe en BookingStatus enum.
+7. Mini-cal de precio efectivo por día en `/dashboard/pricing` — futuro D2.5.
+8. Sin acción admin sobre bookings/properties (cancelar, suspend) — read-only.
+9. Sidebar muestra "0 propiedades vinculadas" mid-revocation.
+10. PostgREST `inet` type mapea a `unknown`, cast `r.ip as string | null`.
+11. **`unreadMessages` sigue hardcoded 0** — no hay flag de unread en `whatsapp_messages`. Schema decision Phase E2.
+12. **Webhook URL de WhatsApp no se muestra en config form** — route `/api/webhooks/whatsapp` no existe (Phase E2).
+13. **Reports sin breakdown por canal `source`** — agregar con Phase E3.
+14. **Reports sin proyección/forecast** — solo histórico.
+15. **Messages sin paginación** — top 500 conversaciones + 500 mensajes por thread.
+16. **iCal config sin botón "Sincronizar ahora"** — cron real es Phase E3.
+17. **WhatsAppMessagesList sin paginación** — top 20 en config page.
+18. **`response-time` metric omitido** del WeekPulse — depende de WhatsApp E2.
+19. **Photos upload real** — Phase E6 Storage.
+20. **Fiscal tab persistencia** — espera módulo facturación electrónica.
+21. **Eliminar propiedad permanentemente** — requiere cascade SQL + soft-delete strategy.
+22. **`/admin/users` carga 50 detalles upfront** — para >50, fetch on-demand sería next step.
 
 ## ❓ Preguntas abiertas para el usuario
 
-1. **Próximo step después de Phase D**: ¿Phase E (integraciones reales) o feature freeze + i18n (D15-D19)?
+1. **Próximo step**: ¿Phase E (integraciones reales — E3 iCal recomendado, self-contained) o feature freeze + i18n (D15-D19)?
 2. Wompi sandbox creds — ¿cuándo?
 3. Vercel preview deploy — ¿hacemos ahora?
 4. ¿Definir pricing real para activar D20 (Plan + facturación tab)?
 
-## 📂 Migrations aplicadas en remoto (11 totales — +1 en sesión 5)
+## 📂 Migrations aplicadas en remoto (11 totales — sin cambios en sesión 6)
 
 ```
 supabase/migrations/
@@ -166,17 +182,16 @@ supabase/migrations/
 ├── 20260523120100_hold_guest_fields.sql
 ├── 20260523120200_realtime_publication.sql
 ├── 20260523120300_properties_contact_phone.sql
-└── 20260524000000_webhook_logs.sql        ← NUEVA sesión 5
+└── 20260524000000_webhook_logs.sql
 ```
 
 ## 🧪 Tests / verificaciones corridas
 
 - ✅ `pnpm typecheck` clean tras cada feature
-- ✅ `pnpm build` final: **31 rutas generadas** (era 22 al inicio de sesión 4, 28 al inicio de sesión 5, +3 admin/* y +1 messages y +2 integraciones details y +1 reports y +1 webhooks)
-- ✅ `pnpm test` — **13/13 RLS tests passing** (era 10, +3 webhook_logs)
-- ✅ Migration aplicada via MCP — `mcp__supabase__apply_migration` + types regenerados via `mcp__supabase__generate_typescript_types`
-- ✅ Advisors check post-migration: **0 issues nuevos** del schema webhook_logs (las warnings existentes son preexistentes — SECURITY DEFINER functions, leaked password protection — Phase F)
-- ⏸️ Live browser test no corrido (necesita login interactivo — typecheck + build + RLS + advisors es la cobertura efectiva)
+- ✅ `pnpm build` final: **31 rutas generadas** (sin cambios, `/admin` ahora dinámico al traer queries reales)
+- ✅ `pnpm test` — **25/25 RLS tests passing** (era 13, +12 cobertura whatsapp_configs/whatsapp_messages/ical_feeds/email_logs)
+- ⏸️ Live browser test no corrido (necesita login interactivo — typecheck + build + RLS es la cobertura efectiva)
+- ⏸️ Live CSV export download no probado en browser real (helper testeado por typecheck)
 
 ## 🔧 Setup de entorno actual
 
@@ -194,21 +209,17 @@ supabase/migrations/
 | 2 | 2026-05-23 AM | ~4h | B1→B18 + 7 migrations + 10 tests RLS passing | Sprint completo Phase B. |
 | 3 | 2026-05-23 PM | ~4h | C1→C6 + 5 hardening commits · 3 migrations · build prod desbloqueado | Sprint Phase C + cleanup deuda. |
 | 4 | 2026-05-23 night | ~4h | D1+D2+D5+D6+D7+D13 · 5 pantallas + multi-property switcher | Sprint Phase D primera ola. |
-| 5 | 2026-05-23 night2 | ~5h | D3+D4+D8+D9+D10+D11+D12 · 7 pantallas + 1 migration + dashboard home wire-up + limpieza | Sprint Phase D segunda ola. Phase D completa en lo que se puede sin bloqueos. |
+| 5 | 2026-05-23 night2 | ~5h | D3+D4+D8+D9+D10+D11+D12 · 7 pantallas + 1 migration + dashboard home wire-up + limpieza | Sprint Phase D segunda ola. |
+| 6 | 2026-05-23 night3 | ~5h | Limpieza transversal: property-settings 8 tabs + nueva reserva manual + /admin/users + /admin overview + CSV exports + 12 RLS tests + dashboard owner real | Cierre de deuda heredada de Phase A/B/C. |
 
-## 📜 Historial de commits recientes (pre-sesión 5)
+## 📜 Historial de commits recientes (pre-sesión 6)
 
 ```
+4a36475 chore: PROGRESS.md sesion 5 (Phase D segunda ola — D3+D4+D8-D12 + limpieza)
+348896b feat(D3+D4+D8+D9+D10+D11+D12): Phase D segunda ola + limpieza
 2a4c4a1 chore: PROGRESS.md sesion 4 (Phase D primera ola — D1+D2+D5+D6+D7+D13)
 9eca1cb feat(D1-D7+D13): Phase D primera ola — 5 pantallas + multi-property switcher
 5ac1fa0 chore: PROGRESS.md sesion 3 (Phase C completa C1-C6 + hardening)
-e08265a feat: properties.contact_phone + placeholder SVG (deuda C visual)
-2a8f7ec feat: wire Confirmar/Rechazar pago en BookingDetailDrawer (C5 dashboard)
-d836a74 feat: agrega tablas calendar a publication supabase_realtime
-581ee31 feat: persist guest data en booking_holds (no mas placeholder)
-8fd7be2 fix: unblock production build (7 JSX type errors + login Suspense)
-8e9a268 feat(C1-C6): wire dashboard + Wompi + manual proof + realtime
-f31dda1 feat(C3): wire public booking flow /p/[slug]/booking/* a data real
 ```
 
-(Próximo commit END-SESSION sesión 5 cerrará Phase D segunda ola con este PROGRESS.md actualizado.)
+(Próximo commit END-SESSION sesión 6 cerrará la limpieza transversal con este PROGRESS.md actualizado.)
