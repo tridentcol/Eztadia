@@ -154,6 +154,8 @@ export function buildBookingDetail(args: {
 
   return {
     ...base,
+    bookingId: b.id,
+    paymentId: args.payment?.id,
     guestInfo: {
       document: b.guest_document_number ?? "—",
       documentType: docTypeFromDb(b.guest_document_type),

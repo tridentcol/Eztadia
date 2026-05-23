@@ -45,6 +45,11 @@ export type HistoryEvent = {
 };
 
 export type BookingDetail = BookingRow & {
+  /** Id real del booking en DB (post-B6) — opcional para mantener back-compat
+   * con el demo data flat. Si presente, el drawer puede disparar actions. */
+  bookingId?: string;
+  /** Id del payment asociado (waiting-receipt) — para confirmManualPaymentAction. */
+  paymentId?: string;
   guestInfo: {
     document: string;
     documentType: "CC" | "CE" | "Pasaporte" | "NIT";

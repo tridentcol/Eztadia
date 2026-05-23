@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import type { BookingDetail } from "@/lib/bookings";
 import { formatCOP } from "@/lib/format";
@@ -10,6 +11,8 @@ import { ArrowRight } from "@/components/icons";
 import { IconWhatsApp } from "@/components/dashboard/icons";
 import { IconArrowDownLeft, IconArrowUpRight, IconFileText, FlagCO, FlagGeneric } from "./icons";
 import { StatusPill, PayStatePill } from "./pills";
+import { confirmManualPaymentAction } from "@/app/actions/payment";
+import { cancelBookingAction } from "@/app/actions/booking";
 
 export function BookingDetailDrawer({
   detail,
@@ -275,20 +278,11 @@ function DrawerInner({ detail, onClose }: { detail: BookingDetail; onClose: () =
           </PairList>
 
           {detail.payment.state === "waiting-receipt" && (
-            <div className="flex gap-2.5 mt-5">
-              <button
-                type="button"
-                className="flex-[1.5] h-10 px-4 rounded-xl bg-terracotta text-cream text-sm font-medium hover:bg-clay transition-colors"
-              >
-                Confirmar pago
-              </button>
-              <button
-                type="button"
-                className="flex-1 h-10 px-4 rounded-xl bg-transparent text-danger border border-[rgba(168,72,60,0.25)] text-sm font-medium hover:bg-[rgba(168,72,60,0.08)] transition-colors"
-              >
-                Rechazar pago
-              </button>
-            </div>
+            <PaymentActions
+              paymentId={detail.paymentId}
+              bookingId={detail.bookingId}
+              onDone={onClose}
+            />
           )}
         </Section>
 
@@ -453,6 +447,91 @@ function DrawerSkeleton({ onClose }: { onClose: () => void }) {
           <span key={i} className="block rounded bg-linen" style={{ height: h, width: `${100 - i * 8}%` }} aria-hidden />
         ))}
       </div>
+    </>
+  );
+}
+
+/**
+ * Botones "Confirmar pago" / "Rechazar pago" para bookings con
+ * payment.state='waiting-receipt'. Wire C5.
+ *
+ * Sin paymentId (caso demo data) los botones quedan disabled — solo
+ * funcionan con detalles reales producidos por buildBookingDetail.
+ */
+function PaymentActions({
+  paymentId,
+  bookingId,
+  onDone,
+}: {
+  paymentId?: string;
+  bookingId?: string;
+  onDone: () => void;
+}) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const canAct = !!paymentId && !!bookingId;
+
+  function confirm() {
+    if (!paymentId) return;
+    setError(null);
+    startTransition(async () => {
+      const res = await confirmManualPaymentAction({ paymentId });
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      router.refresh();
+      onDone();
+    });
+  }
+
+  function reject() {
+    if (!bookingId) return;
+    if (!window.confirm("¿Rechazar el pago y cancelar la reserva?")) return;
+    setError(null);
+    startTransition(async () => {
+      const res = await cancelBookingAction({
+        bookingId,
+        reason: "Pago rechazado: comprobante no valido.",
+      });
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      router.refresh();
+      onDone();
+    });
+  }
+
+  return (
+    <>
+      <div className="flex gap-2.5 mt-5">
+        <button
+          type="button"
+          onClick={confirm}
+          disabled={!canAct || pending}
+          className="flex-[1.5] h-10 px-4 rounded-xl bg-terracotta text-cream text-sm font-medium hover:bg-clay disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          {pending ? "Procesando…" : "Confirmar pago"}
+        </button>
+        <button
+          type="button"
+          onClick={reject}
+          disabled={!canAct || pending}
+          className="flex-1 h-10 px-4 rounded-xl bg-transparent text-danger border border-[rgba(168,72,60,0.25)] text-sm font-medium hover:bg-[rgba(168,72,60,0.08)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          Rechazar pago
+        </button>
+      </div>
+      {error && (
+        <p
+          role="alert"
+          className="mt-3 text-xs text-danger border border-danger/30 bg-danger/5 rounded-md px-3 py-2"
+        >
+          {error}
+        </p>
+      )}
     </>
   );
 }
