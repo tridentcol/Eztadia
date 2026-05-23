@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import type { BookingHold, DocumentType } from "@/lib/booking-flow";
 import { DOCUMENT_LABEL } from "@/lib/booking-flow";
+import { publicCreateHoldAction } from "@/app/actions/public-booking";
 import {
   IconLock,
   IconChevronDown,
@@ -14,6 +15,15 @@ import {
   FlagCO,
   PSEBadge,
 } from "./icons";
+
+export type BookingFormContext = {
+  propertyId: string;
+  roomTypeId: string;
+  checkIn: string;   // YYYY-MM-DD
+  checkOut: string;  // YYYY-MM-DD
+  adults: number;
+  children: number;
+};
 
 const formSchema = z.object({
   fullName: z
@@ -40,7 +50,13 @@ const formSchema = z.object({
 
 export type BookingFormValues = z.infer<typeof formSchema>;
 
-export function BookingForm({ hold }: { hold: BookingHold }) {
+export function BookingForm({
+  hold,
+  context,
+}: {
+  hold: BookingHold;
+  context?: BookingFormContext;
+}) {
   const router = useRouter();
   const {
     register,
@@ -48,6 +64,7 @@ export function BookingForm({ hold }: { hold: BookingHold }) {
     control,
     watch,
     setValue,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<BookingFormValues>({
     resolver: zodResolver(formSchema),
@@ -68,9 +85,44 @@ export function BookingForm({ hold }: { hold: BookingHold }) {
   const acceptTerms = watch("acceptTerms");
 
   async function onSubmit(values: BookingFormValues) {
-    // In production: POST to /api/booking/hold, get hold token, then redirect.
-    // For demo: navigate to /pay with the chosen method as query.
-    router.push(`/p/${hold.property.slug}/booking/${hold.id}/pay?m=${values.paymentMethod}`);
+    // Sin context: fallback al comportamiento legacy (preview demo).
+    if (!context) {
+      router.push(`/p/${hold.property.slug}/booking/${hold.id}/pay?m=${values.paymentMethod}`);
+      return;
+    }
+
+    // Normaliza phone a E.164: junta prefix + digitos del input.
+    const phoneDigits = values.phone.replace(/[^\d]/g, "");
+    const guestPhone = `${values.phonePrefix}${phoneDigits}`;
+    // Mapea "manual" (UI) → "manual_transfer" (DB enum + action schema).
+    const paymentForAction: "pse" | "manual_transfer" =
+      values.paymentMethod === "pse" ? "pse" : "manual_transfer";
+    // Mapea documentType "PA" (UI) → "passport" (action schema).
+    const documentForAction: "CC" | "CE" | "passport" =
+      values.documentType === "PA" ? "passport" : values.documentType;
+
+    const payload = {
+      propertyId: context.propertyId,
+      roomTypeId: context.roomTypeId,
+      checkIn: context.checkIn,
+      checkOut: context.checkOut,
+      adults: context.adults,
+      children: context.children,
+      guestFullName: values.fullName,
+      guestEmail: values.email,
+      guestPhone,
+      guestDocumentType: documentForAction,
+      guestDocumentNumber: values.documentNumber,
+      paymentMethod: paymentForAction,
+      acceptTerms: true as const,
+    };
+
+    const res = await publicCreateHoldAction(payload);
+    if (!res.ok) {
+      setError("root", { message: res.error });
+      return;
+    }
+    router.push(`/p/${hold.property.slug}/booking/${res.data.holdId}/pay`);
   }
 
   return (
@@ -236,6 +288,15 @@ export function BookingForm({ hold }: { hold: BookingHold }) {
       </label>
       {errors.acceptTerms?.message && (
         <p className="ml-8 mt-1.5 text-xs text-danger">{errors.acceptTerms.message}</p>
+      )}
+
+      {errors.root?.message && (
+        <p
+          role="alert"
+          className="mt-6 text-xs text-danger border border-danger/30 bg-danger/5 rounded-md px-3 py-2"
+        >
+          {errors.root.message}
+        </p>
       )}
 
       <button
