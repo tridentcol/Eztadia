@@ -38,10 +38,13 @@ export default async function DashboardHome() {
   const propertyId = await getActivePropertyId();
   if (!propertyId) redirect("/onboarding");
 
-  const [property, pulse, attention, upcoming, checklist] = await Promise.all([
-    getProperty(propertyId),
+  // Cargamos property primero — getAttentionItems necesita check_in_time
+  // para computar hoursAway + checkInTimeLabel reales.
+  const property = await getProperty(propertyId);
+
+  const [pulse, attention, upcoming, checklist] = await Promise.all([
     getWeekPulseMetrics(propertyId),
-    getAttentionItems(propertyId),
+    getAttentionItems(propertyId, property.check_in_time),
     getUpcomingCheckInsDashboard(propertyId),
     getChecklistStatus(propertyId),
   ]);

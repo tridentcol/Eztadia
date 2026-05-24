@@ -97,7 +97,9 @@ function CheckInRow({ row, stripe }: { row: CheckIn; stripe: boolean }) {
             </small>
           )}
           {row.arrival.dayLabel === "Hoy" && (
-            <small className="block text-[12px] text-ink-muted mt-0.5">21 may</small>
+            <small className="block text-[12px] text-ink-muted mt-0.5">
+              {formatRowDate(row.arrival.isoDate)}
+            </small>
           )}
         </span>
       </td>

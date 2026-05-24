@@ -69,14 +69,19 @@ export async function getWeekPulseMetrics(
  * y check-ins de hoy. WhatsApp-pending se omite hasta Phase E2.
  *
  * Cap a 5 items totales para mantener el panel digerible.
+ *
+ * `propertyCheckInTime` (HH:MM o HH:MM:SS) se usa para calcular `hoursAway`
+ * y mostrar la hora real de check-in. Sin esto, defaultea a 15:00.
  */
 export async function getAttentionItems(
   propertyId: string,
+  propertyCheckInTime?: string | null,
 ): Promise<AttentionItem[]> {
   const supabase = await createClient();
   const now = new Date();
   const today = iso(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())));
   const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
+  const checkInTimeLabel = formatCheckInTimeLabel(propertyCheckInTime);
 
   const [pendingR, todayR] = await Promise.all([
     // Pagos pendientes con >1h de antigüedad — el host debería revisarlos.
@@ -94,7 +99,7 @@ export async function getAttentionItems(
     supabase
       .from("bookings")
       .select(
-        "id, guest_full_name, adults, children, room_types(name_es), rooms(number)",
+        "id, guest_full_name, adults, children, check_in, guest_phone, room_types(name_es), rooms(number)",
       )
       .eq("property_id", propertyId)
       .eq("status", "confirmed" satisfies BookingStatus)
@@ -121,6 +126,8 @@ export async function getAttentionItems(
     guest_full_name: string;
     adults: number;
     children: number;
+    check_in: string;
+    guest_phone: string;
     room_types: { name_es: string } | null;
     rooms: { number: string } | null;
   };
@@ -134,12 +141,13 @@ export async function getAttentionItems(
       id: r.id,
       guestName: r.guest_full_name,
       guestInitials: initials(r.guest_full_name),
+      guestPhone: r.guest_phone || undefined,
       room: r.rooms?.number
         ? `${r.room_types?.name_es ?? "Habitación"} ${r.rooms.number}`
         : (r.room_types?.name_es ?? "Habitación"),
       partyLabel: `${party} persona${party === 1 ? "" : "s"}`,
-      checkInTimeLabel: "15:00", // No tracking real de hora en DB; default property check-in.
-      hoursAway: 0,
+      checkInTimeLabel,
+      hoursAway: hoursUntilCheckIn(r.check_in, propertyCheckInTime),
     });
   }
 
@@ -273,4 +281,32 @@ function relativeDayLabel(targetIso: string, todayIso: string): string {
 function shortDayLabel(iso: string): string {
   const d = new Date(iso + "T00:00:00Z");
   return DAYS_ABBR[d.getUTCDay()];
+}
+
+/**
+ * Normaliza `check_in_time` de DB (HH:MM:SS o HH:MM) a label HH:MM.
+ * Default 15:00 si no se pasa o no es parseable.
+ */
+function formatCheckInTimeLabel(checkInTime?: string | null): string {
+  if (!checkInTime) return "15:00";
+  const match = checkInTime.match(/^(\d{2}:\d{2})/);
+  return match ? match[1] : "15:00";
+}
+
+/**
+ * Calcula horas hasta el check-in asumiendo zona horaria America/Bogota
+ * (UTC-5, sin DST). Cuando hagamos multi-timezone (Phase D) usar el
+ * `property.timezone` real. Negativo / 0 → 0 (ya pasó la hora estimada).
+ */
+function hoursUntilCheckIn(
+  checkInDate: string,
+  checkInTime?: string | null,
+): number {
+  const time = formatCheckInTimeLabel(checkInTime);
+  // Construye epoch ms del check-in en Bogota (UTC-5).
+  const ms = Date.parse(`${checkInDate}T${time}:00-05:00`);
+  if (Number.isNaN(ms)) return 0;
+  const diffMs = ms - Date.now();
+  if (diffMs <= 0) return 0;
+  return Math.max(1, Math.round(diffMs / 3_600_000));
 }

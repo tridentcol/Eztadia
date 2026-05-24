@@ -19,6 +19,7 @@ export type AttentionItem =
       guestName: string;
       guestPhoto?: string;
       guestInitials: string;
+      guestPhone?: string;      // E.164 sin "+", para construir wa.me link
       room: string;
       partyLabel: string;       // "3 personas"
       checkInTimeLabel: string; // "17:00"

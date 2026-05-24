@@ -124,7 +124,7 @@ function renderAction(item: AttentionItem) {
   if (item.kind === "payment-pending") {
     return (
       <a
-        href={`#payment-${item.id}`}
+        href={`/dashboard/bookings/${item.id}`}
         className="inline-flex items-center justify-center gap-1.5 h-[38px] px-4 rounded-[10px] text-[13px] font-medium text-ink-soft bg-cream border border-rule hover:bg-linen hover:text-ink hover:border-rule-strong transition-colors whitespace-nowrap"
       >
         Ver comprobante
@@ -133,19 +133,39 @@ function renderAction(item: AttentionItem) {
     );
   }
   if (item.kind === "checkin-today") {
+    // wa.me requiere número sin "+", solo digitos. guestPhone puede venir como
+    // "+57 311 222 3344" o "+573112223344" — limpiamos a digitos.
+    const phoneDigits = item.guestPhone?.replace(/\D/g, "");
+    if (phoneDigits) {
+      const msg = encodeURIComponent(
+        `Hola ${item.guestName.split(" ")[0]}, ¡bienvenido! Te escribo de la propiedad para coordinar tu check-in de hoy.`,
+      );
+      return (
+        <a
+          href={`https://wa.me/${phoneDigits}?text=${msg}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center justify-center gap-1.5 h-[38px] px-4 rounded-[10px] text-[13px] font-medium text-cream bg-sage hover:bg-[#4F6759] transition-colors whitespace-nowrap"
+        >
+          <IconWhatsApp className="w-3.5 h-3.5" />
+          Enviar bienvenida
+        </a>
+      );
+    }
+    // Sin telefono: degrada a "ver reserva".
     return (
       <a
-        href={`#welcome-${item.id}`}
-        className="inline-flex items-center justify-center gap-1.5 h-[38px] px-4 rounded-[10px] text-[13px] font-medium text-cream bg-sage hover:bg-[#4F6759] transition-colors whitespace-nowrap"
+        href={`/dashboard/bookings/${item.id}`}
+        className="inline-flex items-center justify-center gap-1.5 h-[38px] px-4 rounded-[10px] text-[13px] font-medium text-ink-soft bg-cream border border-rule hover:bg-linen hover:text-ink hover:border-rule-strong transition-colors whitespace-nowrap"
       >
-        <IconWhatsApp className="w-3.5 h-3.5" />
-        Enviar bienvenida
+        Ver reserva
+        <IconArrowRight className="w-[13px] h-[13px]" />
       </a>
     );
   }
   return (
     <a
-      href={`#reply-${item.id}`}
+      href={`/dashboard/messages?conversation=${item.id}`}
       className="inline-flex items-center justify-center gap-1.5 h-[38px] px-4 rounded-[10px] text-[13px] font-medium text-ink-soft bg-cream border border-rule hover:bg-linen hover:text-ink hover:border-rule-strong transition-colors whitespace-nowrap"
     >
       Responder
