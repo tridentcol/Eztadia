@@ -3,31 +3,46 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import {
   profileSchema,
   type ProfileValues,
   type OwnerProfile,
 } from "@/lib/personal-settings";
-import { FieldShell, Input, Textarea, Divider } from "@/components/property-settings/primitives";
+import { FieldShell, Input, Divider } from "@/components/property-settings/primitives";
 import { SaveBar } from "@/components/property-settings/SaveBar";
 import { FlagCO, IconChevronDown, IconCopy, IconHelpCircle } from "../icons";
+import { updateProfileAction } from "@/app/actions/profile";
 
 export function ProfileTab({ profile }: { profile: OwnerProfile }) {
+  const router = useRouter();
   const form = useForm<ProfileValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       fullName: profile.fullName,
       phonePrefix: "+57",
       phone: profile.phone,
-      bio: profile.bio,
     },
   });
-  const { register, formState } = form;
+  const { register, formState, reset } = form;
   const { errors } = formState;
   const [copied, setCopied] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
-  async function onSave(_v: ProfileValues) {
-    await new Promise((r) => setTimeout(r, 250));
+  async function onSave(v: ProfileValues) {
+    setSaveError(null);
+    const res = await updateProfileAction({
+      fullName: v.fullName,
+      phone: v.phone || null,
+    });
+    if (!res.ok) {
+      setSaveError(res.error);
+      throw new Error(res.error); // SaveBar mantiene estado dirty si throw
+    }
+    // Reset dirty state con los valores guardados (Greeting del dashboard
+    // tambien se actualiza al refresh por revalidatePath en el action).
+    reset({ fullName: v.fullName, phonePrefix: "+57", phone: v.phone });
+    router.refresh();
   }
 
   async function copyId() {
@@ -143,20 +158,6 @@ export function ProfileTab({ profile }: { profile: OwnerProfile }) {
 
           <Divider />
 
-          <FieldShell
-            label="Bio corta — opcional"
-            error={errors.bio?.message}
-            helper="Visible en facturas y emails que envías a huéspedes."
-          >
-            <Textarea
-              {...register("bio")}
-              rows={3}
-              placeholder="Cuéntanos sobre ti en una o dos frases."
-            />
-          </FieldShell>
-
-          <Divider />
-
           <span className="block text-[11px] font-medium tracking-[0.08em] uppercase text-ink-muted mb-3.5">
             Cuenta
           </span>
@@ -193,6 +194,15 @@ export function ProfileTab({ profile }: { profile: OwnerProfile }) {
               </p>
             </FieldShell>
           </div>
+
+          {saveError && (
+            <p
+              role="alert"
+              className="mt-6 text-[13px] text-danger border border-danger/30 bg-danger/5 rounded-md px-4 py-2.5"
+            >
+              {saveError}
+            </p>
+          )}
         </div>
       </div>
 

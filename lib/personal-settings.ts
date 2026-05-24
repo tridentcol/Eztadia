@@ -15,8 +15,7 @@ export type PersonalSettingsTabKey = (typeof PERSONAL_SETTINGS_TABS)[number]["ke
 export const profileSchema = z.object({
   fullName: z.string().min(2, "Tu nombre, por favor."),
   phonePrefix: z.string().default("+57"),
-  phone: z.string().min(7, "Teléfono incompleto."),
-  bio: z.string().max(280, "Demasiado largo.").optional(),
+  phone: z.string().max(30).optional().or(z.literal("")),
 });
 export type ProfileValues = z.infer<typeof profileSchema>;
 
@@ -140,6 +139,8 @@ export type OwnerProfile = {
   email: string;
   initials: string;
   phone: string;
+  /** Sin columna en BD aun — siempre "" desde getOwnerProfileForSettings.
+   *  Si lo agregamos, requiere migration profiles.bio. */
   bio: string;
   role: "owner" | "manager" | "reception";
   accountId: string;

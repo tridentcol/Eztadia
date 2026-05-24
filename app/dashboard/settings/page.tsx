@@ -6,13 +6,21 @@ import {
 } from "@/components/personal-settings/SettingsTabs";
 import { PersonalSettingsContent } from "@/components/personal-settings/SettingsContent";
 import { getPersonalSettings } from "@/lib/personal-settings";
+import { getOwnerProfileForSettings } from "@/lib/db/queries/profile";
 
 export const metadata: Metadata = {
   title: "Mi cuenta — Eztadia",
 };
 
-export default function SettingsPage() {
-  const data = getPersonalSettings();
+export default async function SettingsPage() {
+  // Profile: query real desde profiles table.
+  // Notifications / language / sessions: demo defaults por ahora — todavia
+  // no hay schema para preferences ni sessions tracking. Deuda separada.
+  const [realProfile, demo] = await Promise.all([
+    getOwnerProfileForSettings(),
+    Promise.resolve(getPersonalSettings()),
+  ]);
+  const data = { ...demo, profile: realProfile };
 
   return (
     <Suspense fallback={null}>
