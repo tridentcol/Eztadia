@@ -50,11 +50,12 @@ const SECTIONS: { label: string; items: { href: string; label: string; Icon: Ico
       { href: "/dashboard/pricing", label: "Precios", Icon: IconDollar },
       { href: "/dashboard/staff", label: "Staff", Icon: IconUsers },
       { href: "/dashboard/integrations", label: "Integraciones", Icon: IconPuzzle },
+      { href: "/dashboard/property-settings", label: "Ajustes", Icon: IconGear },
     ],
   },
   {
     label: "Cuenta",
-    items: [{ href: "/dashboard/settings", label: "Configuración", Icon: IconGear }],
+    items: [{ href: "/dashboard/settings", label: "Mi cuenta", Icon: IconUser }],
   },
 ];
 

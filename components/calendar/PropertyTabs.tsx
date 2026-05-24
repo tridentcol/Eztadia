@@ -12,7 +12,7 @@ const TABS = [
   { href: "/dashboard/pricing", label: "Precios" },
   { href: "/dashboard/staff", label: "Staff" },
   { href: "/dashboard/integrations", label: "Integraciones" },
-  { href: "/dashboard/property-settings", label: "Configuración" },
+  { href: "/dashboard/property-settings", label: "Ajustes" },
 ];
 
 export function PropertyTabs() {

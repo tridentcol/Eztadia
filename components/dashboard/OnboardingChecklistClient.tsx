@@ -59,10 +59,10 @@ export function OnboardingChecklistClient({
               className="font-serif italic font-medium text-ink m-0 tracking-[-0.015em]"
               style={{ fontSize: 22 }}
             >
-              Configurá tu propiedad.
+              Configura tu propiedad.
             </h2>
             <p className="mt-2 text-sm text-ink-soft leading-[1.5] m-0 max-w-[52ch]">
-              Estos cinco pasos te dejan listo para recibir tu primera reserva. Hacelos cuando puedas
+              Estos cinco pasos te dejan listo para recibir tu primera reserva. Hazlos cuando quieras
               — el orden no importa.
             </p>
           </div>

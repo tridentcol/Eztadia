@@ -8,7 +8,7 @@ import { PersonalSettingsContent } from "@/components/personal-settings/Settings
 import { getPersonalSettings } from "@/lib/personal-settings";
 
 export const metadata: Metadata = {
-  title: "Configuración personal — Eztadia",
+  title: "Mi cuenta — Eztadia",
 };
 
 export default function SettingsPage() {

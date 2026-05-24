@@ -44,7 +44,7 @@ const SECTIONS: { label: string; items: { href: string; label: string; Icon: Ico
   },
   {
     label: "Cuenta",
-    items: [{ href: "/dashboard/settings", label: "Configuración", Icon: IconGear }],
+    items: [{ href: "/dashboard/settings", label: "Mi cuenta", Icon: IconGear }],
   },
 ];
 

@@ -50,7 +50,7 @@ export function OnboardingCelebration({ propertySlug }: { propertySlug: string }
             Tu propiedad está activa.
           </h2>
           <p className="mt-2 text-sm text-ink-soft leading-[1.55] m-0 max-w-[58ch]">
-            Ya tenés todo configurado. Tu página pública está recibiendo visitas — la podés
+            Ya tienes todo configurado. Tu página pública está recibiendo visitas — la puedes
             compartir con huéspedes potenciales y empezar a recibir reservas.
           </p>
           <div className="mt-5 flex items-center gap-3 flex-wrap">

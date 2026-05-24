@@ -9,7 +9,7 @@ import { listRoomTypesWithRooms } from "@/lib/db/queries/rooms";
 import { getActivePropertyId } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
-  title: "Configuración — Eztadia",
+  title: "Ajustes — Eztadia",
 };
 
 export default async function PropertySettingsPage() {
