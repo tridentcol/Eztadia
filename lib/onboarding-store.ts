@@ -20,27 +20,16 @@ export type PropertyData = {
   photos: string[]; // data URLs (base64). May be empty after rehydration.
 };
 
-export type RoomsData = {
-  typeName: string;
-  adults: number;
-  children: number;
-  beds: string;
-  pricePerNight: number;
-  quantity: number;
-};
-
 type State = {
   step: OnboardingStep;
   org: OrgData;
   property: PropertyData;
-  rooms: RoomsData;
   _hasHydrated: boolean;
 };
 
 type Actions = {
   setOrg: (patch: Partial<OrgData>) => void;
   setProperty: (patch: Partial<PropertyData>) => void;
-  setRooms: (patch: Partial<RoomsData>) => void;
   addPhoto: (dataUrl: string) => void;
   removePhoto: (index: number) => void;
   goTo: (step: OnboardingStep) => void;
@@ -60,14 +49,6 @@ const INITIAL: State = {
     city: "",
     description: "",
     photos: [],
-  },
-  rooms: {
-    typeName: "",
-    adults: 2,
-    children: 0,
-    beds: "",
-    pricePerNight: 0,
-    quantity: 1,
   },
   _hasHydrated: false,
 };
@@ -92,8 +73,6 @@ export const useOnboardingStore = create<State & Actions>()(
         set((s) => ({ org: { ...s.org, ...patch } })),
       setProperty: (patch) =>
         set((s) => ({ property: { ...s.property, ...patch } })),
-      setRooms: (patch) =>
-        set((s) => ({ rooms: { ...s.rooms, ...patch } })),
       addPhoto: (dataUrl) =>
         set((s) => ({
           property: { ...s.property, photos: [...s.property.photos, dataUrl].slice(0, 5) },
@@ -119,7 +98,6 @@ export const useOnboardingStore = create<State & Actions>()(
         step: state.step,
         org: state.org,
         property: { ...state.property, photos: [] },
-        rooms: state.rooms,
       }),
       onRehydrateStorage: () => (state) => {
         state?.setHydrated(true);

@@ -52,14 +52,26 @@ export async function createPropertyOnboardingAction(raw: unknown) {
       .maybeSingle();
     if (orgErr || !org) throw mapDbError(orgErr);
 
-    // 2. Crear propiedad (createProperty auto-vincula al owner)
-    const prop = await createProperty({
-      organizationId: org.id,
-      slug: input.slug,
-      name: input.name,
-      city: input.city,
-      address: input.address,
-    });
+    // 2. Crear propiedad (createProperty auto-vincula al owner).
+    // Si falla → rollback de la organization recien creada para no dejar
+    // huerfanas. Sin transaccion SQL real porque createProperty hace dos
+    // inserts (properties + property_users) y enredarlas en una RPC es
+    // overkill cuando el caso fallback (slug duplicado) es el unico realista.
+    let prop;
+    try {
+      prop = await createProperty({
+        organizationId: org.id,
+        slug: input.slug,
+        name: input.name,
+        city: input.city,
+        address: input.address,
+      });
+    } catch (err) {
+      // Best-effort cleanup. Si esto tambien falla, no rompemos el throw
+      // original — el user veria el error real del property insert.
+      await supabase.from("organizations").delete().eq("id", org.id);
+      throw err;
+    }
 
     await logAudit({
       action: "property.created",

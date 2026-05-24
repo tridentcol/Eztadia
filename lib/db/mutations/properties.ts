@@ -40,7 +40,7 @@ export async function createProperty(input: {
     .maybeSingle();
 
   if (error) {
-    if (error.code === "23505") throw new ConflictError("Ese slug ya esta en uso.");
+    if (error.code === "23505") throw new ConflictError("Esa URL publica ya esta tomada. Probá con otra.");
     throw mapDbError(error);
   }
   if (!data) throw new NotFoundError("Propiedad");
@@ -71,7 +71,7 @@ export async function updateProperty(
     .maybeSingle();
 
   if (error) {
-    if (error.code === "23505") throw new ConflictError("Ese slug ya esta en uso.");
+    if (error.code === "23505") throw new ConflictError("Esa URL publica ya esta tomada. Probá con otra.");
     throw mapDbError(error);
   }
   if (!data) throw new NotFoundError("Propiedad");

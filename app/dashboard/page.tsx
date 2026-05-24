@@ -74,7 +74,11 @@ export default async function DashboardHome() {
     <main className="max-w-[1200px] mx-auto px-5 lg:px-14 pt-8 lg:pt-12 pb-24">
       <Greeting snapshot={snapshot} now={now} />
 
-      <OnboardingChecklist status={checklist} />
+      <OnboardingChecklist
+        status={checklist}
+        propertyId={propertyId}
+        propertySlug={property.slug}
+      />
 
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-14">
         <div className="lg:col-span-8 min-w-0">
