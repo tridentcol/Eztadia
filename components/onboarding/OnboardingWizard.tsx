@@ -4,7 +4,6 @@ import { useOnboardingStore } from "@/lib/onboarding-store";
 import { OnboardingBody } from "./OnboardingShell";
 import { Step1OrgForm, Step1Tips } from "./Step1Org";
 import { Step2PropertyForm, Step2Tips } from "./Step2Property";
-import { Step3RoomsForm, Step3Tips } from "./Step3Rooms";
 import { WelcomeFinal } from "./WelcomeFinal";
 
 export function OnboardingWizard({ ownerFirstName }: { ownerFirstName?: string }) {
@@ -23,13 +22,8 @@ export function OnboardingWizard({ ownerFirstName }: { ownerFirstName?: string }
   if (step === 1) {
     return <OnboardingBody form={<Step1OrgForm />} tips={<Step1Tips />} />;
   }
-  if (step === 2) {
-    return (
-      <OnboardingBody form={<Step2PropertyForm onBack={back} />} tips={<Step2Tips />} />
-    );
-  }
   return (
-    <OnboardingBody form={<Step3RoomsForm onBack={back} />} tips={<Step3Tips />} />
+    <OnboardingBody form={<Step2PropertyForm onBack={back} />} tips={<Step2Tips />} />
   );
 }
 

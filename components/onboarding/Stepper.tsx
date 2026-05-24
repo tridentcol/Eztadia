@@ -1,10 +1,9 @@
 import { Fragment } from "react";
 import type { OnboardingStep } from "@/lib/onboarding-store";
 
-const STEPS: { step: 1 | 2 | 3; label: string; shortLabel: string }[] = [
+const STEPS: { step: 1 | 2; label: string; shortLabel: string }[] = [
   { step: 1, label: "Tu organización", shortLabel: "Organización" },
   { step: 2, label: "Tu propiedad", shortLabel: "Propiedad" },
-  { step: 3, label: "Tus habitaciones", shortLabel: "Habitaciones" },
 ];
 
 export function OnboardingStepper({
@@ -14,15 +13,15 @@ export function OnboardingStepper({
   current: OnboardingStep;
   compact?: boolean;
 }) {
-  const currentNum = current === "done" ? 4 : current;
+  const currentNum: number = current === "done" ? 3 : Number(current);
 
   return (
     <nav
       aria-label="Pasos del onboarding"
       className="grid items-center mb-10"
       style={{
-        gridTemplateColumns: "auto 1fr auto 1fr auto",
-        maxWidth: compact ? 360 : 520,
+        gridTemplateColumns: "auto 1fr auto",
+        maxWidth: compact ? 280 : 380,
       }}
     >
       {STEPS.map((s, i) => {

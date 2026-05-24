@@ -11,10 +11,12 @@ import {
   getAttentionItems,
   getUpcomingCheckInsDashboard,
 } from "@/lib/db/queries/dashboard";
+import { getChecklistStatus } from "@/lib/db/queries/onboarding-checklist";
 import { Greeting } from "@/components/dashboard/Greeting";
 import { AttentionList } from "@/components/dashboard/AttentionList";
 import { WeekPulse } from "@/components/dashboard/WeekPulse";
 import { UpcomingCheckIns } from "@/components/dashboard/UpcomingCheckIns";
+import { OnboardingChecklist } from "@/components/dashboard/OnboardingChecklist";
 
 export const metadata: Metadata = {
   title: "Resumen — Eztadia",
@@ -36,11 +38,12 @@ export default async function DashboardHome() {
   const propertyId = await getActivePropertyId();
   if (!propertyId) redirect("/onboarding");
 
-  const [property, pulse, attention, upcoming] = await Promise.all([
+  const [property, pulse, attention, upcoming, checklist] = await Promise.all([
     getProperty(propertyId),
     getWeekPulseMetrics(propertyId),
     getAttentionItems(propertyId),
     getUpcomingCheckInsDashboard(propertyId),
+    getChecklistStatus(propertyId),
   ]);
 
   const firstName = profile.full_name?.split(" ")[0] ?? profile.email.split("@")[0] ?? "tú";
@@ -70,6 +73,8 @@ export default async function DashboardHome() {
   return (
     <main className="max-w-[1200px] mx-auto px-5 lg:px-14 pt-8 lg:pt-12 pb-24">
       <Greeting snapshot={snapshot} now={now} />
+
+      <OnboardingChecklist status={checklist} />
 
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-14">
         <div className="lg:col-span-8 min-w-0">

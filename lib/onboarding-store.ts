@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-export type OnboardingStep = 1 | 2 | 3 | "done";
+export type OnboardingStep = 1 | 2 | "done";
 
 export type PropertyType = "" | "hotel" | "building" | "complex";
 
@@ -74,15 +74,13 @@ const INITIAL: State = {
 
 function nextStep(s: OnboardingStep): OnboardingStep {
   if (s === 1) return 2;
-  if (s === 2) return 3;
-  if (s === 3) return "done";
+  if (s === 2) return "done";
   return "done";
 }
 
 function prevStep(s: OnboardingStep): OnboardingStep {
   if (s === 2) return 1;
-  if (s === 3) return 2;
-  if (s === "done") return 3;
+  if (s === "done") return 2;
   return 1;
 }
 
