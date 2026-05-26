@@ -1226,10 +1226,7 @@ export type Database = {
         }
         Returns: string
       }
-      delete_property_cascade: {
-        Args: { p_id: string }
-        Returns: undefined
-      }
+      delete_property_cascade: { Args: { p_id: string }; Returns: undefined }
       expire_old_holds: { Args: never; Returns: number }
       has_property_access: { Args: { p_property_id: string }; Returns: boolean }
       is_property_manager_or_above: {
