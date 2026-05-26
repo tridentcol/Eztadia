@@ -6,15 +6,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { formatCOP } from "@/lib/format";
 import type { BookingHold, BankAccount } from "@/lib/booking-flow";
-import { CASA_MARINA_BANK } from "@/lib/booking-flow";
 import { Countdown } from "./Countdown";
 import { Dropzone } from "./Dropzone";
 import { IconCopy, IconArrowRight } from "./icons";
 import { IconWhatsApp } from "@/components/dashboard/icons";
 
-export function PaySectionManual({ hold }: { hold: BookingHold }) {
+export function PaySectionManual({
+  hold,
+  bank,
+}: {
+  hold: BookingHold;
+  bank: BankAccount | null;
+}) {
   const router = useRouter();
-  const bank: BankAccount = CASA_MARINA_BANK;
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -50,20 +54,63 @@ export function PaySectionManual({ hold }: { hold: BookingHold }) {
   }
 
   async function copyAll() {
+    if (!bank) return;
     const text = [
       `Banco: ${bank.bank}`,
       `Tipo de cuenta: ${bank.accountType}`,
       `Número: ${bank.accountNumber}`,
       `A nombre de: ${bank.holder}`,
-      `NIT: ${bank.nit}`,
+      `${bank.holderDocType}: ${bank.holderDocNumber}`,
       `Referencia: ${hold.code}`,
       `Monto: ${formatCOP(hold.totalCOP)} COP`,
+      ...(bank.notes ? [`Notas: ${bank.notes}`] : []),
     ].join("\n");
     try {
       await navigator.clipboard.writeText(text);
     } catch {
       /* no-op */
     }
+  }
+
+  if (!bank) {
+    return (
+      <article className="bg-paper border border-rule rounded-[28px] p-7 sm:p-12">
+        <div className="flex justify-between items-center mb-6">
+          <span className="font-mono text-xs text-ink-muted tracking-[-0.02em]">
+            {hold.code}
+          </span>
+          <Countdown expiresAt={hold.expiresAt} showHours />
+        </div>
+        <span className="block text-[11px] font-medium tracking-[0.14em] uppercase text-gold-dark mb-2.5">
+          Transferencia bancaria
+        </span>
+        <h1 className="font-serif italic font-medium text-[clamp(26px,4vw,32px)] text-ink m-0 mb-4 tracking-[-0.025em] leading-[1.1]">
+          Solicita los datos al anfitrión.
+        </h1>
+        <p className="text-[15px] text-ink-soft leading-[1.6] m-0 mb-6 max-w-[52ch]">
+          {hold.property.name} aún no publicó sus datos bancarios aquí. Contáctalos
+          por WhatsApp para coordinar la transferencia. Mantenemos tu habitación
+          reservada mientras tanto.
+        </p>
+        <a
+          href={hold.property.helpUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full h-14 rounded-[14px] bg-sage text-cream text-[15px] font-medium inline-flex items-center justify-center gap-2 hover:bg-[#4F6759] transition-colors"
+        >
+          <IconWhatsApp className="w-4 h-4" />
+          Contactar por WhatsApp
+        </a>
+        <div className="mt-6 pt-6 border-t border-rule">
+          <Link
+            href={`/p/${hold.property.slug}/booking/new`}
+            className="text-[13px] font-medium text-ink-soft hover:text-ink transition-colors"
+          >
+            ← Cambiar método de pago
+          </Link>
+        </div>
+      </article>
+    );
   }
 
   return (
@@ -104,7 +151,7 @@ export function PaySectionManual({ hold }: { hold: BookingHold }) {
           <BankRow label="Tipo de cuenta" value={bank.accountType} />
           <BankRow label="Número" value={bank.accountNumber} mono copyable />
           <BankRow label="A nombre de" value={bank.holder} />
-          <BankRow label="NIT" value={bank.nit} mono copyable />
+          <BankRow label={bank.holderDocType} value={bank.holderDocNumber} mono copyable />
           <BankRow
             label="Referencia"
             value={hold.code}
@@ -113,6 +160,13 @@ export function PaySectionManual({ hold }: { hold: BookingHold }) {
             helper="Incluye esto en el detalle de la transferencia para que la encontremos."
           />
           <BankRow label="Monto exacto" value={`${formatCOP(hold.totalCOP)} COP`} big />
+          {bank.notes && (
+            <BankRow
+              label="Notas"
+              value={bank.notes}
+              helper="Instrucciones extras del anfitrión."
+            />
+          )}
         </div>
 
         <button

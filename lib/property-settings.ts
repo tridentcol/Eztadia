@@ -7,6 +7,7 @@ export const SETTINGS_TABS = [
   { key: "amenities", label: "Amenities" },
   { key: "policies", label: "Políticas" },
   { key: "schedules", label: "Horarios" },
+  { key: "payments", label: "Pagos" },
   { key: "fiscal", label: "Domicilio fiscal" },
   { key: "advanced", label: "Avanzado" },
 ] as const;

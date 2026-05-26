@@ -43,15 +43,11 @@ export type BankAccount = {
   accountType: string;
   accountNumber: string;
   holder: string;
-  nit: string;
-};
-
-export const CASA_MARINA_BANK: BankAccount = {
-  bank: "Bancolombia",
-  accountType: "Ahorros",
-  accountNumber: "1234-5678-9012",
-  holder: "Casa Marina S.A.S.",
-  nit: "900.123.456-7",
+  /** Tipo de documento del titular: CC, CE o NIT. */
+  holderDocType: "CC" | "CE" | "NIT";
+  holderDocNumber: string;
+  /** Instrucciones adicionales del owner (opcional). */
+  notes?: string;
 };
 
 /** Demo hold for Andrea Mendoza · Suite Marina · 15–18 may */

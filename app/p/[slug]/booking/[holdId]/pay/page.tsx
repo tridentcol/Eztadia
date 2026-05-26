@@ -3,11 +3,14 @@ import { notFound, redirect } from "next/navigation";
 import { getPropertyBySlug } from "@/lib/db/queries/property";
 import { getRoomTypeById } from "@/lib/db/queries/rooms";
 import { getHoldById } from "@/lib/db/queries/holds";
+import { getPublicBankAccountBySlug } from "@/lib/db/queries/bank-account";
 import { buildHoldFromRow } from "@/lib/booking/adapter";
 import { BookingFlowTopbar } from "@/components/booking-flow/BookingFlowTopbar";
 import { Stepper } from "@/components/booking-flow/Stepper";
 import { PaySectionPSE } from "@/components/booking-flow/PaySectionPSE";
 import { PaySectionManual } from "@/components/booking-flow/PaySectionManual";
+import { ACCOUNT_TYPE_LABEL } from "@/lib/validation/bank-account";
+import type { BankAccount } from "@/lib/booking-flow";
 
 export const metadata: Metadata = {
   title: "Reserva · Pago",
@@ -23,7 +26,10 @@ export default async function PayPage({
   const property = await getPropertyBySlug(slug);
   if (!property) notFound();
 
-  const holdRow = await getHoldById(holdId);
+  const [holdRow, bankRow] = await Promise.all([
+    getHoldById(holdId),
+    getPublicBankAccountBySlug(slug),
+  ]);
   if (!holdRow || holdRow.property_id !== property.id) notFound();
 
   // Si el hold ya no esta activo (expirado, convertido, cancelado), mandamos
@@ -37,6 +43,18 @@ export default async function PayPage({
 
   const hold = buildHoldFromRow({ hold: holdRow, property, roomType });
 
+  const bank: BankAccount | null = bankRow
+    ? {
+        bank: bankRow.bank_name,
+        accountType: ACCOUNT_TYPE_LABEL[bankRow.account_type],
+        accountNumber: bankRow.account_number,
+        holder: bankRow.holder_name,
+        holderDocType: bankRow.holder_document_type,
+        holderDocNumber: bankRow.holder_document_number,
+        notes: bankRow.notes ?? undefined,
+      }
+    : null;
+
   return (
     <>
       <BookingFlowTopbar hold={hold} />
@@ -46,7 +64,7 @@ export default async function PayPage({
         {holdRow.payment_method === "pse" ? (
           <PaySectionPSE hold={hold} />
         ) : (
-          <PaySectionManual hold={hold} />
+          <PaySectionManual hold={hold} bank={bank} />
         )}
       </main>
     </>

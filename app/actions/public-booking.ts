@@ -56,6 +56,23 @@ export async function publicCreateHoldAction(raw: unknown) {
       throw new ValidationError("El tipo de habitacion no pertenece a esta propiedad.");
     }
 
+    // Si el guest pide manual_transfer, la propiedad debe tener bank_account
+    // configurada. UI ya esconde la opcion cuando no existe, pero defensa en
+    // profundidad contra POST manuales.
+    if (input.paymentMethod === "manual_transfer") {
+      const admin = createAdminClient();
+      const { data: bank } = await admin
+        .from("bank_accounts")
+        .select("id")
+        .eq("property_id", input.propertyId)
+        .maybeSingle();
+      if (!bank) {
+        throw new ValidationError(
+          "La transferencia bancaria no esta disponible para esta propiedad. Elige PSE.",
+        );
+      }
+    }
+
     const totalCents = roomType.base_price_cents * nights;
 
     const { holdId } = await createBookingHold(

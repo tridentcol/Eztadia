@@ -53,6 +53,16 @@ export const IconClock = (p: P) => (
     <path d="M12 7v5l3 2" />
   </svg>
 );
+export const IconBank = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M3 9 12 4l9 5" />
+    <path d="M5 9v9" />
+    <path d="M10 9v9" />
+    <path d="M14 9v9" />
+    <path d="M19 9v9" />
+    <path d="M3 21h18" />
+  </svg>
+);
 export const IconReceipt = (p: P) => (
   <svg {...base(p)}>
     <path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2z" />

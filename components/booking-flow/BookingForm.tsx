@@ -55,9 +55,11 @@ export type BookingFormValues = z.infer<typeof formSchema>;
 export function BookingForm({
   hold,
   context,
+  bankAvailable = true,
 }: {
   hold: BookingHold;
   context?: BookingFormContext;
+  bankAvailable?: boolean;
 }) {
   const router = useRouter();
   const [turnstileToken, setTurnstileToken] = useState<string>("");
@@ -235,7 +237,11 @@ export function BookingForm({
         </h2>
       </header>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+      <div
+        className={`grid grid-cols-1 ${
+          bankAvailable ? "sm:grid-cols-2" : ""
+        } gap-3.5`}
+      >
         <PayMethodCard
           selected={paymentMethod === "pse"}
           onSelect={() => setValue("paymentMethod", "pse", { shouldDirty: true })}
@@ -243,23 +249,25 @@ export function BookingForm({
           title="Pagar con PSE"
           description="Pago inmediato desde tu banco colombiano. Tu reserva queda confirmada al instante."
           foot="Vía Wompi · Seguro y autorizado"
-          tag="Recomendado"
+          tag={bankAvailable ? "Recomendado" : undefined}
         />
-        <PayMethodCard
-          selected={paymentMethod === "manual"}
-          onSelect={() => setValue("paymentMethod", "manual", { shouldDirty: true })}
-          logo={
-            <span className="inline-flex items-center gap-2 text-ink-muted text-[12px]">
-              <BankDot color="#FDDA24" outline />
-              <BankDot color="#ED1C24" />
-              <BankDot color="#004481" />
-              <BankDot color="#0F4D9E" />
-            </span>
-          }
-          title="Transferencia bancaria"
-          description="Transfiere y sube tu comprobante. Confirmamos tu reserva en menos de 24 horas."
-          foot="Bancolombia · Davivienda · BBVA"
-        />
+        {bankAvailable && (
+          <PayMethodCard
+            selected={paymentMethod === "manual"}
+            onSelect={() => setValue("paymentMethod", "manual", { shouldDirty: true })}
+            logo={
+              <span className="inline-flex items-center gap-2 text-ink-muted text-[12px]">
+                <BankDot color="#FDDA24" outline />
+                <BankDot color="#ED1C24" />
+                <BankDot color="#004481" />
+                <BankDot color="#0F4D9E" />
+              </span>
+            }
+            title="Transferencia bancaria"
+            description="Transfiere y sube tu comprobante. Confirmamos tu reserva en menos de 24 horas."
+            foot="Bancolombia · Davivienda · BBVA"
+          />
+        )}
       </div>
 
       {/* Terms */}

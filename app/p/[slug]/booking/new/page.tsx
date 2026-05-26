@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { getPropertyBySlug } from "@/lib/db/queries/property";
 import { getRoomTypeById } from "@/lib/db/queries/rooms";
+import { getPublicBankAccountBySlug } from "@/lib/db/queries/bank-account";
 import { buildDraftHold } from "@/lib/booking/adapter";
 import { BookingFlowTopbar } from "@/components/booking-flow/BookingFlowTopbar";
 import { Stepper } from "@/components/booking-flow/Stepper";
@@ -55,7 +56,10 @@ export default async function BookingNewPage({
   const property = await getPropertyBySlug(slug);
   if (!property) notFound();
 
-  const roomType = await getRoomTypeById(sp.roomTypeId);
+  const [roomType, bank] = await Promise.all([
+    getRoomTypeById(sp.roomTypeId),
+    getPublicBankAccountBySlug(slug),
+  ]);
   if (!roomType || roomType.property_id !== property.id) notFound();
 
   const adults = parseIntSafe(sp.adults, 2, 1, 10);
@@ -103,6 +107,7 @@ export default async function BookingNewPage({
             adults,
             children: childrenCount,
           }}
+          bankAvailable={!!bank}
         />
       </main>
     </>

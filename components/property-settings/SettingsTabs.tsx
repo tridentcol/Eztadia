@@ -11,6 +11,7 @@ import {
   IconAmenities,
   IconPolicies,
   IconClock,
+  IconBank,
   IconReceipt,
   IconGear,
   IconChevronDown,
@@ -23,6 +24,7 @@ const ICONS: Record<SettingsTabKey, (p: { className?: string }) => JSX.Element> 
   amenities: IconAmenities,
   policies: IconPolicies,
   schedules: IconClock,
+  payments: IconBank,
   fiscal: IconReceipt,
   advanced: IconGear,
 };

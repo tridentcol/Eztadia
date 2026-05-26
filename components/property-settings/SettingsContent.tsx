@@ -7,18 +7,22 @@ import { PhotosTab } from "./tabs/PhotosTab";
 import { AmenitiesTab } from "./tabs/AmenitiesTab";
 import { PoliciesTab } from "./tabs/PoliciesTab";
 import { SchedulesTab } from "./tabs/SchedulesTab";
+import { PaymentsTab } from "./tabs/PaymentsTab";
 import { FiscalTab } from "./tabs/FiscalTab";
 import { AdvancedTab } from "./tabs/AdvancedTab";
 import type { PropertySettings } from "@/lib/property-settings";
+import type { BankAccountInput } from "@/lib/validation/bank-account";
 
 export function SettingsContent({
   propertyId,
   settings,
   totalRooms,
+  bankAccount,
 }: {
   propertyId: string;
   settings: PropertySettings;
   totalRooms: number;
+  bankAccount: BankAccountInput | null;
 }) {
   const tab = useActiveTab();
 
@@ -30,6 +34,7 @@ export function SettingsContent({
       {tab === "amenities" && <AmenitiesTab propertyId={propertyId} initial={settings.amenities} />}
       {tab === "policies" && <PoliciesTab propertyId={propertyId} initial={settings.policies} />}
       {tab === "schedules" && <SchedulesTab propertyId={propertyId} initial={settings.schedules} />}
+      {tab === "payments" && <PaymentsTab propertyId={propertyId} initial={bankAccount} />}
       {tab === "fiscal" && <FiscalTab initial={settings.fiscal} />}
       {tab === "advanced" && <AdvancedTab propertyId={propertyId} initial={settings.advanced} />}
     </div>

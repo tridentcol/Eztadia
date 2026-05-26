@@ -139,6 +139,56 @@ export type Database = {
           },
         ]
       }
+      bank_accounts: {
+        Row: {
+          account_number: string
+          account_type: Database["public"]["Enums"]["BankAccountType"]
+          bank_name: string
+          created_at: string
+          holder_document_number: string
+          holder_document_type: Database["public"]["Enums"]["BankAccountHolderDocumentType"]
+          holder_name: string
+          id: string
+          notes: string | null
+          property_id: string
+          updated_at: string
+        }
+        Insert: {
+          account_number: string
+          account_type: Database["public"]["Enums"]["BankAccountType"]
+          bank_name: string
+          created_at?: string
+          holder_document_number: string
+          holder_document_type: Database["public"]["Enums"]["BankAccountHolderDocumentType"]
+          holder_name: string
+          id?: string
+          notes?: string | null
+          property_id: string
+          updated_at?: string
+        }
+        Update: {
+          account_number?: string
+          account_type?: Database["public"]["Enums"]["BankAccountType"]
+          bank_name?: string
+          created_at?: string
+          holder_document_number?: string
+          holder_document_type?: Database["public"]["Enums"]["BankAccountHolderDocumentType"]
+          holder_name?: string
+          id?: string
+          notes?: string | null
+          property_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_accounts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           adults: number
@@ -1154,6 +1204,8 @@ export type Database = {
     }
     Enums: {
       AuditActorType: "user" | "system" | "webhook"
+      BankAccountHolderDocumentType: "CC" | "CE" | "NIT"
+      BankAccountType: "savings" | "checking"
       BookingSource: "direct" | "booking_com" | "airbnb" | "manual"
       BookingStatus:
         | "pending_payment"
@@ -1308,6 +1360,8 @@ export const Constants = {
   public: {
     Enums: {
       AuditActorType: ["user", "system", "webhook"],
+      BankAccountHolderDocumentType: ["CC", "CE", "NIT"],
+      BankAccountType: ["savings", "checking"],
       BookingSource: ["direct", "booking_com", "airbnb", "manual"],
       BookingStatus: [
         "pending_payment",
