@@ -30,6 +30,14 @@ export default async function DashboardLayout({
     listAccessibleProperties(),
   ]);
 
+  // Si el user no tiene ninguna property accesible (caso post-revocacion
+  // o cuenta nueva sin onboarding) lo mandamos al wizard que maneja el
+  // case de crear/aceptar invitacion. Evita el estado "Sin propiedad" +
+  // "0 propiedades vinculadas" en el sidebar.
+  if (properties.length === 0) {
+    redirect("/onboarding");
+  }
+
   // El layout solo necesita owner + property + unreadMessages. Atención,
   // pulse, upcoming los provee la page que los muestra (dashboard home).
   let propertyShell: OwnerSnapshot["property"] = {

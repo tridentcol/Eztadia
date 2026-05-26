@@ -153,9 +153,19 @@ export function Sidebar({
             style={{ boxShadow: "var(--shadow-pop, var(--shadow-soft))" }}
           >
             {availableProperties.length === 0 ? (
-              <p className="text-[12.5px] text-ink-muted px-2.5 py-2 m-0">
-                No tienes propiedades vinculadas.
-              </p>
+              <div className="px-2.5 py-2">
+                <p className="text-[12.5px] text-ink-muted m-0 mb-2">
+                  No tienes propiedades vinculadas.
+                </p>
+                <Link
+                  href="/onboarding"
+                  onClick={() => setPropOpen(false)}
+                  className="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-sage hover:text-[#4F6759] transition-colors"
+                >
+                  <IconPlus className="w-3 h-3" />
+                  Crear nueva propiedad
+                </Link>
+              </div>
             ) : (
               availableProperties.map((p) => {
                 const isActive = p.id === activePropertyId;
