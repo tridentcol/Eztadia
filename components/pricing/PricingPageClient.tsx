@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { formatCOP } from "@/lib/format";
 import { SeasonalRateFormDrawer } from "./SeasonalRateFormDrawer";
+import { PricingMiniCalendar } from "./PricingMiniCalendar";
 import {
   IconArrow,
   IconCalendar,
@@ -211,6 +212,11 @@ function RoomTypeRow({
           </button>
         )}
       </header>
+
+      <PricingMiniCalendar
+        basePriceCents={rt.basePriceCents}
+        rates={rt.rates}
+      />
 
       <div className="border-t border-rule px-5 sm:px-6 py-4">
         {sortedRates.length === 0 ? (

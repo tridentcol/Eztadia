@@ -159,3 +159,75 @@ export async function setActivePropertyAction(raw: unknown) {
     return { propertyId };
   });
 }
+
+/**
+ * Elimina una property con TODAS sus dependencias (bookings, holds,
+ * rooms, fotos, integrations, bank account, etc.).
+ *
+ * Defensa multi-capa:
+ *  1. requirePropertyRole("owner") — solo owner puede iniciar.
+ *  2. confirmSlug en el input — el caller (UI) pide al user typear el
+ *     slug exacto antes de habilitar. Si no matchea, error.
+ *  3. La SQL function delete_property_cascade verifica is_property_owner
+ *     server-side (defense in depth contra calls fuera de la UI).
+ *
+ * Audit log queda como registro historico (no se borra junto a la
+ * property). Tras el borrado, limpia el cookie active_property y
+ * redirect al fallback adecuado.
+ */
+const deletePropertySchema = z.object({
+  propertyId: uuid,
+  confirmSlug: z.string().min(1, "Confirma escribiendo el slug."),
+});
+
+export async function deletePropertyAction(raw: unknown) {
+  const result = await run(deletePropertySchema, raw, async ({ propertyId, confirmSlug }) => {
+    await requirePropertyRole(propertyId, "owner");
+
+    const supabase = await createClient();
+    const { data: prop, error: propErr } = await supabase
+      .from("properties")
+      .select("id, slug, name")
+      .eq("id", propertyId)
+      .maybeSingle();
+    if (propErr) throw mapDbError(propErr);
+    if (!prop) throw mapDbError({ code: "PGRST116" });
+
+    if (prop.slug !== confirmSlug.trim()) {
+      return {
+        ok: false as const,
+        error: "El slug no coincide. Revisalo e intenta de nuevo.",
+      };
+    }
+
+    const { error: rpcErr } = await supabase.rpc("delete_property_cascade", {
+      p_id: propertyId,
+    });
+    if (rpcErr) throw mapDbError(rpcErr);
+
+    await logAudit({
+      action: "property.deleted",
+      resourceType: "property",
+      resourceId: propertyId,
+      diff: { slug: prop.slug, name: prop.name },
+    });
+
+    // Limpia el cookie active si apuntaba a la borrada.
+    const cookieStore = await cookies();
+    const active = cookieStore.get(ACTIVE_PROPERTY_COOKIE)?.value;
+    if (active === propertyId) {
+      cookieStore.delete(ACTIVE_PROPERTY_COOKIE);
+    }
+
+    revalidatePath("/dashboard", "layout");
+    return { ok: true as const };
+  });
+
+  if (result.ok && "ok" in result.data && result.data.ok) {
+    // Despues de borrar: si quedan otras properties, va al dashboard
+    // (layout las carga); si no, al onboarding.
+    const next = await getFirstAccessibleProperty();
+    redirect(next ? "/dashboard" : "/onboarding");
+  }
+  return result;
+}

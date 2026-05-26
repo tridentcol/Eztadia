@@ -52,3 +52,25 @@ export async function deleteWhatsAppConfig(propertyId: string): Promise<void> {
     .eq("property_id", propertyId);
   if (error) throw mapDbError(error);
 }
+
+/**
+ * Marca como leidos todos los mensajes inbound de una conversacion
+ * (property + counterpart phone). Idempotente — si ya estan leidos no
+ * cambia nada. Solo afecta mensajes con read_at IS NULL.
+ */
+export async function markConversationAsRead(
+  propertyId: string,
+  counterpartPhone: string,
+): Promise<number> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("whatsapp_messages")
+    .update({ read_at: new Date().toISOString() })
+    .eq("property_id", propertyId)
+    .eq("direction", "inbound")
+    .eq("from_phone", counterpartPhone)
+    .is("read_at", null)
+    .select("id");
+  if (error) throw mapDbError(error);
+  return data?.length ?? 0;
+}

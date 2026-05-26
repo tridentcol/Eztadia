@@ -12,14 +12,19 @@ import {
 } from "../primitives";
 import { SaveBar } from "../SaveBar";
 import { useSettingsSave } from "../useSettingsSave";
-import { updatePropertyAction } from "@/app/actions/property";
+import {
+  updatePropertyAction,
+  deletePropertyAction,
+} from "@/app/actions/property";
 import { useRouter } from "next/navigation";
 
 export function AdvancedTab({
   propertyId,
+  propertySlug,
   initial,
 }: {
   propertyId: string;
+  propertySlug: string;
   initial: AdvancedValues;
 }) {
   const form = useForm<AdvancedValues>({
@@ -170,7 +175,11 @@ export function AdvancedTab({
       </section>
 
       {showDeleteModal && (
-        <DeletePropertyModal onCancel={() => setShowDeleteModal(false)} />
+        <DeletePropertyModal
+          propertyId={propertyId}
+          propertySlug={propertySlug}
+          onCancel={() => setShowDeleteModal(false)}
+        />
       )}
 
       {error && (
@@ -182,7 +191,40 @@ export function AdvancedTab({
   );
 }
 
-function DeletePropertyModal({ onCancel }: { onCancel: () => void }) {
+function DeletePropertyModal({
+  propertyId,
+  propertySlug,
+  onCancel,
+}: {
+  propertyId: string;
+  propertySlug: string;
+  onCancel: () => void;
+}) {
+  const [confirm, setConfirm] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const canSubmit = confirm.trim() === propertySlug && !submitting;
+
+  async function onSubmit() {
+    if (!canSubmit) return;
+    setSubmitting(true);
+    setError(null);
+    try {
+      const res = await deletePropertyAction({
+        propertyId,
+        confirmSlug: confirm.trim(),
+      });
+      if (!res.ok) {
+        setError(res.error ?? "No pudimos eliminar la propiedad.");
+      }
+      // Si ok, la action ya hizo redirect — no llegamos aca.
+    } catch {
+      setError("Sin conexión. Intenta de nuevo.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <div
       role="dialog"
@@ -209,35 +251,49 @@ function DeletePropertyModal({ onCancel }: { onCancel: () => void }) {
           Eliminar permanentemente
         </h3>
         <p className="text-sm text-ink-soft m-0 mb-4 leading-[1.55]">
-          Eliminar borra reservas, fotos, mensajes y configuración de forma definitiva — preferimos hacerlo manualmente para evitar accidentes.
+          Borra reservas, fotos, mensajes, integraciones y configuración de
+          forma definitiva. Si solo querés pausar, usá{" "}
+          <strong className="text-ink font-medium">Desactivar propiedad</strong>{" "}
+          (mantiene los datos).
         </p>
-        <p className="text-sm text-ink-soft m-0 mb-6 leading-[1.55]">
-          Mientras tanto, <strong className="text-ink font-medium">Desactivar propiedad</strong> oculta la página pública sin perder datos.
-        </p>
-        <div className="rounded-xl bg-linen border border-rule p-4 mb-6">
-          <p className="text-[12px] font-medium tracking-[0.08em] uppercase text-ink-muted m-0 mb-1">
-            Para eliminar definitivamente
+        <div className="rounded-xl bg-linen border border-rule p-4 mb-5">
+          <p className="text-[12px] font-medium tracking-[0.08em] uppercase text-ink-muted m-0 mb-2">
+            Escribí{" "}
+            <span className="font-mono text-ink normal-case tracking-tight">
+              {propertySlug}
+            </span>{" "}
+            para confirmar
           </p>
-          <p className="text-sm text-ink m-0 leading-[1.5]">
-            Escríbenos por{" "}
-            <a
-              href="https://wa.me/573112223344"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sage underline underline-offset-[3px] decoration-1 decoration-[rgba(92,117,103,0.4)] hover:decoration-sage"
-            >
-              WhatsApp
-            </a>{" "}
-            y procesamos el borrado tras confirmar identidad.
-          </p>
+          <input
+            type="text"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            disabled={submitting}
+            autoComplete="off"
+            className="w-full h-10 bg-paper border border-rule-strong rounded-lg px-3 text-[14px] text-ink outline-0 font-mono focus:border-danger focus:shadow-[0_0_0_3px_rgba(168,72,60,0.18)] transition-[border-color,box-shadow] duration-200"
+          />
         </div>
-        <div className="flex justify-end">
+        {error && (
+          <p role="alert" className="text-[13px] text-danger m-0 mb-4">
+            {error}
+          </p>
+        )}
+        <div className="flex justify-end gap-2.5">
           <button
             type="button"
             onClick={onCancel}
-            className="h-10 px-[18px] rounded-xl bg-cream text-ink-soft border border-rule text-sm font-medium hover:bg-linen hover:text-ink transition-colors"
+            disabled={submitting}
+            className="h-10 px-[18px] rounded-xl bg-cream text-ink-soft border border-rule text-sm font-medium hover:bg-linen hover:text-ink transition-colors disabled:opacity-60"
           >
-            Cerrar
+            Cancelar
+          </button>
+          <button
+            type="button"
+            disabled={!canSubmit}
+            onClick={onSubmit}
+            className="h-10 px-[18px] rounded-xl bg-danger text-cream text-sm font-medium hover:bg-[#8E3B30] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {submitting ? "Eliminando…" : "Eliminar permanentemente"}
           </button>
         </div>
       </div>

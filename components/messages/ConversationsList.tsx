@@ -77,12 +77,11 @@ export function ConversationsList({
                     Reserva {c.bookingCode}
                   </span>
                 )}
-                {c.recentInbound > 0 && (
+                {c.unreadCount > 0 && (
                   <span
-                    className="text-[10px] font-medium px-1.5 py-0.5 rounded-full text-gold-dark"
-                    style={{ background: "rgba(184,146,62,0.14)" }}
+                    className="text-[10px] font-medium px-1.5 py-0.5 rounded-full text-cream bg-sage"
                   >
-                    {c.recentInbound} reciente{c.recentInbound === 1 ? "" : "s"}
+                    {c.unreadCount} sin leer
                   </span>
                 )}
                 {c.lastStatus === "failed" && (

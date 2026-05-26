@@ -7,6 +7,7 @@ import {
   type NotificationPrefs,
   type NotificationEventKey,
 } from "@/lib/personal-settings";
+import { updateNotificationPrefsAction } from "@/app/actions/profile";
 import { ToggleSwitch } from "@/components/property-settings/primitives";
 import { IconMail, IconWhatsApp, IconBell } from "../icons";
 
@@ -18,12 +19,28 @@ const CHANNELS: { key: NotificationChannel; label: string; Icon: typeof IconMail
 
 export function NotificationsTab({ initial }: { initial: NotificationPrefs }) {
   const [prefs, setPrefs] = useState(initial);
+  const [error, setError] = useState<string | null>(null);
 
   function toggle(event: NotificationEventKey, channel: NotificationChannel) {
-    setPrefs((p) => ({
-      ...p,
-      [event]: { ...p[event], [channel]: !p[event][channel] },
-    }));
+    const next: NotificationPrefs = {
+      ...prefs,
+      [event]: { ...prefs[event], [channel]: !prefs[event][channel] },
+    };
+    const previous = prefs;
+    setPrefs(next);
+    setError(null);
+    // Fire-and-forget; revert si falla.
+    updateNotificationPrefsAction({ prefs: next })
+      .then((res) => {
+        if (!res.ok) {
+          setPrefs(previous);
+          setError(res.error ?? "No pudimos guardar el cambio.");
+        }
+      })
+      .catch(() => {
+        setPrefs(previous);
+        setError("Sin conexión. Reintenta.");
+      });
   }
 
   return (
@@ -36,6 +53,15 @@ export function NotificationsTab({ initial }: { initial: NotificationPrefs }) {
           Elige qué te notificamos y cómo. Los toggles guardan automáticamente.
         </p>
       </header>
+
+      {error && (
+        <p
+          role="alert"
+          className="mb-4 text-xs text-danger border border-danger/30 bg-danger/5 rounded-md px-3 py-2"
+        >
+          {error}
+        </p>
+      )}
 
       {/* Desktop table */}
       <div className="hidden md:block">

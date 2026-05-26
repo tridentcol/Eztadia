@@ -9,6 +9,8 @@ import {
   getConversationMessages,
 } from "@/lib/db/queries/messages";
 import { getWhatsAppConfigForUI } from "@/lib/db/queries/integrations";
+import { markConversationAsRead } from "@/lib/db/mutations/whatsapp";
+import { revalidatePath } from "next/cache";
 import { PropertyTabs } from "@/components/calendar/PropertyTabs";
 import { ConversationsList } from "@/components/messages/ConversationsList";
 import { ConversationThread } from "@/components/messages/ConversationThread";
@@ -42,6 +44,17 @@ export default async function MessagesPage({
   const messages = activePhone
     ? await getConversationMessages(propertyId, activePhone)
     : [];
+
+  // Si el owner abrio una conversacion, marcamos sus mensajes inbound
+  // como leidos. Idempotente. Best-effort: si falla no rompemos el render.
+  if (activePhone) {
+    try {
+      const marked = await markConversationAsRead(propertyId, activePhone);
+      if (marked > 0) revalidatePath("/dashboard", "layout");
+    } catch {
+      // noop — el badge se actualizara en el proximo refresh
+    }
+  }
 
   const activeConv = activePhone
     ? conversations.find((c) => c.counterpartPhone === activePhone) ?? null

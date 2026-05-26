@@ -645,10 +645,13 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          date_format: string
           email: string
           full_name: string | null
           id: string
           locale: string
+          notification_prefs: Json | null
+          number_format: string
           phone: string | null
           role: Database["public"]["Enums"]["UserRole"]
           totp_enabled: boolean
@@ -657,10 +660,13 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          date_format?: string
           email: string
           full_name?: string | null
           id: string
           locale?: string
+          notification_prefs?: Json | null
+          number_format?: string
           phone?: string | null
           role?: Database["public"]["Enums"]["UserRole"]
           totp_enabled?: boolean
@@ -669,10 +675,13 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string
+          date_format?: string
           email?: string
           full_name?: string | null
           id?: string
           locale?: string
+          notification_prefs?: Json | null
+          number_format?: string
           phone?: string | null
           role?: Database["public"]["Enums"]["UserRole"]
           totp_enabled?: boolean
@@ -1089,6 +1098,7 @@ export type Database = {
           id: string
           meta_message_id: string | null
           property_id: string
+          read_at: string | null
           status: Database["public"]["Enums"]["WhatsappMessageStatus"]
           template_name: string | null
           to_phone: string
@@ -1103,6 +1113,7 @@ export type Database = {
           id?: string
           meta_message_id?: string | null
           property_id: string
+          read_at?: string | null
           status?: Database["public"]["Enums"]["WhatsappMessageStatus"]
           template_name?: string | null
           to_phone: string
@@ -1117,6 +1128,7 @@ export type Database = {
           id?: string
           meta_message_id?: string | null
           property_id?: string
+          read_at?: string | null
           status?: Database["public"]["Enums"]["WhatsappMessageStatus"]
           template_name?: string | null
           to_phone?: string
@@ -1213,6 +1225,10 @@ export type Database = {
           p_ttl_minutes: number
         }
         Returns: string
+      }
+      delete_property_cascade: {
+        Args: { p_id: string }
+        Returns: undefined
       }
       expire_old_holds: { Args: never; Returns: number }
       has_property_access: { Args: { p_property_id: string }; Returns: boolean }

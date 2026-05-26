@@ -6,6 +6,7 @@ import {
   listAccessibleProperties,
 } from "@/lib/auth/session";
 import { getProperty } from "@/lib/db/queries/property";
+import { getUnreadMessagesCount } from "@/lib/db/queries/messages";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 
 const PLACEHOLDER_PROPERTY_PHOTO = "/placeholder.svg";
@@ -46,6 +47,7 @@ export default async function DashboardLayout({
     city: "",
     photo: PLACEHOLDER_PROPERTY_PHOTO,
   };
+  let unreadMessages = 0;
   if (activeId) {
     try {
       const p = await getProperty(activeId);
@@ -57,6 +59,11 @@ export default async function DashboardLayout({
       };
     } catch {
       // Si no se puede leer, dejamos el shell por default.
+    }
+    try {
+      unreadMessages = await getUnreadMessagesCount(activeId);
+    } catch {
+      // Si la query falla (RLS, etc.) dejamos 0 — el badge no aparece.
     }
   }
 
@@ -73,7 +80,7 @@ export default async function DashboardLayout({
     attention: [],
     pulse: [],
     upcoming: [],
-    unreadMessages: 0,
+    unreadMessages,
   };
 
   return (

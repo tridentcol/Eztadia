@@ -15,11 +15,13 @@ import type { BankAccountInput } from "@/lib/validation/bank-account";
 
 export function SettingsContent({
   propertyId,
+  propertySlug,
   settings,
   totalRooms,
   bankAccount,
 }: {
   propertyId: string;
+  propertySlug: string;
   settings: PropertySettings;
   totalRooms: number;
   bankAccount: BankAccountInput | null;
@@ -36,7 +38,13 @@ export function SettingsContent({
       {tab === "schedules" && <SchedulesTab propertyId={propertyId} initial={settings.schedules} />}
       {tab === "payments" && <PaymentsTab propertyId={propertyId} initial={bankAccount} />}
       {tab === "fiscal" && <FiscalTab initial={settings.fiscal} />}
-      {tab === "advanced" && <AdvancedTab propertyId={propertyId} initial={settings.advanced} />}
+      {tab === "advanced" && (
+        <AdvancedTab
+          propertyId={propertyId}
+          propertySlug={propertySlug}
+          initial={settings.advanced}
+        />
+      )}
     </div>
   );
 }

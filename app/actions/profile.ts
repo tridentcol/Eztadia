@@ -1,7 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { updateProfileSchema } from "@/lib/validation/profile";
+import {
+  updateProfileSchema,
+  updateLanguagePrefsSchema,
+  updateNotificationPrefsSchema,
+} from "@/lib/validation/profile";
 import { requireProfile } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { mapDbError } from "@/lib/errors";
@@ -47,5 +51,66 @@ export async function updateProfileAction(raw: unknown) {
     revalidatePath("/dashboard/settings");
 
     return { profile: data };
+  });
+}
+
+/**
+ * Actualiza preferencias de idioma + formato (locale, date_format,
+ * number_format) en profiles. RLS exige id = auth.uid().
+ */
+export async function updateLanguagePrefsAction(raw: unknown) {
+  return run(updateLanguagePrefsSchema, raw, async (input) => {
+    const profile = await requireProfile();
+    const supabase = await createClient();
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        locale: input.language,
+        date_format: input.dateFormat,
+        number_format: input.numberFormat,
+      })
+      .eq("id", profile.id);
+
+    if (error) throw mapDbError(error);
+
+    await logAudit({
+      action: "profile.language_updated",
+      resourceType: "profile",
+      resourceId: profile.id,
+      diff: {
+        to: {
+          locale: input.language,
+          date_format: input.dateFormat,
+          number_format: input.numberFormat,
+        },
+      },
+    });
+
+    revalidatePath("/dashboard/settings");
+    return { ok: true as const };
+  });
+}
+
+/**
+ * Actualiza la matriz completa de preferencias de notificaciones. El
+ * caller (tab Notifications) envia el shape completo tras cada toggle
+ * — mantenemos optimistic UI client-side y persistimos sin merge
+ * adicional aqui.
+ */
+export async function updateNotificationPrefsAction(raw: unknown) {
+  return run(updateNotificationPrefsSchema, raw, async (input) => {
+    const profile = await requireProfile();
+    const supabase = await createClient();
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ notification_prefs: input.prefs })
+      .eq("id", profile.id);
+
+    if (error) throw mapDbError(error);
+
+    revalidatePath("/dashboard/settings");
+    return { ok: true as const };
   });
 }

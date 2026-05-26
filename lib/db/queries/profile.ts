@@ -1,7 +1,13 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/auth/session";
-import type { OwnerProfile } from "@/lib/personal-settings";
+import {
+  NOTIFICATION_EVENTS,
+  type OwnerProfile,
+  type LanguageValues,
+  type NotificationPrefs,
+  type NotificationEventKey,
+} from "@/lib/personal-settings";
 
 /**
  * Lee el perfil del usuario actual desde la BD y lo mapea al shape
@@ -30,6 +36,84 @@ export async function getOwnerProfileForSettings(): Promise<OwnerProfile> {
     twoFactorEnabled: profile.totp_enabled,
     backupCodesAvailable: 0,
     backupCodesUsed: 0,
+  };
+}
+
+const DEFAULT_PREFS: NotificationPrefs = {
+  "booking-confirmed": { email: true, whatsapp: true, inapp: true },
+  "booking-pending": { email: true, whatsapp: true, inapp: true },
+  "checkin-today": { email: false, whatsapp: true, inapp: true },
+  "checkout-today": { email: false, whatsapp: false, inapp: true },
+  "guest-message": { email: false, whatsapp: true, inapp: true },
+  cancellation: { email: true, whatsapp: true, inapp: true },
+  "webhook-error": { email: true, whatsapp: false, inapp: true },
+  "weekly-summary": { email: true, whatsapp: false, inapp: false },
+  "product-news": { email: true, whatsapp: false, inapp: false },
+};
+
+/**
+ * Lee preferencias de notificaciones desde profiles.notification_prefs
+ * (jsonb). Sanitiza con DEFAULT_PREFS — completa eventos o channels
+ * faltantes y descarta keys desconocidas. Esto evita romper la UI si
+ * el shape evoluciona (por ej. nuevo evento sin migrar prefs existentes).
+ */
+export async function getNotificationPrefs(): Promise<NotificationPrefs> {
+  const profile = await requireProfile();
+  const supabase = await createClient();
+
+  const { data } = await supabase
+    .from("profiles")
+    .select("notification_prefs")
+    .eq("id", profile.id)
+    .maybeSingle();
+
+  const raw = data?.notification_prefs;
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    return DEFAULT_PREFS;
+  }
+  const stored = raw as Record<string, unknown>;
+
+  // Merge stored over defaults, manteniendo solo eventos conocidos.
+  const result = {} as NotificationPrefs;
+  for (const ev of NOTIFICATION_EVENTS) {
+    const evKey = ev.key as NotificationEventKey;
+    const storedEv = stored[evKey];
+    const isObj = storedEv && typeof storedEv === "object" && !Array.isArray(storedEv);
+    const storedEvObj = isObj ? (storedEv as Record<string, unknown>) : {};
+    result[evKey] = {
+      email: typeof storedEvObj.email === "boolean" ? storedEvObj.email : DEFAULT_PREFS[evKey].email,
+      whatsapp: typeof storedEvObj.whatsapp === "boolean" ? storedEvObj.whatsapp : DEFAULT_PREFS[evKey].whatsapp,
+      inapp: typeof storedEvObj.inapp === "boolean" ? storedEvObj.inapp : DEFAULT_PREFS[evKey].inapp,
+    };
+  }
+  return result;
+}
+
+/**
+ * Lee las preferencias de idioma + formato del user actual. Si los
+ * valores en DB son strings no validos (no deberia pasar — CHECK
+ * constraint los enfuerza), retorna defaults.
+ */
+export async function getLanguagePrefs(): Promise<LanguageValues> {
+  const profile = await requireProfile();
+  const supabase = await createClient();
+
+  const { data } = await supabase
+    .from("profiles")
+    .select("locale, date_format, number_format")
+    .eq("id", profile.id)
+    .maybeSingle();
+
+  const lang = data?.locale === "en" ? "en" : "es";
+  const df = data?.date_format;
+  const nf = data?.number_format;
+
+  return {
+    language: lang,
+    dateFormat: df === "mdy" || df === "iso" ? df : "dmy",
+    numberFormat: nf === "dot-decimal" ? "dot-decimal" : "comma-decimal",
+    // Timezone no persiste por user — default a Bogota.
+    timezone: "America/Bogota",
   };
 }
 

@@ -1,24 +1,48 @@
 "use client";
 
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   languageSchema,
   type LanguageValues,
 } from "@/lib/personal-settings";
+import { updateLanguagePrefsAction } from "@/app/actions/profile";
 import { FieldShell, Select, Divider } from "@/components/property-settings/primitives";
 import { SaveBar } from "@/components/property-settings/SaveBar";
 import { FlagCO, FlagUS } from "../icons";
 
 export function LanguageTab({ initial }: { initial: LanguageValues }) {
+  const router = useRouter();
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [, startTransition] = useTransition();
   const form = useForm<LanguageValues>({
     resolver: zodResolver(languageSchema),
     defaultValues: initial,
   });
   const { control, register } = form;
 
-  async function onSave(_v: LanguageValues) {
-    await new Promise((r) => setTimeout(r, 250));
+  async function onSave(v: LanguageValues) {
+    setSaving(true);
+    setError(null);
+    try {
+      // Solo persistimos language + dateFormat + numberFormat (timezone es
+      // demo por ahora — no hay schema profile.timezone).
+      const res = await updateLanguagePrefsAction({
+        language: v.language,
+        dateFormat: v.dateFormat,
+        numberFormat: v.numberFormat,
+      });
+      if (!res.ok) {
+        setError(res.error ?? "No pudimos guardar tus preferencias.");
+        throw new Error("save-failed");
+      }
+      startTransition(() => router.refresh());
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -132,7 +156,16 @@ export function LanguageTab({ initial }: { initial: LanguageValues }) {
         </FieldShell>
       </div>
 
-      <SaveBar form={form} onSave={onSave} />
+      {error && (
+        <p
+          role="alert"
+          className="mt-3 text-xs text-danger border border-danger/30 bg-danger/5 rounded-md px-3 py-2"
+        >
+          {error}
+        </p>
+      )}
+
+      <SaveBar form={form} onSave={onSave} saving={saving} />
     </>
   );
 }

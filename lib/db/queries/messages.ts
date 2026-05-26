@@ -21,8 +21,8 @@ export type ConversationSummary = {
   lastAt: string;
   /** Total de mensajes con esta contraparte. */
   totalCount: number;
-  /** Mensajes entrantes en últimas 48h (proxy de "sin leer" — no hay flag real). */
-  recentInbound: number;
+  /** Mensajes inbound sin leer (read_at IS NULL). */
+  unreadCount: number;
 };
 
 /**
@@ -43,7 +43,7 @@ export async function listConversations(
   const { data, error } = await supabase
     .from("whatsapp_messages")
     .select(
-      "id, direction, status, from_phone, to_phone, body, booking_id, created_at",
+      "id, direction, status, from_phone, to_phone, body, booking_id, created_at, read_at",
     )
     .eq("property_id", propertyId)
     .order("created_at", { ascending: false })
@@ -59,30 +59,27 @@ export async function listConversations(
     {
       lastRow: typeof rows[number];
       total: number;
-      recentInbound: number;
+      unread: number;
       bookingId: string | null;
     }
   >();
 
-  const since48h = Date.now() - 48 * 60 * 60 * 1000;
-
   for (const r of rows) {
     const counterpart =
       r.direction === "outbound" ? r.to_phone : r.from_phone;
-    const isRecentInbound =
-      r.direction === "inbound" && new Date(r.created_at).getTime() >= since48h;
+    const isUnread = r.direction === "inbound" && r.read_at === null;
 
     const cur = buckets.get(counterpart);
     if (!cur) {
       buckets.set(counterpart, {
         lastRow: r, // primero que vemos = el más reciente (orden desc)
         total: 1,
-        recentInbound: isRecentInbound ? 1 : 0,
+        unread: isUnread ? 1 : 0,
         bookingId: r.booking_id,
       });
     } else {
       cur.total += 1;
-      if (isRecentInbound) cur.recentInbound += 1;
+      if (isUnread) cur.unread += 1;
       // Si no había booking aún pero esta tiene, adóptala (queremos linkear).
       if (!cur.bookingId && r.booking_id) cur.bookingId = r.booking_id;
     }
@@ -124,12 +121,31 @@ export async function listConversations(
         lastStatus: bucket.lastRow.status,
         lastAt: bucket.lastRow.created_at,
         totalCount: bucket.total,
-        recentInbound: bucket.recentInbound,
+        unreadCount: bucket.unread,
       };
     },
   );
 
   return summaries.sort((a, b) => b.lastAt.localeCompare(a.lastAt));
+}
+
+/**
+ * Count total de mensajes inbound NO leidos en la propiedad. Lo usa el
+ * sidebar para el badge "Mensajes". O(1) gracias al indice parcial
+ * whatsapp_messages_unread_idx.
+ */
+export async function getUnreadMessagesCount(
+  propertyId: string,
+): Promise<number> {
+  const supabase = await createClient();
+  const { count, error } = await supabase
+    .from("whatsapp_messages")
+    .select("id", { count: "exact", head: true })
+    .eq("property_id", propertyId)
+    .eq("direction", "inbound")
+    .is("read_at", null);
+  if (error) throw mapDbError(error);
+  return count ?? 0;
 }
 
 export type ConversationMessage = Pick<

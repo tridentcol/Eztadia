@@ -7,6 +7,7 @@ import { SettingsContent } from "@/components/property-settings/SettingsContent"
 import { getPropertySettingsFromDb } from "@/lib/db/queries/property-settings";
 import { listRoomTypesWithRooms } from "@/lib/db/queries/rooms";
 import { getBankAccountByPropertyId } from "@/lib/db/queries/bank-account";
+import { getProperty } from "@/lib/db/queries/property";
 import { getActivePropertyId } from "@/lib/auth/session";
 import type { BankAccountInput } from "@/lib/validation/bank-account";
 
@@ -18,10 +19,11 @@ export default async function PropertySettingsPage() {
   const propertyId = await getActivePropertyId();
   if (!propertyId) redirect("/onboarding");
 
-  const [settings, roomTypes, bankRow] = await Promise.all([
+  const [settings, roomTypes, bankRow, propertyRow] = await Promise.all([
     getPropertySettingsFromDb(propertyId),
     listRoomTypesWithRooms(propertyId),
     getBankAccountByPropertyId(propertyId),
+    getProperty(propertyId),
   ]);
   const totalRooms = roomTypes.reduce((acc, rt) => acc + (rt.rooms?.length ?? 0), 0);
 
@@ -50,6 +52,7 @@ export default async function PropertySettingsPage() {
             </div>
             <SettingsContent
               propertyId={propertyId}
+              propertySlug={propertyRow.slug}
               settings={settings}
               totalRooms={totalRooms}
               bankAccount={bankAccount}
