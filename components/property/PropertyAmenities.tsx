@@ -2,6 +2,8 @@ import type { Property } from "@/lib/properties";
 import { AMENITY_META } from "./PhosphorIcons";
 
 export function PropertyAmenities({ property }: { property: Property }) {
+  if (property.amenities.length === 0) return null;
+
   return (
     <section className="mb-20" aria-labelledby="amen-title">
       <span id="amen-title" className="inline-block text-[12px] font-medium tracking-[0.14em] uppercase text-gold mb-4">

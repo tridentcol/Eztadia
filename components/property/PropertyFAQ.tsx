@@ -7,6 +7,8 @@ import type { FAQItem } from "@/lib/properties";
 export function PropertyFAQ({ items }: { items: FAQItem[] }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
+  if (items.length === 0) return null;
+
   return (
     <section className="mb-20" id="faq" aria-labelledby="faq-title">
       <span className="inline-block text-[12px] font-medium tracking-[0.14em] uppercase text-gold mb-4">

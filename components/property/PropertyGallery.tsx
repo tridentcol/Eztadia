@@ -16,7 +16,13 @@ const TILE_CLASSES = [
   "col-span-1 row-span-1 lg:col-span-3 lg:row-span-4",
 ];
 
-export function PropertyGallery({ photos, totalCount = 24 }: { photos: Photo[]; totalCount?: number }) {
+export function PropertyGallery({
+  photos,
+  propertyName,
+}: {
+  photos: Photo[];
+  propertyName?: string;
+}) {
   const [lightbox, setLightbox] = useState<Photo | null>(null);
 
   useEffect(() => {
@@ -27,11 +33,15 @@ export function PropertyGallery({ photos, totalCount = 24 }: { photos: Photo[]; 
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  if (photos.length === 0) return null;
+
   return (
     <section className="mb-20" aria-labelledby="gal-title">
-      <span className="inline-block text-[12px] font-medium tracking-[0.14em] uppercase text-gold mb-4">
-        Casa Marina
-      </span>
+      {propertyName && (
+        <span className="inline-block text-[12px] font-medium tracking-[0.14em] uppercase text-gold mb-4">
+          {propertyName}
+        </span>
+      )}
       <h3
         id="gal-title"
         className="font-serif font-medium text-ink m-0 mb-5 tracking-[-0.015em]"
@@ -70,13 +80,16 @@ export function PropertyGallery({ photos, totalCount = 24 }: { photos: Photo[]; 
         ))}
       </div>
 
-      <a
-        href="#"
-        className="inline-flex items-center gap-1.5 mt-5 text-sm font-medium text-sage border-b border-transparent hover:border-sage transition-colors pb-px"
-      >
-        Ver las <span className="oldstyle">{totalCount}</span> fotos
-        <ArrowRight className="w-3.5 h-3.5" />
-      </a>
+      {photos.length > 8 && (
+        <button
+          type="button"
+          onClick={() => setLightbox(photos[0])}
+          className="inline-flex items-center gap-1.5 mt-5 text-sm font-medium text-sage border-b border-transparent hover:border-sage transition-colors pb-px"
+        >
+          Ver las <span className="oldstyle">{photos.length}</span> fotos
+          <ArrowRight className="w-3.5 h-3.5" />
+        </button>
+      )}
 
       {lightbox && (
         <div

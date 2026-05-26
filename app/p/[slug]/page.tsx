@@ -58,7 +58,7 @@ export default async function PropertyPage({
                 <PropertyDescription property={property} />
                 <PropertyAmenities property={property} />
                 <PropertyRooms />
-                <PropertyGallery photos={property.photos} totalCount={24} />
+                <PropertyGallery photos={property.photos} propertyName={property.name} />
                 <PropertyMap property={property} />
                 <PropertyFAQ items={property.faq} />
               </div>

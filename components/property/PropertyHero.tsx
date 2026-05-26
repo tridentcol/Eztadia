@@ -2,7 +2,18 @@ import Image from "next/image";
 import { Star } from "@/components/property/PhosphorIcons";
 import type { Property } from "@/lib/properties";
 
+const HERO_FALLBACK_SRC =
+  "https://images.unsplash.com/photo-1545158535-c3f7168c28b6?auto=format&fit=crop&w=2200&q=80";
+
 export function PropertyHero({ property }: { property: Property }) {
+  const hero = property.photos[0];
+  const heroSrc = hero?.src ?? HERO_FALLBACK_SRC;
+  const heroAlt = hero?.alt ?? `Fachada de ${property.name}`;
+  const showRating = property.rating > 0;
+  const showNeighborhood =
+    property.neighborhood.length > 0 &&
+    property.neighborhood.toLowerCase() !== property.city.toLowerCase();
+
   return (
     <section aria-labelledby="hero-name" className="px-4 pt-6 lg:px-8 lg:pt-6 relative">
       <div
@@ -10,8 +21,8 @@ export function PropertyHero({ property }: { property: Property }) {
         style={{ height: "65vh", minHeight: 520, maxHeight: 720, borderRadius: 40 }}
       >
         <Image
-          src="https://images.unsplash.com/photo-1545158535-c3f7168c28b6?auto=format&fit=crop&w=2200&q=80"
-          alt={`Patio interior colonial de ${property.name} con buganvilla floreciendo y luz dorada de la tarde.`}
+          src={heroSrc}
+          alt={heroAlt}
           fill
           priority
           sizes="100vw"
@@ -43,16 +54,25 @@ export function PropertyHero({ property }: { property: Property }) {
             {property.name}
           </h1>
           <p className="inline-flex flex-wrap items-center gap-2.5 text-sm text-ink-soft">
-            <span className="inline-flex items-center gap-1.5">
-              <Star className="w-3.5 h-3.5 text-gold" />
-              <span>
-                {property.rating} <span className="oldstyle">({property.reviewCount} reseñas)</span>
-              </span>
-            </span>
-            <span aria-hidden className="text-rule-strong">·</span>
+            {showRating && (
+              <>
+                <span className="inline-flex items-center gap-1.5">
+                  <Star className="w-3.5 h-3.5 text-gold" />
+                  <span>
+                    {property.rating}{" "}
+                    <span className="oldstyle">({property.reviewCount} reseñas)</span>
+                  </span>
+                </span>
+                <span aria-hidden className="text-rule-strong">·</span>
+              </>
+            )}
             <span>{property.totalRooms} habitaciones</span>
-            <span aria-hidden className="text-rule-strong">·</span>
-            <span>{property.neighborhood}</span>
+            {showNeighborhood && (
+              <>
+                <span aria-hidden className="text-rule-strong">·</span>
+                <span>{property.neighborhood}</span>
+              </>
+            )}
           </p>
         </article>
       </div>
