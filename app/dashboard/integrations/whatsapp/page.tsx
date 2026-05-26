@@ -33,6 +33,7 @@ export default async function WhatsAppConfigPage() {
 
   const isConnected = !!(cfg?.businessAccountId && cfg.hasAccessToken);
   const isPaused = isConnected && !cfg?.isActive;
+  const webhookUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/api/webhooks/whatsapp`;
 
   return (
     <>
@@ -86,6 +87,7 @@ export default async function WhatsAppConfigPage() {
 
         <WhatsAppConfigForm
           propertyId={propertyId}
+          webhookUrl={webhookUrl}
           initial={
             cfg
               ? {

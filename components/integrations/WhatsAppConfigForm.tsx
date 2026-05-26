@@ -34,9 +34,11 @@ export type WhatsAppConfigInitial = {
 export function WhatsAppConfigForm({
   propertyId,
   initial,
+  webhookUrl,
 }: {
   propertyId: string;
   initial: WhatsAppConfigInitial | null;
+  webhookUrl: string;
 }) {
   const form = useForm<Values>({
     resolver: zodResolver(schema),
@@ -109,6 +111,13 @@ export function WhatsAppConfigForm({
 
   return (
     <>
+      <section className="mt-9">
+        <span className="block text-[11px] font-medium tracking-[0.08em] uppercase text-ink-muted mb-3.5">
+          Webhook
+        </span>
+        <WebhookInfoBlock url={webhookUrl} />
+      </section>
+
       <section className="mt-9">
         <span className="block text-[11px] font-medium tracking-[0.08em] uppercase text-ink-muted mb-3.5">
           Estado
@@ -206,6 +215,49 @@ type SecretProps = InputHTMLAttributes<HTMLInputElement> & {
   label: string;
   error?: string;
 };
+
+function WebhookInfoBlock({ url }: { url: string }) {
+  const [copied, setCopied] = useState(false);
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* noop */
+    }
+  }
+
+  return (
+    <div className="bg-linen rounded-[14px] p-5">
+      <span className="block text-[11px] font-medium tracking-[0.14em] uppercase text-gold-dark mb-2.5">
+        Webhook URL
+      </span>
+      <div className="flex items-center gap-2.5 mb-2.5">
+        <code className="flex-1 min-w-0 bg-paper border border-rule rounded-[10px] px-3 py-2 font-mono text-xs text-ink-soft tracking-[-0.01em] overflow-hidden text-ellipsis whitespace-nowrap">
+          {url}
+        </code>
+        <button
+          type="button"
+          onClick={copy}
+          className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-[10px] bg-paper border border-rule text-ink-soft text-xs font-medium hover:bg-cream hover:text-ink transition-colors shrink-0"
+        >
+          <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+            <rect x={8} y={8} width={13} height={13} rx={2} />
+            <path d="M16 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h2" />
+          </svg>
+          {copied ? "Copiado" : "Copiar"}
+        </button>
+      </div>
+      <p className="text-xs text-ink-muted leading-[1.55] m-0">
+        Configura esta URL en Meta (Business Manager → WhatsApp → Configuración →
+        Webhooks). El <span className="font-mono text-[11px]">verify token</span>{" "}
+        que Meta solicita es el valor de tu env{" "}
+        <span className="font-mono text-[11px]">META_VERIFY_TOKEN</span>.
+      </p>
+    </div>
+  );
+}
 
 const SecretInput = forwardRef<HTMLInputElement, SecretProps>(function SecretInput(
   { label, error, ...rest },

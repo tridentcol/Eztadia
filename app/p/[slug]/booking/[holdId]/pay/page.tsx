@@ -38,6 +38,16 @@ export default async function PayPage({
     redirect(`/p/${slug}/booking/${holdId}/status`);
   }
 
+  // Defensa: external/admin_override son metodos internos (staff los crea desde
+  // el dashboard sin pasar por flow guest). Si por alguna razon el guest llega
+  // aqui con uno de esos metodos, mandamos al status — no hay nada que cobrar.
+  if (
+    holdRow.payment_method !== "pse" &&
+    holdRow.payment_method !== "manual_transfer"
+  ) {
+    redirect(`/p/${slug}/booking/${holdId}/status`);
+  }
+
   const roomType = await getRoomTypeById(holdRow.room_type_id);
   if (!roomType) notFound();
 
