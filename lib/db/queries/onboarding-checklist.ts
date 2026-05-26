@@ -26,8 +26,8 @@ export type ChecklistStatus = {
 export async function getChecklistStatus(propertyId: string): Promise<ChecklistStatus> {
   const supabase = await createClient();
 
-  // En paralelo: property (gallery + is_active), room_types (count + precio), wompi
-  const [property, roomTypesRes, wompiRes] = await Promise.all([
+  // En paralelo: property (gallery + is_active), room_types, wompi config, bank account.
+  const [property, roomTypesRes, wompiRes, bankRes] = await Promise.all([
     getProperty(propertyId),
     supabase
       .from("room_types")
@@ -36,6 +36,11 @@ export async function getChecklistStatus(propertyId: string): Promise<ChecklistS
     supabase
       .from("wompi_configs")
       .select("is_active")
+      .eq("property_id", propertyId)
+      .maybeSingle(),
+    supabase
+      .from("bank_accounts")
+      .select("id")
       .eq("property_id", propertyId)
       .maybeSingle(),
   ]);
@@ -47,7 +52,12 @@ export async function getChecklistStatus(propertyId: string): Promise<ChecklistS
   const gallery = Array.isArray(property.gallery) ? property.gallery : [];
   const hasPhotos = gallery.length > 0;
 
-  const hasPaymentMethod = Boolean(wompiRes.data?.is_active);
+  // El item "payments" se completa con CUALQUIERA de los dos metodos: PSE
+  // (Wompi activo) o transferencia bancaria. Asi el owner no esta forzado
+  // a configurar ambos para terminar el onboarding.
+  const hasWompi = Boolean(wompiRes.data?.is_active);
+  const hasBank = Boolean(bankRes.data);
+  const hasPaymentMethod = hasWompi || hasBank;
   const isPublished = property.is_active === true;
 
   const items: ChecklistItem[] = [
@@ -74,9 +84,15 @@ export async function getChecklistStatus(propertyId: string): Promise<ChecklistS
     },
     {
       key: "payments",
-      label: "Conecta cobros con PSE",
-      description: "Vincula tu cuenta Wompi para recibir pagos en línea.",
-      href: "/dashboard/integrations/wompi",
+      label: "Configura cómo cobrarás",
+      description: hasWompi
+        ? "PSE conectado con Wompi."
+        : hasBank
+        ? "Transferencia bancaria configurada."
+        : "PSE con Wompi o transferencia bancaria — basta con uno.",
+      href: hasBank && !hasWompi
+        ? "/dashboard/property-settings?tab=payments"
+        : "/dashboard/integrations/wompi",
       done: hasPaymentMethod,
     },
     {
