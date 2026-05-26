@@ -1,10 +1,6 @@
-// TODO(B6 incremental): wire a lib/db/queries/property.getPropertyBySlug
-// + adaptador a la shape que esperan los componentes (faq, photos rich, etc.).
-// Por ahora /p/[slug] sigue mostrando las propiedades demo de lib/properties.ts.
-// El flow publico de booking sí dispara mutations reales contra la DB.
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getAllPropertySlugs, getProperty } from "@/lib/properties";
+import { getPublicPropertyBySlug } from "@/lib/db/queries/public-property";
 import { PropertyTopbar } from "@/components/property/PropertyTopbar";
 import { PropertyHero } from "@/components/property/PropertyHero";
 import { PropertyDescription } from "@/components/property/PropertyDescription";
@@ -17,9 +13,7 @@ import { BookingProvider } from "@/components/property/BookingProvider";
 import { BookingWidget } from "@/components/property/BookingWidget";
 import { MobileBookingCTA } from "@/components/property/MobileBookingCTA";
 
-export function generateStaticParams() {
-  return getAllPropertySlugs().map((slug) => ({ slug }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -27,7 +21,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const property = getProperty(slug);
+  const property = await getPublicPropertyBySlug(slug);
   if (!property) return {};
   return {
     title: `${property.name} · ${property.type} en ${property.city} — gestionado con Eztadia`,
@@ -47,7 +41,7 @@ export default async function PropertyPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const property = getProperty(slug);
+  const property = await getPublicPropertyBySlug(slug);
   if (!property) notFound();
 
   return (
@@ -87,7 +81,7 @@ export default async function PropertyPage({
         <a href="/" className="text-ink-soft border-b border-transparent hover:border-ink-soft transition-colors pb-px">
           Eztadia
         </a>{" "}
-        · Cartagena, Colombia
+        · {property.city}, Colombia
       </footer>
     </>
   );
